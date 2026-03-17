@@ -1,10 +1,10 @@
 using CSharpFunctionalExtensions;
-using GymManager.Application.Bookings.CreateBooking;
 using GymManager.Application.Bookings.Shared;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Domain.Enums;
 using MediatR;
+using static GymManager.Application.Bookings.Shared.BookingMapper;
 
 namespace GymManager.Application.Bookings.GetBookings;
 
@@ -29,7 +29,7 @@ public sealed class GetBookingsQueryHandler(
         foreach (var booking in pagedBookings.Items)
         {
             var member = booking.Member ?? await memberRepository.GetByIdAsync(booking.MemberId, ct);
-            dtos.Add(CreateBookingCommandHandler.ToDto(booking, member!));
+            dtos.Add(ToDto(booking, member!));
         }
 
         return Result.Success(new PagedList<BookingDto>(

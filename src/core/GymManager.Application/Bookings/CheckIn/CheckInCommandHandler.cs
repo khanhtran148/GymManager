@@ -1,10 +1,10 @@
 using CSharpFunctionalExtensions;
-using GymManager.Application.Bookings.CreateBooking;
 using GymManager.Application.Bookings.Shared;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Domain.Enums;
 using MediatR;
+using static GymManager.Application.Bookings.Shared.BookingMapper;
 
 namespace GymManager.Application.Bookings.CheckIn;
 
@@ -39,7 +39,9 @@ public sealed class CheckInCommandHandler(
         await bookingRepository.UpdateAsync(booking, ct);
 
         var member = await memberRepository.GetByIdAsync(booking.MemberId, ct);
+        if (member is null)
+            return Result.Failure<BookingDto>(new NotFoundError("Member", booking.MemberId).ToString());
 
-        return Result.Success(CreateBookingCommandHandler.ToDto(booking, member!));
+        return Result.Success(ToDto(booking, member));
     }
 }

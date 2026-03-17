@@ -6,6 +6,7 @@ using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
 using GymManager.Domain.Events;
 using MediatR;
+using static GymManager.Application.Bookings.Shared.BookingMapper;
 
 namespace GymManager.Application.Bookings.CreateBooking;
 
@@ -29,6 +30,9 @@ public sealed class CreateBookingCommandHandler(
 
         var member = await memberRepository.GetByIdAsync(request.MemberId, ct);
         if (member is null)
+            return Result.Failure<BookingDto>(new NotFoundError("Member", request.MemberId).ToString());
+
+        if (member.GymHouseId != request.GymHouseId)
             return Result.Failure<BookingDto>(new NotFoundError("Member", request.MemberId).ToString());
 
         if (request.Type == BookingType.TimeSlot)
@@ -157,17 +161,4 @@ public sealed class CreateBookingCommandHandler(
         return Result.Success(ToDto(booking, member));
     }
 
-    internal static BookingDto ToDto(Booking b, Member member) => new(
-        b.Id,
-        b.MemberId,
-        b.GymHouseId,
-        b.BookingType,
-        b.TimeSlotId,
-        b.ClassScheduleId,
-        b.Status,
-        b.BookedAt,
-        b.CheckedInAt,
-        b.CheckInSource,
-        member.User?.FullName ?? string.Empty,
-        member.MemberCode);
 }

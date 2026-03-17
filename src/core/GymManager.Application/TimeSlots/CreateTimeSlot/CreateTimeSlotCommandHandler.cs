@@ -5,6 +5,7 @@ using GymManager.Application.TimeSlots.Shared;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
 using MediatR;
+using static GymManager.Application.TimeSlots.Shared.TimeSlotMapper;
 
 namespace GymManager.Application.TimeSlots.CreateTimeSlot;
 
@@ -40,14 +41,4 @@ public sealed class CreateTimeSlotCommandHandler(
 
         return Result.Success(ToDto(timeSlot));
     }
-
-    internal static TimeSlotDto ToDto(TimeSlot ts) => new(
-        ts.Id,
-        ts.GymHouseId,
-        ts.Date,
-        ts.StartTime,
-        ts.EndTime,
-        ts.MaxCapacity,
-        ts.CurrentBookings,
-        ts.MaxCapacity - ts.CurrentBookings);
 }

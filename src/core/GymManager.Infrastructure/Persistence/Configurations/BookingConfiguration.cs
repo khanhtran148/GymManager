@@ -53,6 +53,12 @@ public sealed class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.HasIndex(b => new { b.GymHouseId, b.BookedAt })
             .HasDatabaseName("ix_bookings_gym_house_id_booked_at");
 
+        builder.HasIndex(b => b.TimeSlotId)
+            .HasDatabaseName("ix_bookings_time_slot_id");
+
+        builder.HasIndex(b => b.ClassScheduleId)
+            .HasDatabaseName("ix_bookings_class_schedule_id");
+
         builder.HasQueryFilter(b => b.DeletedAt == null);
     }
 }

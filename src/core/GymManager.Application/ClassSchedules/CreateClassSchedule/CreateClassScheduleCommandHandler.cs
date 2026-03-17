@@ -5,6 +5,7 @@ using GymManager.Application.Common.Models;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
 using MediatR;
+using static GymManager.Application.ClassSchedules.Shared.ClassScheduleMapper;
 
 namespace GymManager.Application.ClassSchedules.CreateClassSchedule;
 
@@ -49,18 +50,4 @@ public sealed class CreateClassScheduleCommandHandler(
 
         return Result.Success(ToDto(classSchedule));
     }
-
-    internal static ClassScheduleDto ToDto(ClassSchedule cs) => new(
-        cs.Id,
-        cs.GymHouseId,
-        cs.TrainerId,
-        cs.Trainer?.FullName ?? string.Empty,
-        cs.ClassName,
-        cs.DayOfWeek,
-        cs.StartTime,
-        cs.EndTime,
-        cs.MaxCapacity,
-        cs.CurrentEnrollment,
-        cs.MaxCapacity - cs.CurrentEnrollment,
-        cs.IsRecurring);
 }

@@ -42,7 +42,7 @@ public sealed class CancelBookingCommandHandler(
         // Decrement capacity counter
         if (booking.BookingType == BookingType.TimeSlot && booking.TimeSlotId.HasValue)
         {
-            var timeSlot = await timeSlotRepository.GetByIdAsync(booking.TimeSlotId.Value, ct);
+            var timeSlot = await timeSlotRepository.GetByIdForUpdateAsync(booking.TimeSlotId.Value, ct);
             if (timeSlot is not null && timeSlot.CurrentBookings > 0)
             {
                 timeSlot.CurrentBookings--;
@@ -51,7 +51,7 @@ public sealed class CancelBookingCommandHandler(
         }
         else if (booking.BookingType == BookingType.ClassSession && booking.ClassScheduleId.HasValue)
         {
-            var classSchedule = await classScheduleRepository.GetByIdAsync(booking.ClassScheduleId.Value, ct);
+            var classSchedule = await classScheduleRepository.GetByIdForUpdateAsync(booking.ClassScheduleId.Value, ct);
             if (classSchedule is not null && classSchedule.CurrentEnrollment > 0)
             {
                 classSchedule.CurrentEnrollment--;

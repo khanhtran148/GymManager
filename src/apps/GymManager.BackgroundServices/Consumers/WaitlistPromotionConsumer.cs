@@ -40,7 +40,7 @@ public sealed class WaitlistPromotionConsumer(
         // Increment capacity counter for the promoted booking
         if (evt.Type == BookingType.TimeSlot && evt.TimeSlotId.HasValue)
         {
-            var timeSlot = await timeSlotRepository.GetByIdAsync(evt.TimeSlotId.Value, ct);
+            var timeSlot = await timeSlotRepository.GetByIdForUpdateAsync(evt.TimeSlotId.Value, ct);
             if (timeSlot is not null)
             {
                 timeSlot.CurrentBookings++;
@@ -49,7 +49,7 @@ public sealed class WaitlistPromotionConsumer(
         }
         else if (evt.Type == BookingType.ClassSession && evt.ClassScheduleId.HasValue)
         {
-            var classSchedule = await classScheduleRepository.GetByIdAsync(evt.ClassScheduleId.Value, ct);
+            var classSchedule = await classScheduleRepository.GetByIdForUpdateAsync(evt.ClassScheduleId.Value, ct);
             if (classSchedule is not null)
             {
                 classSchedule.CurrentEnrollment++;
