@@ -188,7 +188,7 @@ public sealed class MembersController : ApiControllerBase
 
 ## Test-First Development — Non-Negotiable
 
-- **Framework:** xUnit + FluentAssertions + NSubstitute
+- **Framework:** xUnit + FluentAssertions
 - **Integration tests:** Testcontainers with real PostgreSQL
 - **Coverage target:** ≥70% on Application layer
 - Use `[Theory]` with `[InlineData]` to eliminate test duplication
