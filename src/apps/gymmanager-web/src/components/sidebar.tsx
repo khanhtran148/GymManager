@@ -21,6 +21,9 @@ import {
   Receipt,
   FileText,
   ChevronDown,
+  UserCog,
+  CalendarDays,
+  Banknote,
 } from "lucide-react";
 
 type IconComponent = React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" | "false" }>;
@@ -62,19 +65,32 @@ const navEntries: NavEntry[] = [
       { label: "P&L Report", href: "/finance/pnl", icon: FileText },
     ],
   },
+  {
+    label: "Staff & HR",
+    icon: UserCog,
+    prefix: "/staff-hr",
+    children: [
+      { label: "Staff", href: "/staff", icon: Users },
+      { label: "Shifts", href: "/shifts", icon: CalendarDays },
+      { label: "Payroll", href: "/payroll", icon: Banknote },
+    ],
+  },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ "/finance": true });
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ "/finance": true, "/staff-hr": true });
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname === href || (href !== "/" && pathname.startsWith(href + "/"));
   };
 
-  const isGroupActive = (prefix: string) => pathname.startsWith(prefix);
+  const isGroupActive = (group: NavGroup) => {
+    if (pathname.startsWith(group.prefix)) return true;
+    return group.children.some((child) => isActive(child.href));
+  };
 
   const toggleGroup = (prefix: string) => {
     setExpandedGroups((prev) => ({ ...prev, [prefix]: !prev[prefix] }));
@@ -117,7 +133,7 @@ export function Sidebar() {
 
   function renderNavGroup(group: NavGroup) {
     const Icon = group.icon;
-    const groupActive = isGroupActive(group.prefix);
+    const groupActive = isGroupActive(group);
     const expanded = expandedGroups[group.prefix] ?? groupActive;
     return (
       <div key={group.prefix}>
@@ -244,7 +260,7 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-sidebar-border-color">
-          <p className="text-[10px] text-text-muted font-medium">Phase 3 — Finance v3.0</p>
+          <p className="text-[10px] text-text-muted font-medium">Phase 4 — Staff/HR v4.0</p>
         </div>
       </aside>
     </>

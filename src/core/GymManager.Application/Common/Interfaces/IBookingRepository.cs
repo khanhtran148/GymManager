@@ -10,4 +10,5 @@ public interface IBookingRepository
     Task UpdateAsync(Booking booking, CancellationToken ct = default);
     Task<PagedList<Booking>> GetByMemberAsync(Guid memberId, int page, int pageSize, CancellationToken ct = default);
     Task<PagedList<Booking>> GetByGymHouseAsync(Guid gymHouseId, int page, int pageSize, DateTime? from, DateTime? to, CancellationToken ct = default);
+    Task<int> CountCompletedByTrainerAsync(Guid trainerId, Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default);
 }

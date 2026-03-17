@@ -1,6 +1,7 @@
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Domain.Entities;
+using GymManager.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymManager.Infrastructure.Persistence.Repositories;
@@ -76,4 +77,17 @@ public sealed class BookingRepository(GymManagerDbContext db) : IBookingReposito
 
         return new PagedList<Booking>(items, totalCount, page, pageSize);
     }
+
+    public async Task<int> CountCompletedByTrainerAsync(
+        Guid trainerId, Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default) =>
+        await db.Bookings
+            .AsNoTracking()
+            .Include(b => b.ClassSchedule)
+            .CountAsync(b =>
+                b.GymHouseId == gymHouseId
+                && b.Status == BookingStatus.Completed
+                && b.ClassSchedule != null
+                && b.ClassSchedule.TrainerId == trainerId
+                && b.BookedAt >= from
+                && b.BookedAt <= to, ct);
 }

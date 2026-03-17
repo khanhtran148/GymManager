@@ -29,6 +29,10 @@ public static class DependencyInjection
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IWaitlistRepository, WaitlistRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
+        services.AddScoped<IStaffRepository, StaffRepository>();
+        services.AddScoped<IShiftAssignmentRepository, ShiftAssignmentRepository>();
+        services.AddScoped<IPayrollPeriodRepository, PayrollPeriodRepository>();
+        services.AddScoped<IPayrollEntryRepository, PayrollEntryRepository>();
 
         // Auth Services
         services.AddScoped<ITokenService, JwtTokenService>();
