@@ -19,6 +19,9 @@ public sealed class GymManagerDbContext(DbContextOptions<GymManagerDbContext> op
     public DbSet<ShiftAssignment> ShiftAssignments => Set<ShiftAssignment>();
     public DbSet<PayrollPeriod> PayrollPeriods => Set<PayrollPeriod>();
     public DbSet<PayrollEntry> PayrollEntries => Set<PayrollEntry>();
+    public DbSet<Announcement> Announcements => Set<Announcement>();
+    public DbSet<NotificationDelivery> NotificationDeliveries => Set<NotificationDelivery>();
+    public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

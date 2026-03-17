@@ -1,6 +1,7 @@
 using GymManager.Application;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Infrastructure.Auth;
+using GymManager.Infrastructure.Notifications;
 using GymManager.Infrastructure.Persistence;
 using GymManager.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -60,6 +61,13 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         services.AddScoped<IShiftAssignmentRepository, ShiftAssignmentRepository>();
         services.AddScoped<IPayrollPeriodRepository, PayrollPeriodRepository>();
         services.AddScoped<IPayrollEntryRepository, PayrollEntryRepository>();
+        services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
+        services.AddScoped<INotificationDeliveryRepository, NotificationDeliveryRepository>();
+        services.AddScoped<INotificationPreferenceRepository, NotificationPreferenceRepository>();
+
+        // Notification services
+        services.AddScoped<IFirebaseMessagingService, FirebaseMessagingService>();
+        services.AddScoped<INotificationHub, GymManager.Tests.Common.Fakes.FakeNotificationHub>();
 
         // Auth services
         services.AddScoped<ITokenService, JwtTokenService>();

@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { ChevronDown, LogOut, Bell, Search } from "lucide-react";
+import { ChevronDown, LogOut, Search } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationBell } from "@/components/notification-bell";
 import { cn } from "@/lib/utils";
 
 function getPageTitle(pathname: string): string {
@@ -15,6 +16,9 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith("/class-schedules")) return "Class Schedules";
   if (pathname.startsWith("/time-slots")) return "Time Slots";
   if (pathname.startsWith("/check-in")) return "Check-in";
+  if (pathname.startsWith("/announcements")) return "Announcements";
+  if (pathname.startsWith("/notifications")) return "Notifications";
+  if (pathname.startsWith("/settings")) return "Settings";
   return "GymManager";
 }
 
@@ -26,6 +30,9 @@ function getPageDescription(pathname: string): string {
   if (pathname.startsWith("/class-schedules")) return "Manage class schedules";
   if (pathname.startsWith("/time-slots")) return "Manage time slots";
   if (pathname.startsWith("/check-in")) return "Check in members";
+  if (pathname.startsWith("/announcements")) return "Create and manage announcements";
+  if (pathname.startsWith("/notifications")) return "Your notification inbox";
+  if (pathname.startsWith("/settings/notifications")) return "Manage notification preferences";
   return "";
 }
 
@@ -83,14 +90,7 @@ export function TopBar() {
         </button>
 
         {/* Notifications */}
-        <button
-          type="button"
-          className="relative p-2 rounded-xl text-text-muted hover:text-text-secondary hover:bg-hover transition-all"
-          aria-label="Notifications"
-        >
-          <Bell className="w-[18px] h-[18px]" aria-hidden="true" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary-500 rounded-full border-2 border-dot-border" aria-hidden="true" />
-        </button>
+        <NotificationBell />
 
         <ThemeToggle />
 

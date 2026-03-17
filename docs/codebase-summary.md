@@ -1,14 +1,14 @@
 ---
 type: codebase-summary
 updated: 2026-03-17
-phases-complete: Phase 1 (Foundation), Phase 2 (Booking)
+phases-complete: Phase 1 (Foundation), Phase 2 (Booking), Phase 3 (Finance), Phase 4 (Staff/HR), Phase 5 (Communications)
 ---
 
 # Codebase Summary
 
 ## Project Overview
 
-GymManager is a multi-tenant SaaS platform for gym owners managing 2–5 locations. Gym owners get one account; each physical location is a `GymHouse`. All data scoped by `GymHouseId`. Phase 1 (Foundation) and Phase 2 (Booking) are complete.
+GymManager is a multi-tenant SaaS platform for gym owners managing 2–5 locations. Gym owners get one account; each physical location is a `GymHouse`. All data scoped by `GymHouseId`. Phases 1–5 are complete.
 
 ## Tech Stack
 
@@ -267,6 +267,45 @@ Methods: `CheckIn()`, `Cancel()`, `MarkNoShow()`, `Complete()`.
 | `SubscriptionStatus` | Active, Frozen, Expired, Cancelled |
 | `SubscriptionType` | Monthly, Quarterly, Annual, DayPass |
 | `DayOfWeekFlag` | [Flags] Monday–Sunday bitmask |
+| `TargetAudience` | AllMembers, ActiveMembers, Staff, Trainers, Everyone |
+| `NotificationChannel` | InApp, Push, Email |
+| `DeliveryStatus` | Pending, Sent, Delivered, Read, Failed |
+
+### Announcement
+
+| Property | Type | Notes |
+|---|---|---|
+| `GymHouseId` | Guid? | null = chain-wide (Owner only) |
+| `AuthorId` | Guid | FK → User |
+| `Title` | string | |
+| `Content` | string | |
+| `TargetAudience` | `TargetAudience` | |
+| `PublishAt` | DateTime | scheduled publish time (UTC) |
+| `IsPublished` | bool | set by `AnnouncementPublisherJob` |
+
+Methods: `Publish()` — sets `IsPublished = true`.
+
+### NotificationDelivery
+
+| Property | Type | Notes |
+|---|---|---|
+| `AnnouncementId` | Guid | FK → Announcement |
+| `RecipientId` | Guid | FK → User |
+| `GymHouseId` | Guid | tenant scope |
+| `Channel` | `NotificationChannel` | InApp / Push / Email |
+| `Status` | `DeliveryStatus` | Pending → Sent → Delivered → Read |
+| `ReadAt` | DateTime? | set on mark-read |
+
+Methods: `MarkRead()` — sets `Status = Read`, `ReadAt = utcNow`.
+
+### NotificationPreference
+
+| Property | Type | Notes |
+|---|---|---|
+| `UserId` | Guid | FK → User, unique per user |
+| `InAppEnabled` | bool | default true |
+| `PushEnabled` | bool | default true |
+| `EmailEnabled` | bool | default false |
 
 ---
 
@@ -282,6 +321,7 @@ All implement `IDomainEvent`. Published via MassTransit to RabbitMQ. Once publis
 | `MemberCreatedEvent` | MemberId, GymHouseId |
 | `SubscriptionCreatedEvent` | (see file) |
 | `SubscriptionExpiredEvent` | SubscriptionId, MemberId |
+| `AnnouncementPublishedEvent` | AnnouncementId, GymHouseId?, TargetAudience |
 
 ---
 
@@ -332,11 +372,27 @@ GymManager.Application/
 │   ├── CreateTimeSlot/
 │   ├── GetTimeSlots/
 │   └── Shared/               # TimeSlotDto
+├── Announcements/
+│   ├── CreateAnnouncement/       # command, validator, handler
+│   ├── GetAnnouncements/         # query, handler
+│   ├── GetAnnouncementById/      # query, handler
+│   └── Shared/                   # AnnouncementDto
+├── Notifications/
+│   ├── GetNotifications/         # query, handler
+│   ├── MarkNotificationRead/     # command, handler
+│   ├── UpdatePreferences/        # command, validator, handler
+│   ├── GetPreferences/           # query, handler
+│   └── Shared/                   # NotificationDto, NotificationPreferenceDto
 └── Common/
     ├── Behaviors/
     │   ├── ValidationBehavior.cs
     │   └── LoggingBehavior.cs
     ├── Interfaces/
+    │   ├── IAnnouncementRepository.cs
+    │   ├── INotificationDeliveryRepository.cs
+    │   ├── INotificationPreferenceRepository.cs
+    │   ├── IFirebaseMessagingService.cs
+    │   ├── INotificationHub.cs
     │   ├── IBookingRepository.cs
     │   ├── IClassScheduleRepository.cs
     │   ├── ICurrentUser.cs
@@ -347,7 +403,7 @@ GymManager.Application/
     │   ├── ISubscriptionRepository.cs
     │   ├── ITimeSlotRepository.cs
     │   ├── ITokenService.cs
-    │   ├── IUserRepository.cs
+    │   ├── IUserRepository.cs        # + GetByRoleAndHouseAsync added in Phase 5
     │   └── IWaitlistRepository.cs
     └── Models/
         ├── PagedList<T>.cs        # { Items, TotalCount, Page, PageSize }
@@ -360,11 +416,18 @@ GymManager.Application/
 
 ### EF Core Configurations (`Persistence/Configurations/`)
 
-One `IEntityTypeConfiguration<T>` per entity: `BookingConfiguration`, `ClassScheduleConfiguration`, `GymHouseConfiguration`, `MemberConfiguration`, `SubscriptionConfiguration`, `TimeSlotConfiguration`, `UserConfiguration`, `WaitlistConfiguration`.
+One `IEntityTypeConfiguration<T>` per entity: `AnnouncementConfiguration`, `BookingConfiguration`, `ClassScheduleConfiguration`, `GymHouseConfiguration`, `MemberConfiguration`, `NotificationDeliveryConfiguration`, `NotificationPreferenceConfiguration`, `SubscriptionConfiguration`, `TimeSlotConfiguration`, `UserConfiguration`, `WaitlistConfiguration`.
 
 ### Repositories (`Persistence/Repositories/`)
 
-One repository per entity: `BookingRepository`, `ClassScheduleRepository`, `GymHouseRepository`, `MemberRepository`, `SubscriptionRepository`, `TimeSlotRepository`, `UserRepository`, `WaitlistRepository`. All implement corresponding interfaces from Application.
+One repository per entity: `AnnouncementRepository`, `BookingRepository`, `ClassScheduleRepository`, `GymHouseRepository`, `MemberRepository`, `NotificationDeliveryRepository`, `NotificationPreferenceRepository`, `SubscriptionRepository`, `TimeSlotRepository`, `UserRepository`, `WaitlistRepository`. All implement corresponding interfaces from Application.
+
+### Notification Services (`Notifications/`)
+
+| Class | Interface | Notes |
+|---|---|---|
+| `FirebaseMessagingService` | `IFirebaseMessagingService` | No-op stub — FCM credentials not yet provisioned |
+| `SignalRNotificationHub` | `INotificationHub` | Uses non-generic `IHubContext`; wired to `NotificationHub` at API registration |
 
 `GymManagerDbContext` — EF Core DbContext with global soft-delete query filters.
 
@@ -397,7 +460,7 @@ ExceptionHandlingMiddleware → HTTPS → CORS → RateLimit → Auth → Author
 
 ### SignalR
 
-`NotificationHub` at `/hubs/notifications`. Requires `[Authorize]`. On connect, groups the client into `tenant:{tenantId}` based on JWT claim.
+`NotificationHub` at `/hubs/notifications`. Requires `[Authorize]`. On connect, groups the client into both `tenant:{tenantId}` and `user:{userId}` based on JWT claims. Phase 5 added the `user:{userId}` group for targeted notification delivery.
 
 ### API Versioning
 
@@ -415,6 +478,18 @@ Consumes `BookingCancelledEvent` from RabbitMQ via MassTransit. When a booking i
 3. Increments `CurrentBookings` or `CurrentEnrollment` on the slot.
 4. Marks the `Waitlist` entry with `PromotedAt`.
 5. Publishes `WaitlistPromotedEvent`.
+
+### AnnouncementSignalRConsumer
+
+Consumes `AnnouncementPublishedEvent`. For each targeted recipient, creates a `NotificationDelivery` record (InApp channel) and calls `INotificationHub.SendToGroupAsync` to push to the `user:{userId}` SignalR group.
+
+### AnnouncementFcmConsumer
+
+Consumes `AnnouncementPublishedEvent`. Checks `NotificationPreference.PushEnabled` per recipient. Calls `IFirebaseMessagingService.SendMulticastAsync`. Currently a no-op until FCM credentials and device token storage are provisioned.
+
+### AnnouncementPublisherJob (Quartz.NET)
+
+Runs every 30 seconds. Queries all `Announcement` records where `IsPublished = false` AND `PublishAt <= utcNow`. Calls `announcement.Publish()` on each and persists. Publishes `AnnouncementPublishedEvent` via MassTransit.
 
 ---
 
@@ -453,6 +528,13 @@ Base path: `/api/v1/`
 | GET | `/gymhouses/{gymHouseId}/class-schedules/{id}` | Get class schedule |
 | POST | `/gymhouses/{gymHouseId}/class-schedules` | Create class schedule |
 | PUT | `/gymhouses/{gymHouseId}/class-schedules/{id}` | Update class schedule |
+| POST | `/announcements` | Create announcement (scheduled publish; chain-wide requires Owner) |
+| GET | `/announcements` | List announcements (paginated, gymHouseId filter optional) |
+| GET | `/announcements/{id}` | Get announcement by ID |
+| GET | `/notifications` | List notifications for current user (paginated) |
+| PATCH | `/notifications/{id}/read` | Mark notification as read |
+| GET | `/notification-preferences` | Get notification preferences for current user |
+| PUT | `/notification-preferences` | Update notification preferences |
 
 ---
 
@@ -486,18 +568,22 @@ Next.js App Router with two route groups:
 | `/members/[id]` | Member detail |
 | `/members/[id]/subscriptions/new` | Create subscription |
 | `/time-slots` | Time slot list |
+| `/announcements` | Announcement list (filterable by gym house) |
+| `/announcements/new` | Create announcement form (Zod validation, scheduled publish) |
+| `/notifications` | Full-page notification inbox |
+| `/settings/notifications` | Notification channel preference toggles |
 
 ### Frontend Structure
 
 ```
 src/
 ├── app/           # Next.js App Router pages
-├── components/    # Shared UI components
-├── hooks/         # TanStack Query hooks (use-bookings, use-members, etc.)
-├── lib/           # api-client, auth helpers, booking-utils, utils
+├── components/    # Shared UI components (+ notification-bell.tsx, notification-feed.tsx)
+├── hooks/         # TanStack Query hooks (+ use-announcements.ts, use-notifications.ts)
+├── lib/           # api-client, auth helpers, booking-utils, utils, signalr.ts
 ├── providers/     # React context providers
-├── stores/        # Zustand stores (auth-store, theme-store)
-└── types/         # TypeScript types (auth, booking, gym-house, member, subscription)
+├── stores/        # Zustand stores (auth-store, theme-store, notification-store.ts)
+└── types/         # TypeScript types (+ announcement.ts, notification.ts)
 ```
 
 ---
@@ -541,7 +627,7 @@ Testing rules: no "Arrange/Act/Assert" comments, use `[Theory]` for parameterize
 |---|---|---|
 | Phase 1 — Foundation | Complete | User, GymHouse, Member, Subscription, Auth, Permissions |
 | Phase 2 — Booking | Complete | TimeSlot, ClassSchedule, Booking, Waitlist, Check-In, WaitlistPromotion |
-| Phase 3 — Finance | Pending | Transaction, P&L reports |
-| Phase 4 — Staff/HR | Pending | Staff, ShiftAssignment, Payroll |
-| Phase 5 — Communications | Pending | Announcements, FCM push, SignalR fan-out |
+| Phase 3 — Finance | Complete | Transaction, P&L reports |
+| Phase 4 — Staff/HR | Complete | Staff, ShiftAssignment, Payroll |
+| Phase 5 — Communications | Complete | Announcements, FCM push (stub), SignalR fan-out |
 | Phase 6 — Hardening | Pending | PostgreSQL RLS, load testing, offline mobile |
