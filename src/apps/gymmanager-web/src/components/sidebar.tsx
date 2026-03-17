@@ -17,15 +17,34 @@ import {
   GraduationCap,
   Clock,
   ScanLine,
+  Wallet,
+  Receipt,
+  FileText,
+  ChevronDown,
 } from "lucide-react";
+
+type IconComponent = React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" | "false" }>;
 
 interface NavItem {
   label: string;
   href: string;
-  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" | "false" }>;
+  icon: IconComponent;
 }
 
-const navItems: NavItem[] = [
+interface NavGroup {
+  label: string;
+  icon: IconComponent;
+  prefix: string;
+  children: NavItem[];
+}
+
+type NavEntry = NavItem | NavGroup;
+
+function isNavGroup(entry: NavEntry): entry is NavGroup {
+  return "children" in entry;
+}
+
+const navEntries: NavEntry[] = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Gym Houses", href: "/gym-houses", icon: Building2 },
   { label: "Members", href: "/members", icon: Users },
@@ -33,55 +52,122 @@ const navItems: NavItem[] = [
   { label: "Class Schedules", href: "/class-schedules", icon: GraduationCap },
   { label: "Time Slots", href: "/time-slots", icon: Clock },
   { label: "Check-in", href: "/check-in", icon: ScanLine },
+  {
+    label: "Finance",
+    icon: Wallet,
+    prefix: "/finance",
+    children: [
+      { label: "Dashboard", href: "/finance", icon: Wallet },
+      { label: "Transactions", href: "/finance/transactions", icon: Receipt },
+      { label: "P&L Report", href: "/finance/pnl", icon: FileText },
+    ],
+  },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ "/finance": true });
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
-    return pathname.startsWith(href);
+    return pathname === href || (href !== "/" && pathname.startsWith(href + "/"));
   };
+
+  const isGroupActive = (prefix: string) => pathname.startsWith(prefix);
+
+  const toggleGroup = (prefix: string) => {
+    setExpandedGroups((prev) => ({ ...prev, [prefix]: !prev[prefix] }));
+  };
+
+  function renderNavItem(item: NavItem, indent = false) {
+    const Icon = item.icon;
+    const active = isActive(item.href);
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        onClick={() => setMobileOpen(false)}
+        className={cn(
+          "group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+          indent && "ml-4",
+          active
+            ? "bg-nav-active-bg text-nav-active-text shadow-sm"
+            : "text-text-muted hover:bg-nav-hover-bg hover:text-text-secondary"
+        )}
+        aria-current={active ? "page" : undefined}
+      >
+        <div
+          className={cn(
+            "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
+            active
+              ? "bg-nav-active-icon-bg text-nav-active-text"
+              : "bg-nav-icon-bg text-text-muted group-hover:bg-nav-icon-hover-bg group-hover:text-text-secondary"
+          )}
+        >
+          <Icon className="w-4 h-4" aria-hidden={true} />
+        </div>
+        {item.label}
+        {active && (
+          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-500" aria-hidden="true" />
+        )}
+      </Link>
+    );
+  }
+
+  function renderNavGroup(group: NavGroup) {
+    const Icon = group.icon;
+    const groupActive = isGroupActive(group.prefix);
+    const expanded = expandedGroups[group.prefix] ?? groupActive;
+    return (
+      <div key={group.prefix}>
+        <button
+          type="button"
+          onClick={() => toggleGroup(group.prefix)}
+          className={cn(
+            "w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+            groupActive
+              ? "text-nav-active-text"
+              : "text-text-muted hover:bg-nav-hover-bg hover:text-text-secondary"
+          )}
+          aria-expanded={expanded}
+        >
+          <div
+            className={cn(
+              "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
+              groupActive
+                ? "bg-nav-active-icon-bg text-nav-active-text"
+                : "bg-nav-icon-bg text-text-muted group-hover:bg-nav-icon-hover-bg group-hover:text-text-secondary"
+            )}
+          >
+            <Icon className="w-4 h-4" aria-hidden={true} />
+          </div>
+          <span className="flex-1 text-left">{group.label}</span>
+          <ChevronDown
+            className={cn(
+              "w-3.5 h-3.5 transition-transform duration-200",
+              expanded ? "rotate-180" : ""
+            )}
+            aria-hidden="true"
+          />
+        </button>
+        {expanded && (
+          <div className="mt-0.5 space-y-0.5">
+            {group.children.map((child) => renderNavItem(child, true))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const navContent = (
     <nav aria-label="Main navigation" className="flex-1 px-3 py-4 space-y-1 sidebar-scroll overflow-y-auto">
       <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-text-muted">
         Menu
       </p>
-      {navItems.map((item) => {
-        const Icon = item.icon;
-        const active = isActive(item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={() => setMobileOpen(false)}
-            className={cn(
-              "group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
-              active
-                ? "bg-nav-active-bg text-nav-active-text shadow-sm"
-                : "text-text-muted hover:bg-nav-hover-bg hover:text-text-secondary"
-            )}
-            aria-current={active ? "page" : undefined}
-          >
-            <div
-              className={cn(
-                "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
-                active
-                  ? "bg-nav-active-icon-bg text-nav-active-text"
-                  : "bg-nav-icon-bg text-text-muted group-hover:bg-nav-icon-hover-bg group-hover:text-text-secondary"
-              )}
-            >
-              <Icon className="w-4 h-4" aria-hidden={true} />
-            </div>
-            {item.label}
-            {active && (
-              <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-500" aria-hidden="true" />
-            )}
-          </Link>
-        );
-      })}
+      {navEntries.map((entry) =>
+        isNavGroup(entry) ? renderNavGroup(entry) : renderNavItem(entry)
+      )}
     </nav>
   );
 
@@ -158,7 +244,7 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-sidebar-border-color">
-          <p className="text-[10px] text-text-muted font-medium">Phase 2 — Booking v2.0</p>
+          <p className="text-[10px] text-text-muted font-medium">Phase 3 — Finance v3.0</p>
         </div>
       </aside>
     </>

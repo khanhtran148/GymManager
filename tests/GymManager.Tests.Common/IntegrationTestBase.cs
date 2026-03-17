@@ -55,6 +55,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         services.AddScoped<IClassScheduleRepository, ClassScheduleRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IWaitlistRepository, WaitlistRepository>();
+        services.AddScoped<ITransactionRepository, TransactionRepository>();
 
         // Auth services
         services.AddScoped<ITokenService, JwtTokenService>();

@@ -43,4 +43,18 @@ public sealed class SubscriptionRepository(GymManagerDbContext db) : ISubscripti
         }
         await db.SaveChangesAsync(ct);
     }
+
+    public async Task<int> GetActiveCountByGymHouseAsync(Guid gymHouseId, CancellationToken ct = default) =>
+        await db.Subscriptions
+            .AsNoTracking()
+            .CountAsync(s => s.GymHouseId == gymHouseId && s.Status == SubscriptionStatus.Active, ct);
+
+    public async Task<int> GetCancelledCountByGymHouseAsync(
+        Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default) =>
+        await db.Subscriptions
+            .AsNoTracking()
+            .CountAsync(s => s.GymHouseId == gymHouseId
+                && s.Status == SubscriptionStatus.Cancelled
+                && s.UpdatedAt >= from
+                && s.UpdatedAt <= to, ct);
 }
