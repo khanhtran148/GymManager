@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/src/core/">
+    <Project Path="src/core/GymManager.Domain/GymManager.Domain.csproj" />
+    <Project Path="src/core/GymManager.Application/GymManager.Application.csproj" />
+    <Project Path="src/core/GymManager.Infrastructure/GymManager.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/apps/">
+    <Project Path="src/apps/GymManager.Api/GymManager.Api.csproj" />
+    <Project Path="src/apps/GymManager.BackgroundServices/GymManager.BackgroundServices.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GymManager.Tests.Common/GymManager.Tests.Common.csproj" />
+    <Project Path="tests/GymManager.Domain.Tests/GymManager.Domain.Tests.csproj" />
+    <Project Path="tests/GymManager.Application.Tests/GymManager.Application.Tests.csproj" />
+    <Project Path="tests/GymManager.Infrastructure.Tests/GymManager.Infrastructure.Tests.csproj" />
+    <Project Path="tests/GymManager.Api.Tests/GymManager.Api.Tests.csproj" />
+  </Folder>
+</Solution>

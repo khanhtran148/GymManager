@@ -1,0 +1,11 @@
+{
+  "plan": "gym-manager",
+  "last_completed_phase": 3,
+  "last_completed_phase_name": "Planning",
+  "timestamp": "2026-03-17T00:00:00Z",
+  "phases_done": [
+    { "phase": 1, "name": "Discovery", "completed_at": "2026-03-17T00:00:00Z" },
+    { "phase": 2, "name": "Research", "completed_at": "2026-03-17T00:00:00Z" },
+    { "phase": 3, "name": "Planning", "completed_at": "2026-03-17T00:00:00Z" }
+  ]
+}
