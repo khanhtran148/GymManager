@@ -3,8 +3,8 @@ using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Application.TimeSlots.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
-using static GymManager.Application.TimeSlots.Shared.TimeSlotMapper;
 
 namespace GymManager.Application.TimeSlots.GetTimeSlots;
 
@@ -24,6 +24,6 @@ public sealed class GetTimeSlotsQueryHandler(
         var timeSlots = await timeSlotRepository.GetByDateRangeAsync(
             request.GymHouseId, request.From, request.To, ct);
 
-        return Result.Success(timeSlots.Select(ToDto).ToList());
+        return Result.Success(timeSlots.Adapt<List<TimeSlotDto>>());
     }
 }

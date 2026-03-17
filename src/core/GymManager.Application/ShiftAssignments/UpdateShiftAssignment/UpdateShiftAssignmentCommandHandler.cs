@@ -3,6 +3,7 @@ using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Application.ShiftAssignments.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.ShiftAssignments.UpdateShiftAssignment;
@@ -33,6 +34,6 @@ public sealed class UpdateShiftAssignmentCommandHandler(
         await shiftRepository.UpdateAsync(shift, ct);
 
         var updated = await shiftRepository.GetByIdAsync(shift.Id, request.GymHouseId, ct);
-        return Result.Success(ShiftAssignmentDto.FromEntity(updated!));
+        return Result.Success(updated!.Adapt<ShiftAssignmentDto>());
     }
 }

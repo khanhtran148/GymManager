@@ -3,6 +3,7 @@ using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Application.Staff.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Staff.GetStaffById;
@@ -24,6 +25,6 @@ public sealed class GetStaffByIdQueryHandler(
         if (staff is null)
             return Result.Failure<StaffDto>(new NotFoundError("Staff", request.Id).ToString());
 
-        return Result.Success(StaffDto.FromEntity(staff));
+        return Result.Success(staff.Adapt<StaffDto>());
     }
 }

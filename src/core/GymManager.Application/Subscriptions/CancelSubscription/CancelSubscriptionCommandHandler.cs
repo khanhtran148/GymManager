@@ -1,9 +1,9 @@
 using CSharpFunctionalExtensions;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
-using GymManager.Application.Subscriptions.CreateSubscription;
 using GymManager.Application.Subscriptions.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Subscriptions.CancelSubscription;
@@ -31,6 +31,6 @@ public sealed class CancelSubscriptionCommandHandler(
 
         await subscriptionRepository.UpdateAsync(subscription, ct);
 
-        return Result.Success(CreateSubscriptionCommandHandler.ToDto(subscription));
+        return Result.Success(subscription.Adapt<SubscriptionDto>());
     }
 }

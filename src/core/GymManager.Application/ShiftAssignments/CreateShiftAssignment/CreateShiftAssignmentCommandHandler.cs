@@ -4,6 +4,7 @@ using GymManager.Application.Common.Models;
 using GymManager.Application.ShiftAssignments.Shared;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.ShiftAssignments.CreateShiftAssignment;
@@ -40,6 +41,6 @@ public sealed class CreateShiftAssignmentCommandHandler(
         await shiftRepository.CreateAsync(shift, ct);
 
         var created = await shiftRepository.GetByIdAsync(shift.Id, request.GymHouseId, ct);
-        return Result.Success(ShiftAssignmentDto.FromEntity(created!));
+        return Result.Success(created!.Adapt<ShiftAssignmentDto>());
     }
 }

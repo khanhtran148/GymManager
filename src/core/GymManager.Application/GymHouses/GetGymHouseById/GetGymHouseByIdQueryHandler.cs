@@ -1,9 +1,9 @@
 using CSharpFunctionalExtensions;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
-using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Application.GymHouses.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.GymHouses.GetGymHouseById;
@@ -25,6 +25,6 @@ public sealed class GetGymHouseByIdQueryHandler(
         if (gymHouse is null)
             return Result.Failure<GymHouseDto>(new NotFoundError("GymHouse", request.Id).ToString());
 
-        return Result.Success(CreateGymHouseCommandHandler.ToDto(gymHouse));
+        return Result.Success(gymHouse.Adapt<GymHouseDto>());
     }
 }

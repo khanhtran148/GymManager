@@ -3,6 +3,7 @@ using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Application.ShiftAssignments.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.ShiftAssignments.GetShiftAssignments;
@@ -23,6 +24,6 @@ public sealed class GetShiftAssignmentsQueryHandler(
         var shifts = await shiftRepository.GetByGymHouseAsync(
             request.GymHouseId, request.From, request.To, request.StaffId, ct);
 
-        return Result.Success(shifts.Select(ShiftAssignmentDto.FromEntity).ToList());
+        return Result.Success(shifts.Adapt<List<ShiftAssignmentDto>>());
     }
 }

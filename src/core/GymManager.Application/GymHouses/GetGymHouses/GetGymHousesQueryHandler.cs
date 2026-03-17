@@ -1,9 +1,9 @@
 using CSharpFunctionalExtensions;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
-using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Application.GymHouses.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.GymHouses.GetGymHouses;
@@ -23,6 +23,6 @@ public sealed class GetGymHousesQueryHandler(
 
         var houses = await gymHouseRepository.GetByOwnerIdAsync(currentUser.UserId, ct);
 
-        return Result.Success(houses.Select(CreateGymHouseCommandHandler.ToDto).ToList());
+        return Result.Success(houses.Adapt<List<GymHouseDto>>());
     }
 }

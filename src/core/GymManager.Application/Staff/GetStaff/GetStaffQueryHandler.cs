@@ -3,6 +3,7 @@ using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Application.Staff.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Staff.GetStaff;
@@ -24,7 +25,7 @@ public sealed class GetStaffQueryHandler(
             request.GymHouseId, request.StaffType, request.Page, request.PageSize, ct);
 
         var dtos = new PagedList<StaffDto>(
-            paged.Items.Select(StaffDto.FromEntity).ToList(),
+            paged.Items.Adapt<List<StaffDto>>(),
             paged.TotalCount,
             paged.Page,
             paged.PageSize);

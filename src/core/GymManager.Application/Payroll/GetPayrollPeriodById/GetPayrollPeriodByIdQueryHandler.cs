@@ -3,6 +3,7 @@ using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Application.Payroll.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Payroll.GetPayrollPeriodById;
@@ -24,6 +25,6 @@ public sealed class GetPayrollPeriodByIdQueryHandler(
         if (payrollPeriod is null)
             return Result.Failure<PayrollPeriodDetailDto>(new NotFoundError("PayrollPeriod", request.Id).ToString());
 
-        return Result.Success(PayrollPeriodDetailDto.FromEntity(payrollPeriod));
+        return Result.Success(payrollPeriod.Adapt<PayrollPeriodDetailDto>());
     }
 }

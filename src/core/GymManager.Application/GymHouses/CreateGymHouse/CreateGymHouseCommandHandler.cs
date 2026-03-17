@@ -4,6 +4,7 @@ using GymManager.Application.Common.Models;
 using GymManager.Application.GymHouses.Shared;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.GymHouses.CreateGymHouse;
@@ -33,9 +34,6 @@ public sealed class CreateGymHouseCommandHandler(
 
         await gymHouseRepository.CreateAsync(gymHouse, ct);
 
-        return Result.Success(ToDto(gymHouse));
+        return Result.Success(gymHouse.Adapt<GymHouseDto>());
     }
-
-    internal static GymHouseDto ToDto(GymHouse g) => new(
-        g.Id, g.Name, g.Address, g.Phone, g.OperatingHours, g.HourlyCapacity, g.OwnerId, g.CreatedAt);
 }

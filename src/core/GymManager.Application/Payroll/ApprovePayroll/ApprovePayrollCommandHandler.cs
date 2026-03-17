@@ -4,6 +4,7 @@ using GymManager.Application.Common.Models;
 using GymManager.Application.Payroll.Shared;
 using GymManager.Domain.Enums;
 using GymManager.Domain.Events;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Payroll.ApprovePayroll;
@@ -39,6 +40,6 @@ public sealed class ApprovePayrollCommandHandler(
         await publisher.Publish(new PayrollApprovedEvent(payrollPeriod.Id, payrollPeriod.GymHouseId), ct);
 
         var updated = await payrollPeriodRepository.GetByIdWithEntriesAsync(payrollPeriod.Id, request.GymHouseId, ct);
-        return Result.Success(PayrollPeriodDetailDto.FromEntity(updated!));
+        return Result.Success(updated!.Adapt<PayrollPeriodDetailDto>());
     }
 }

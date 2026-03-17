@@ -4,6 +4,7 @@ using GymManager.Application.Common.Models;
 using GymManager.Application.Staff.Shared;
 using GymManager.Domain.Enums;
 using GymManager.Domain.Events;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Staff.CreateStaff;
@@ -41,6 +42,6 @@ public sealed class CreateStaffCommandHandler(
         await publisher.Publish(new StaffCreatedEvent(staff.Id, staff.UserId, staff.GymHouseId), ct);
 
         var created = await staffRepository.GetByIdAsync(staff.Id, request.GymHouseId, ct);
-        return Result.Success(StaffDto.FromEntity(created!));
+        return Result.Success(created!.Adapt<StaffDto>());
     }
 }

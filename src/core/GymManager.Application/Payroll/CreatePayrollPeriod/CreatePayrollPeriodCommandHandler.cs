@@ -4,6 +4,7 @@ using GymManager.Application.Common.Models;
 using GymManager.Application.Payroll.Shared;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Payroll.CreatePayrollPeriod;
@@ -78,6 +79,6 @@ public sealed class CreatePayrollPeriodCommandHandler(
 
         await payrollPeriodRepository.CreateAsync(payrollPeriod, ct);
 
-        return Result.Success(PayrollPeriodDetailDto.FromEntity(payrollPeriod));
+        return Result.Success(payrollPeriod.Adapt<PayrollPeriodDetailDto>());
     }
 }

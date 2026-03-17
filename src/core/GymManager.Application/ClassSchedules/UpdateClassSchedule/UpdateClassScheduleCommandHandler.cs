@@ -3,8 +3,8 @@ using GymManager.Application.ClassSchedules.Shared;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
-using static GymManager.Application.ClassSchedules.Shared.ClassScheduleMapper;
 
 namespace GymManager.Application.ClassSchedules.UpdateClassSchedule;
 
@@ -42,6 +42,6 @@ public sealed class UpdateClassScheduleCommandHandler(
 
         await classScheduleRepository.UpdateAsync(classSchedule, ct);
 
-        return Result.Success(ToDto(classSchedule));
+        return Result.Success(classSchedule.Adapt<ClassScheduleDto>());
     }
 }

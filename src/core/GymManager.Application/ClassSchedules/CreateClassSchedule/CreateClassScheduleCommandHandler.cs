@@ -4,8 +4,8 @@ using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
-using static GymManager.Application.ClassSchedules.Shared.ClassScheduleMapper;
 
 namespace GymManager.Application.ClassSchedules.CreateClassSchedule;
 
@@ -48,6 +48,6 @@ public sealed class CreateClassScheduleCommandHandler(
         await classScheduleRepository.CreateAsync(classSchedule, ct);
 
         var created = await classScheduleRepository.GetByIdAsync(classSchedule.Id, ct);
-        return Result.Success(ToDto(created!));
+        return Result.Success(created!.Adapt<ClassScheduleDto>());
     }
 }

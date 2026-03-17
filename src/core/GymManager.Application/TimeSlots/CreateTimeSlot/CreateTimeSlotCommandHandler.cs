@@ -4,8 +4,8 @@ using GymManager.Application.Common.Models;
 using GymManager.Application.TimeSlots.Shared;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
-using static GymManager.Application.TimeSlots.Shared.TimeSlotMapper;
 
 namespace GymManager.Application.TimeSlots.CreateTimeSlot;
 
@@ -39,6 +39,6 @@ public sealed class CreateTimeSlotCommandHandler(
 
         await timeSlotRepository.CreateAsync(timeSlot, ct);
 
-        return Result.Success(ToDto(timeSlot));
+        return Result.Success(timeSlot.Adapt<TimeSlotDto>());
     }
 }

@@ -1,4 +1,3 @@
-using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
 
 namespace GymManager.Application.Transactions.Shared;
@@ -18,22 +17,4 @@ public sealed record TransactionDto(
     Guid? ApprovedById,
     PaymentMethod? PaymentMethod,
     string? ExternalReference,
-    DateTime CreatedAt)
-{
-    internal static TransactionDto FromEntity(Transaction t) => new(
-        t.Id,
-        t.GymHouseId,
-        t.TransactionType,
-        t.Direction,
-        t.Amount,
-        t.Category,
-        t.Description,
-        t.TransactionDate,
-        t.RelatedEntityId,
-        t.ReversesTransactionId,
-        t.ReversedByTransactionId,
-        t.ApprovedById,
-        t.PaymentMethod,
-        t.ExternalReference,
-        t.CreatedAt);
-}
+    DateTime CreatedAt);

@@ -3,6 +3,7 @@ using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Application.Payroll.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Payroll.GetPayrollPeriods;
@@ -24,7 +25,7 @@ public sealed class GetPayrollPeriodsQueryHandler(
             request.GymHouseId, request.Page, request.PageSize, ct);
 
         var dtos = new PagedList<PayrollPeriodDto>(
-            paged.Items.Select(PayrollPeriodDto.FromEntity).ToList(),
+            paged.Items.Adapt<List<PayrollPeriodDto>>(),
             paged.TotalCount,
             paged.Page,
             paged.PageSize);
