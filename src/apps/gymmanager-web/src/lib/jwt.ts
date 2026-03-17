@@ -14,10 +14,10 @@ export interface JwtPermissionClaims {
 export function decodePermissionClaims(token: string): JwtPermissionClaims | null {
   try {
     const claims = decodeJwt(token);
-    return {
-      role: claims.role as string,
-      permissions: claims.permissions as string,
-    };
+    const role = typeof claims.role === "string" ? claims.role : null;
+    const permissions = typeof claims.permissions === "string" ? claims.permissions : null;
+    if (!role || !permissions) return null;
+    return { role, permissions };
   } catch {
     return null;
   }

@@ -1,9 +1,11 @@
-import type { RoleType } from "@/lib/roles";
+import { Role, type RoleType } from "@/lib/roles";
 
 interface RouteAccess {
   path: string;
   allowedRoles: RoleType[];
 }
+
+const VALID_ROLES = new Set<string>(Object.values(Role));
 
 /**
  * Route-to-role access map. Single source of truth for frontend route guards.
@@ -34,6 +36,9 @@ const routeAccessMap: RouteAccess[] = [
  * Returns true for unknown routes (fail-open for UX).
  */
 export function canAccessRoute(pathname: string, role: string): boolean {
+  // Reject unknown roles (fail-closed for invalid cookie values)
+  if (!VALID_ROLES.has(role)) return false;
+
   for (const route of routeAccessMap) {
     if (route.path === "/") {
       if (pathname === "/") {
@@ -49,6 +54,15 @@ export function canAccessRoute(pathname: string, role: string): boolean {
 
   // Unknown route: fail-open (UX-only, backend enforces)
   return true;
+}
+
+/**
+ * Get allowed roles for a specific route path.
+ * Returns undefined for unknown routes (all roles allowed).
+ */
+export function getAllowedRolesForRoute(path: string): RoleType[] | undefined {
+  const route = routeAccessMap.find((r) => r.path === path);
+  return route?.allowedRoles;
 }
 
 export { routeAccessMap };

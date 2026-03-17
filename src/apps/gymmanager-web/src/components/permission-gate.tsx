@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useCanDo } from "@/hooks/use-permissions";
 
 interface PermissionGateProps {
@@ -14,12 +15,7 @@ interface PermissionGateProps {
  *
  * This is a UX-only gate. The backend IPermissionChecker enforces security.
  */
-export function PermissionGate({ permission, fallback = null, children }: PermissionGateProps) {
+export const PermissionGate = memo(function PermissionGate({ permission, fallback = null, children }: PermissionGateProps) {
   const canDo = useCanDo(permission);
-
-  if (!canDo) {
-    return <>{fallback}</>;
-  }
-
-  return <>{children}</>;
-}
+  return canDo ? <>{children}</> : <>{fallback}</>;
+});

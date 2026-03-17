@@ -20,7 +20,7 @@ interface AuthState {
 function setAuthCookie(isAuthenticated: boolean): void {
   if (typeof document === "undefined") return;
   if (isAuthenticated) {
-    document.cookie = "is_authenticated=1; path=/; max-age=604800; SameSite=Lax";
+    document.cookie = "is_authenticated=1; path=/; max-age=604800; SameSite=Lax; Secure";
   } else {
     document.cookie = "is_authenticated=; path=/; max-age=0; SameSite=Lax";
   }
@@ -29,7 +29,7 @@ function setAuthCookie(isAuthenticated: boolean): void {
 function setRoleCookie(role: string | null): void {
   if (typeof document === "undefined") return;
   if (role) {
-    document.cookie = `user_role=${role}; path=/; max-age=604800; SameSite=Lax`;
+    document.cookie = `user_role=${role}; path=/; max-age=604800; SameSite=Lax; Secure`;
   } else {
     document.cookie = "user_role=; path=/; max-age=0; SameSite=Lax";
   }

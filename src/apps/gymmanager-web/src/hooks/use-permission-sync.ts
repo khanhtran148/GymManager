@@ -23,8 +23,12 @@ interface PermissionsChangedPayload {
  */
 export function usePermissionSync(): void {
   const handlePermissionsChanged = useCallback(
-    async (_payload: PermissionsChangedPayload) => {
+    async (payload: PermissionsChangedPayload) => {
       try {
+        // Validate event is for the current user (guard against cross-user group bugs)
+        const currentUserId = useAuthStore.getState().user?.userId;
+        if (payload.userId && currentUserId && payload.userId !== currentUserId) return;
+
         const accessToken =
           typeof window !== "undefined"
             ? localStorage.getItem("access_token")
@@ -47,8 +51,11 @@ export function usePermissionSync(): void {
         }
 
         useAuthStore.getState().updateFromToken(response.accessToken);
-      } catch {
-        // Silently fail; permissions will update on next regular token refresh
+      } catch (error) {
+        // Log for debugging; permissions will update on next regular token refresh (~15 min)
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[PermissionSync] Token refresh failed after role change:", error);
+        }
       }
     },
     []

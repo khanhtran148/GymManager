@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useHasRole } from "@/hooks/use-permissions";
 import type { RoleType } from "@/lib/roles";
 
@@ -15,12 +16,7 @@ interface RoleGateProps {
  *
  * This is a UX-only gate. The backend IPermissionChecker enforces security.
  */
-export function RoleGate({ roles, fallback = null, children }: RoleGateProps) {
+export const RoleGate = memo(function RoleGate({ roles, fallback = null, children }: RoleGateProps) {
   const hasRole = useHasRole(...roles);
-
-  if (!hasRole) {
-    return <>{fallback}</>;
-  }
-
-  return <>{children}</>;
-}
+  return hasRole ? <>{children}</> : <>{fallback}</>;
+});

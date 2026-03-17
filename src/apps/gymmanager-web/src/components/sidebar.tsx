@@ -6,6 +6,7 @@ import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/hooks/use-permissions";
 import type { RoleType } from "@/lib/roles";
+import { getAllowedRolesForRoute } from "@/lib/route-access";
 import {
   LayoutDashboard,
   Building2,
@@ -50,41 +51,38 @@ function isNavGroup(entry: NavEntry): entry is NavGroup {
   return "children" in entry;
 }
 
-const ALL_ROLES: RoleType[] = ["Owner", "HouseManager", "Trainer", "Staff", "Member"];
-const STAFF_AND_ABOVE: RoleType[] = ["Owner", "HouseManager", "Trainer", "Staff"];
-const MANAGEMENT_ONLY: RoleType[] = ["Owner", "HouseManager"];
-
+// Derive allowed roles from route-access.ts (single source of truth)
 const navEntries: NavEntry[] = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard, allowedRoles: ALL_ROLES },
-  { label: "Gym Houses", href: "/gym-houses", icon: Building2, allowedRoles: STAFF_AND_ABOVE },
-  { label: "Members", href: "/members", icon: Users, allowedRoles: ALL_ROLES },
-  { label: "Bookings", href: "/bookings", icon: CalendarCheck, allowedRoles: ALL_ROLES },
-  { label: "Class Schedules", href: "/class-schedules", icon: GraduationCap, allowedRoles: ALL_ROLES },
-  { label: "Time Slots", href: "/time-slots", icon: Clock, allowedRoles: ALL_ROLES },
-  { label: "Check-in", href: "/check-in", icon: ScanLine, allowedRoles: STAFF_AND_ABOVE },
+  { label: "Dashboard", href: "/", icon: LayoutDashboard, allowedRoles: getAllowedRolesForRoute("/") },
+  { label: "Gym Houses", href: "/gym-houses", icon: Building2, allowedRoles: getAllowedRolesForRoute("/gym-houses") },
+  { label: "Members", href: "/members", icon: Users, allowedRoles: getAllowedRolesForRoute("/members") },
+  { label: "Bookings", href: "/bookings", icon: CalendarCheck, allowedRoles: getAllowedRolesForRoute("/bookings") },
+  { label: "Class Schedules", href: "/class-schedules", icon: GraduationCap, allowedRoles: getAllowedRolesForRoute("/class-schedules") },
+  { label: "Time Slots", href: "/time-slots", icon: Clock, allowedRoles: getAllowedRolesForRoute("/time-slots") },
+  { label: "Check-in", href: "/check-in", icon: ScanLine, allowedRoles: getAllowedRolesForRoute("/check-in") },
   {
     label: "Finance",
     icon: Wallet,
     prefix: "/finance",
-    allowedRoles: ["Owner", "HouseManager", "Staff"],
+    allowedRoles: getAllowedRolesForRoute("/finance"),
     children: [
-      { label: "Dashboard", href: "/finance", icon: Wallet, allowedRoles: ["Owner", "HouseManager", "Staff"] },
-      { label: "Transactions", href: "/finance/transactions", icon: Receipt, allowedRoles: ["Owner", "HouseManager", "Staff"] },
-      { label: "P&L Report", href: "/finance/pnl", icon: FileText, allowedRoles: MANAGEMENT_ONLY },
+      { label: "Dashboard", href: "/finance", icon: Wallet, allowedRoles: getAllowedRolesForRoute("/finance") },
+      { label: "Transactions", href: "/finance/transactions", icon: Receipt, allowedRoles: getAllowedRolesForRoute("/finance/transactions") },
+      { label: "P&L Report", href: "/finance/pnl", icon: FileText, allowedRoles: getAllowedRolesForRoute("/finance/pnl") },
     ],
   },
   {
     label: "Staff & HR",
     icon: UserCog,
     prefix: "/staff-hr",
-    allowedRoles: MANAGEMENT_ONLY,
+    allowedRoles: getAllowedRolesForRoute("/staff"),
     children: [
-      { label: "Staff", href: "/staff", icon: Users, allowedRoles: MANAGEMENT_ONLY },
-      { label: "Shifts", href: "/shifts", icon: CalendarDays, allowedRoles: MANAGEMENT_ONLY },
-      { label: "Payroll", href: "/payroll", icon: Banknote, allowedRoles: MANAGEMENT_ONLY },
+      { label: "Staff", href: "/staff", icon: Users, allowedRoles: getAllowedRolesForRoute("/staff") },
+      { label: "Shifts", href: "/shifts", icon: CalendarDays, allowedRoles: getAllowedRolesForRoute("/shifts") },
+      { label: "Payroll", href: "/payroll", icon: Banknote, allowedRoles: getAllowedRolesForRoute("/payroll") },
     ],
   },
-  { label: "Announcements", href: "/announcements", icon: Megaphone, allowedRoles: ALL_ROLES },
+  { label: "Announcements", href: "/announcements", icon: Megaphone, allowedRoles: getAllowedRolesForRoute("/announcements") },
 ];
 
 export function Sidebar() {

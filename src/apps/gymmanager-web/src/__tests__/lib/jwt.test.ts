@@ -30,27 +30,21 @@ describe("decodePermissionClaims", () => {
     expect(decodePermissionClaims("")).toBeNull();
   });
 
-  it("handles tokens with missing role claim gracefully", () => {
+  it("returns null for tokens with missing role claim", () => {
     const token = makeUnsignedJwt({
       sub: "user-123",
       permissions: "100",
     });
 
-    const claims = decodePermissionClaims(token);
-    expect(claims).not.toBeNull();
-    expect(claims!.role).toBeUndefined();
-    expect(claims!.permissions).toBe("100");
+    expect(decodePermissionClaims(token)).toBeNull();
   });
 
-  it("handles tokens with missing permissions claim gracefully", () => {
+  it("returns null for tokens with missing permissions claim", () => {
     const token = makeUnsignedJwt({
       sub: "user-123",
       role: "Member",
     });
 
-    const claims = decodePermissionClaims(token);
-    expect(claims).not.toBeNull();
-    expect(claims!.role).toBe("Member");
-    expect(claims!.permissions).toBeUndefined();
+    expect(decodePermissionClaims(token)).toBeNull();
   });
 });
