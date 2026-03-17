@@ -48,6 +48,9 @@ public sealed class MemberRepository(GymManagerDbContext db) : IMemberRepository
 
     public async Task<int> GetNextSequenceAsync(Guid gymHouseId, CancellationToken ct = default)
     {
+        // IgnoreQueryFilters: intentionally includes soft-deleted members in the count to
+        // guarantee member code uniqueness across the full historical sequence for this gym house.
+        // The explicit gymHouseId filter provides tenant isolation — cross-tenant leakage is prevented.
         var count = await db.Members
             .IgnoreQueryFilters()
             .CountAsync(m => m.GymHouseId == gymHouseId, ct);

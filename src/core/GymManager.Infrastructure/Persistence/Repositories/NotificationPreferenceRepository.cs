@@ -15,6 +15,9 @@ public sealed class NotificationPreferenceRepository(GymManagerDbContext db) : I
 
     public async Task UpsertAsync(Guid userId, NotificationChannel channel, bool isEnabled, CancellationToken ct = default)
     {
+        // IgnoreQueryFilters: intentionally includes soft-deleted preferences so we can
+        // restore (un-delete) a previously deleted preference rather than creating a duplicate.
+        // No gym_house_id on NotificationPreference — isolation is by UserId which is user-scoped.
         var existing = await db.NotificationPreferences
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(p => p.UserId == userId && p.Channel == channel, ct);

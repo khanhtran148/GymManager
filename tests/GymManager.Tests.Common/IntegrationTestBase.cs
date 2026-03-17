@@ -2,7 +2,9 @@ using GymManager.Application;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Infrastructure.Auth;
 using GymManager.Infrastructure.Notifications;
+using GymManager.Infrastructure.Payments;
 using GymManager.Infrastructure.Persistence;
+using GymManager.Infrastructure.Persistence.Interceptors;
 using GymManager.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +26,11 @@ public abstract class IntegrationTestBase : IAsyncLifetime
     protected IServiceProvider Services { get; private set; } = null!;
     protected GymManagerDbContext DbContext { get; private set; } = null!;
 
+    /// <summary>
+    /// Exposes the fake current user so tests can set TenantId before raw-SQL RLS tests.
+    /// </summary>
+    protected Fakes.FakeCurrentUser TestCurrentUser { get; } = new();
+
     public async Task InitializeAsync()
     {
         await _postgres.StartAsync();
@@ -41,8 +48,17 @@ public abstract class IntegrationTestBase : IAsyncLifetime
 
         services.AddSingleton<IConfiguration>(config);
 
-        services.AddDbContext<GymManagerDbContext>(options =>
-            options.UseNpgsql(_postgres.GetConnectionString()));
+        // Register the fake ICurrentUser so the interceptor can resolve it
+        services.AddSingleton<ICurrentUser>(TestCurrentUser);
+
+        // Register interceptor as scoped (resolves ICurrentUser from DI)
+        services.AddScoped<TenantConnectionInterceptor>();
+
+        services.AddDbContext<GymManagerDbContext>((sp, options) =>
+        {
+            options.UseNpgsql(_postgres.GetConnectionString());
+            options.AddInterceptors(sp.GetRequiredService<TenantConnectionInterceptor>());
+        });
 
         // Application layer
         services.AddApplication();
@@ -73,6 +89,9 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         services.AddScoped<ITokenService, JwtTokenService>();
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IPermissionChecker, PermissionChecker>();
+
+        // Payment Gateway — stub for tests
+        services.AddScoped<IPaymentGatewayService, StubPaymentGatewayService>();
 
         // Logging
         services.AddLogging();

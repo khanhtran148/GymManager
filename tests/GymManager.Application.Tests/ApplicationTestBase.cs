@@ -9,16 +9,17 @@ namespace GymManager.Application.Tests;
 
 public abstract class ApplicationTestBase : IntegrationTestBase
 {
-    protected FakeCurrentUser CurrentUser { get; } = new()
-    {
-        Permissions = Permission.Admin
-    };
+    /// <summary>
+    /// Alias for the base TestCurrentUser so existing tests don't break.
+    /// Mutations on CurrentUser are reflected in the interceptor since they share the same instance.
+    /// </summary>
+    protected FakeCurrentUser CurrentUser => TestCurrentUser;
 
     protected ISender Sender => Services.GetRequiredService<ISender>();
 
     protected override void ConfigureServices(IServiceCollection services)
     {
-        // Override ICurrentUser with our fake
-        services.AddSingleton<ICurrentUser>(CurrentUser);
+        // Permissions default to Admin; test cases can narrow via CurrentUser.Permissions
+        TestCurrentUser.Permissions = Permission.Admin;
     }
 }

@@ -1,11 +1,14 @@
 using GymManager.Application.Common.Interfaces;
 using GymManager.Infrastructure.Auth;
 using GymManager.Infrastructure.Notifications;
+using GymManager.Infrastructure.Payments;
 using GymManager.Infrastructure.Persistence;
+using GymManager.Infrastructure.Persistence.Interceptors;
 using GymManager.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace GymManager.Infrastructure;
 
@@ -13,12 +16,19 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment? environment = null)
     {
-        services.AddDbContext<GymManagerDbContext>(options =>
+        // Register interceptor as scoped so it can access ICurrentUser (scoped service)
+        services.AddScoped<TenantConnectionInterceptor>();
+
+        services.AddDbContext<GymManagerDbContext>((serviceProvider, options) =>
+        {
             options.UseNpgsql(
                 configuration.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly(typeof(GymManagerDbContext).Assembly.FullName)));
+                b => b.MigrationsAssembly(typeof(GymManagerDbContext).Assembly.FullName));
+            options.AddInterceptors(serviceProvider.GetRequiredService<TenantConnectionInterceptor>());
+        });
 
         // Repositories
         services.AddScoped<IUserRepository, UserRepository>();
@@ -47,6 +57,12 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<IPermissionChecker, PermissionChecker>();
+
+        // Payment Gateway — stub for development/test only; swap with real gateway in production
+        if (environment is null || environment.IsDevelopment())
+        {
+            services.AddScoped<IPaymentGatewayService, StubPaymentGatewayService>();
+        }
 
         return services;
     }
