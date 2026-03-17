@@ -9,6 +9,8 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
+import { PermissionGate } from "@/components/permission-gate";
+import { Permission } from "@/lib/permissions";
 import type { AnnouncementDto } from "@/types/announcement";
 
 const AUDIENCE_LABELS: Record<string, string> = {
@@ -137,12 +139,14 @@ export default function AnnouncementsPage() {
             </div>
           )}
 
-          <Link href="/announcements/new">
-            <Button variant="primary" size="md">
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              New Announcement
-            </Button>
-          </Link>
+          <PermissionGate permission={Permission.ManageAnnouncements}>
+            <Link href="/announcements/new">
+              <Button variant="primary" size="md">
+                <Plus className="w-4 h-4" aria-hidden="true" />
+                New Announcement
+              </Button>
+            </Link>
+          </PermissionGate>
         </div>
       </div>
 

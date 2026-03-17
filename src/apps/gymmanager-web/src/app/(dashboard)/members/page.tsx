@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
+import { PermissionGate } from "@/components/permission-gate";
+import { Permission } from "@/lib/permissions";
 import type { MemberDto } from "@/types/member";
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -126,12 +128,14 @@ export default function MembersPage() {
           </Button>
         </form>
 
-        <Link href="/members/new">
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4" aria-hidden="true" />
-            Add Member
-          </Button>
-        </Link>
+        <PermissionGate permission={Permission.ManageMembers}>
+          <Link href="/members/new">
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              Add Member
+            </Button>
+          </Link>
+        </PermissionGate>
       </div>
 
       <DataTable

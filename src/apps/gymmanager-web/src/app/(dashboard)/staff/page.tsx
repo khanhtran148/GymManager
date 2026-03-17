@@ -11,6 +11,8 @@ import { Select } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { PermissionGate } from "@/components/permission-gate";
+import { Permission } from "@/lib/permissions";
 import type { StaffDto, StaffType } from "@/types/staff";
 
 function formatCurrency(value: number): string {
@@ -132,12 +134,14 @@ export default function StaffPage() {
           <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Staff & HR</p>
           <h2 className="text-2xl font-bold text-text-primary tracking-tight">Staff</h2>
         </div>
-        <Link href="/staff/new">
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4" aria-hidden="true" />
-            Add Staff
-          </Button>
-        </Link>
+        <PermissionGate permission={Permission.ManageStaff}>
+          <Link href="/staff/new">
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              Add Staff
+            </Button>
+          </Link>
+        </PermissionGate>
       </div>
 
       {error && (

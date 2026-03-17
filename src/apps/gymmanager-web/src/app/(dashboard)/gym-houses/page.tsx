@@ -8,6 +8,8 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Alert } from "@/components/ui/alert";
+import { PermissionGate } from "@/components/permission-gate";
+import { Permission } from "@/lib/permissions";
 import type { GymHouseDto } from "@/types/gym-house";
 
 export default function GymHousesPage() {
@@ -61,27 +63,29 @@ export default function GymHousesPage() {
       header: "",
       className: "w-24",
       render: (gym: GymHouseDto) => (
-        <div className="flex items-center gap-1">
-          <Link href={`/gym-houses/${gym.id}`}>
+        <PermissionGate permission={Permission.ManageTenant}>
+          <div className="flex items-center gap-1">
+            <Link href={`/gym-houses/${gym.id}`}>
+              <Button
+                variant="ghost"
+                size="sm"
+                aria-label={`Edit ${gym.name}`}
+                className="text-text-muted hover:text-primary-500"
+              >
+                <Pencil className="w-4 h-4" aria-hidden="true" />
+              </Button>
+            </Link>
             <Button
               variant="ghost"
               size="sm"
-              aria-label={`Edit ${gym.name}`}
-              className="text-text-muted hover:text-primary-500"
+              onClick={() => setDeleteTarget(gym)}
+              aria-label={`Delete ${gym.name}`}
+              className="text-text-muted hover:text-red-500"
             >
-              <Pencil className="w-4 h-4" aria-hidden="true" />
+              <Trash2 className="w-4 h-4" aria-hidden="true" />
             </Button>
-          </Link>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setDeleteTarget(gym)}
-            aria-label={`Delete ${gym.name}`}
-            className="text-text-muted hover:text-red-500"
-          >
-            <Trash2 className="w-4 h-4" aria-hidden="true" />
-          </Button>
-        </div>
+          </div>
+        </PermissionGate>
       ),
     },
   ];
@@ -100,12 +104,14 @@ export default function GymHousesPage() {
             {isLoading ? "Loading..." : `${gymHouses?.length ?? 0} locations registered`}
           </p>
         </div>
-        <Link href="/gym-houses/new">
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4" aria-hidden="true" />
-            Add Gym House
-          </Button>
-        </Link>
+        <PermissionGate permission={Permission.ManageTenant}>
+          <Link href="/gym-houses/new">
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              Add Gym House
+            </Button>
+          </Link>
+        </PermissionGate>
       </div>
 
       <DataTable

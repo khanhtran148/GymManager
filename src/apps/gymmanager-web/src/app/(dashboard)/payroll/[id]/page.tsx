@@ -11,6 +11,8 @@ import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
+import { PermissionGate } from "@/components/permission-gate";
+import { Permission } from "@/lib/permissions";
 import type { PayrollEntryDto, PayrollStatus, StaffType } from "@/types/staff";
 
 function formatCurrency(value: number): string {
@@ -152,14 +154,16 @@ export default function PayrollDetailPage() {
           </h2>
         </div>
         {(period.status === "Draft" || period.status === "PendingApproval") && (
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => setShowConfirm(true)}
-          >
-            <CheckCircle className="w-4 h-4" aria-hidden="true" />
-            Approve Payroll
-          </Button>
+          <PermissionGate permission={Permission.ApprovePayroll}>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => setShowConfirm(true)}
+            >
+              <CheckCircle className="w-4 h-4" aria-hidden="true" />
+              Approve Payroll
+            </Button>
+          </PermissionGate>
         )}
       </div>
 

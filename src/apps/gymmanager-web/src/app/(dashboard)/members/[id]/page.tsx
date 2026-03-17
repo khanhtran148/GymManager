@@ -13,6 +13,8 @@ import { SubscriptionCard } from "@/components/subscription-card";
 import { PageHeader } from "@/components/ui/page-header";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
+import { PermissionGate } from "@/components/permission-gate";
+import { Permission } from "@/lib/permissions";
 
 export default function MemberDetailPage() {
   const params = useParams<{ id: string }>();
@@ -47,12 +49,14 @@ export default function MemberDetailPage() {
         breadcrumb="Members"
         title={member.fullName}
         actions={
-          <Link href={`/members/${member.id}/subscriptions/new`}>
-            <Button variant="primary" size="md">
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              Add Subscription
-            </Button>
-          </Link>
+          <PermissionGate permission={Permission.ManageMembers}>
+            <Link href={`/members/${member.id}/subscriptions/new`}>
+              <Button variant="primary" size="md">
+                <Plus className="w-4 h-4" aria-hidden="true" />
+                Add Subscription
+              </Button>
+            </Link>
+          </PermissionGate>
         }
       />
 

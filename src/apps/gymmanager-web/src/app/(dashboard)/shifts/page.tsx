@@ -15,6 +15,8 @@ import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { FormField } from "@/components/ui/form-field";
 import { cn } from "@/lib/utils";
+import { PermissionGate } from "@/components/permission-gate";
+import { Permission } from "@/lib/permissions";
 import type {
   ShiftAssignmentDto,
   ShiftStatus,
@@ -183,10 +185,12 @@ export default function ShiftsPage() {
           <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Staff & HR</p>
           <h2 className="text-2xl font-bold text-text-primary tracking-tight">Shift Schedule</h2>
         </div>
-        <Button variant="primary" size="md" onClick={handleOpenModal} disabled={!gymHouseId}>
-          <Plus className="w-4 h-4" aria-hidden="true" />
-          Add Shift
-        </Button>
+        <PermissionGate permission={Permission.ManageShifts}>
+          <Button variant="primary" size="md" onClick={handleOpenModal} disabled={!gymHouseId}>
+            <Plus className="w-4 h-4" aria-hidden="true" />
+            Add Shift
+          </Button>
+        </PermissionGate>
       </div>
 
       {error && (

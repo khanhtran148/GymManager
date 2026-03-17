@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { canAccessRoute } from "@/lib/route-access";
 
-const PUBLIC_PATHS = ["/login", "/register"];
+const PUBLIC_PATHS = ["/login", "/register", "/403"];
 
 export function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
@@ -16,9 +17,18 @@ export function middleware(request: NextRequest): NextResponse {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isAuthenticated && isPublic) {
+  if (isAuthenticated && isPublic && pathname !== "/403") {
     const homeUrl = new URL("/", request.url);
     return NextResponse.redirect(homeUrl);
+  }
+
+  // Role-based route guard (UX-only; backend enforces security)
+  if (isAuthenticated && !isPublic) {
+    const userRole = request.cookies.get("user_role")?.value;
+    if (userRole && !canAccessRoute(pathname, userRole)) {
+      const forbiddenUrl = new URL("/403", request.url);
+      return NextResponse.redirect(forbiddenUrl);
+    }
   }
 
   return NextResponse.next();

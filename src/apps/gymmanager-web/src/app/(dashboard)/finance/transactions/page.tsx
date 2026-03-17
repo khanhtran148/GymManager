@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { PermissionGate } from "@/components/permission-gate";
+import { Permission } from "@/lib/permissions";
 import type { TransactionDto, TransactionType, TransactionDirection } from "@/types/transaction";
 
 function formatCurrency(value: number): string {
@@ -162,12 +164,14 @@ export default function TransactionsPage() {
           <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Finance</p>
           <h2 className="text-2xl font-bold text-text-primary tracking-tight">Transactions</h2>
         </div>
-        <Link href="/finance/transactions/new">
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4" aria-hidden="true" />
-            Record Transaction
-          </Button>
-        </Link>
+        <PermissionGate permission={Permission.ProcessPayments}>
+          <Link href="/finance/transactions/new">
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              Record Transaction
+            </Button>
+          </Link>
+        </PermissionGate>
       </div>
 
       {error && (

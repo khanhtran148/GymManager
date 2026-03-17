@@ -15,6 +15,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { PermissionGate } from "@/components/permission-gate";
+import { Permission } from "@/lib/permissions";
 
 const gymHouseSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -132,26 +134,28 @@ export default function GymHouseDetailPage() {
     <div className="max-w-2xl space-y-5">
       <div className="flex items-center justify-between gap-4">
         <PageHeader backHref="/gym-houses" breadcrumb="Gym Houses" title={gymHouse.name} />
-        <div className="flex items-center gap-2 shrink-0">
-          <Button
-            type="button"
-            variant="secondary"
-            size="md"
-            onClick={() => {
-              document.getElementById("name")?.focus();
-            }}
-          >
-            Edit
-          </Button>
-          <Button
-            type="button"
-            variant="danger"
-            size="md"
-            onClick={() => setShowDeleteConfirm(true)}
-          >
-            Delete
-          </Button>
-        </div>
+        <PermissionGate permission={Permission.ManageTenant}>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={() => {
+                document.getElementById("name")?.focus();
+              }}
+            >
+              Edit
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              size="md"
+              onClick={() => setShowDeleteConfirm(true)}
+            >
+              Delete
+            </Button>
+          </div>
+        </PermissionGate>
       </div>
 
       <Card>

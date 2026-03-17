@@ -4,6 +4,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 import type { AuthResponse } from "@/types/auth";
+import { useAuthStore } from "@/stores/auth-store";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1";
 
@@ -91,6 +92,9 @@ function createApiClient(): AxiosInstance {
           const { accessToken, refreshToken } = response.data;
           localStorage.setItem("access_token", accessToken);
           localStorage.setItem("refresh_token", refreshToken);
+
+          // Sync role + permissions from refreshed JWT
+          useAuthStore.getState().updateFromToken(accessToken);
 
           instance.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;

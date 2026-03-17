@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { FormField } from "@/components/ui/form-field";
 import { Spinner } from "@/components/ui/spinner";
+import { PermissionGate } from "@/components/permission-gate";
+import { Permission } from "@/lib/permissions";
 import { dayOfWeekLabel } from "@/lib/booking-utils";
 import type { ClassScheduleDto } from "@/types/booking";
 
@@ -144,12 +146,14 @@ export default function ClassSchedulesPage() {
           </Select>
         </FormField>
 
-        <Link href="/class-schedules/new">
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4" aria-hidden="true" />
-            New Class
-          </Button>
-        </Link>
+        <PermissionGate permission={Permission.ManageSchedule}>
+          <Link href="/class-schedules/new">
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              New Class
+            </Button>
+          </Link>
+        </PermissionGate>
       </div>
 
       <DataTable

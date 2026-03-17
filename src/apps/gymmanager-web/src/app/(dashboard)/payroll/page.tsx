@@ -11,6 +11,8 @@ import { Select } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { PermissionGate } from "@/components/permission-gate";
+import { Permission } from "@/lib/permissions";
 import type { PayrollPeriodDto, PayrollStatus } from "@/types/staff";
 
 function formatCurrency(value: number): string {
@@ -125,12 +127,14 @@ export default function PayrollPage() {
           <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Staff & HR</p>
           <h2 className="text-2xl font-bold text-text-primary tracking-tight">Payroll</h2>
         </div>
-        <Link href="/payroll/new">
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4" aria-hidden="true" />
-            Generate Payroll
-          </Button>
-        </Link>
+        <PermissionGate permission={Permission.ManageStaff}>
+          <Link href="/payroll/new">
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              Generate Payroll
+            </Button>
+          </Link>
+        </PermissionGate>
       </div>
 
       {error && (

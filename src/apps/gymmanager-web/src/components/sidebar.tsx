@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { useRole } from "@/hooks/use-permissions";
+import type { RoleType } from "@/lib/roles";
 import {
   LayoutDashboard,
   Building2,
@@ -31,6 +33,7 @@ interface NavItem {
   label: string;
   href: string;
   icon: IconComponent;
+  allowedRoles?: RoleType[];
 }
 
 interface NavGroup {
@@ -38,6 +41,7 @@ interface NavGroup {
   icon: IconComponent;
   prefix: string;
   children: NavItem[];
+  allowedRoles?: RoleType[];
 }
 
 type NavEntry = NavItem | NavGroup;
@@ -46,41 +50,67 @@ function isNavGroup(entry: NavEntry): entry is NavGroup {
   return "children" in entry;
 }
 
+const ALL_ROLES: RoleType[] = ["Owner", "HouseManager", "Trainer", "Staff", "Member"];
+const STAFF_AND_ABOVE: RoleType[] = ["Owner", "HouseManager", "Trainer", "Staff"];
+const MANAGEMENT_ONLY: RoleType[] = ["Owner", "HouseManager"];
+
 const navEntries: NavEntry[] = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Gym Houses", href: "/gym-houses", icon: Building2 },
-  { label: "Members", href: "/members", icon: Users },
-  { label: "Bookings", href: "/bookings", icon: CalendarCheck },
-  { label: "Class Schedules", href: "/class-schedules", icon: GraduationCap },
-  { label: "Time Slots", href: "/time-slots", icon: Clock },
-  { label: "Check-in", href: "/check-in", icon: ScanLine },
+  { label: "Dashboard", href: "/", icon: LayoutDashboard, allowedRoles: ALL_ROLES },
+  { label: "Gym Houses", href: "/gym-houses", icon: Building2, allowedRoles: STAFF_AND_ABOVE },
+  { label: "Members", href: "/members", icon: Users, allowedRoles: ALL_ROLES },
+  { label: "Bookings", href: "/bookings", icon: CalendarCheck, allowedRoles: ALL_ROLES },
+  { label: "Class Schedules", href: "/class-schedules", icon: GraduationCap, allowedRoles: ALL_ROLES },
+  { label: "Time Slots", href: "/time-slots", icon: Clock, allowedRoles: ALL_ROLES },
+  { label: "Check-in", href: "/check-in", icon: ScanLine, allowedRoles: STAFF_AND_ABOVE },
   {
     label: "Finance",
     icon: Wallet,
     prefix: "/finance",
+    allowedRoles: ["Owner", "HouseManager", "Staff"],
     children: [
-      { label: "Dashboard", href: "/finance", icon: Wallet },
-      { label: "Transactions", href: "/finance/transactions", icon: Receipt },
-      { label: "P&L Report", href: "/finance/pnl", icon: FileText },
+      { label: "Dashboard", href: "/finance", icon: Wallet, allowedRoles: ["Owner", "HouseManager", "Staff"] },
+      { label: "Transactions", href: "/finance/transactions", icon: Receipt, allowedRoles: ["Owner", "HouseManager", "Staff"] },
+      { label: "P&L Report", href: "/finance/pnl", icon: FileText, allowedRoles: MANAGEMENT_ONLY },
     ],
   },
   {
     label: "Staff & HR",
     icon: UserCog,
     prefix: "/staff-hr",
+    allowedRoles: MANAGEMENT_ONLY,
     children: [
-      { label: "Staff", href: "/staff", icon: Users },
-      { label: "Shifts", href: "/shifts", icon: CalendarDays },
-      { label: "Payroll", href: "/payroll", icon: Banknote },
+      { label: "Staff", href: "/staff", icon: Users, allowedRoles: MANAGEMENT_ONLY },
+      { label: "Shifts", href: "/shifts", icon: CalendarDays, allowedRoles: MANAGEMENT_ONLY },
+      { label: "Payroll", href: "/payroll", icon: Banknote, allowedRoles: MANAGEMENT_ONLY },
     ],
   },
-  { label: "Announcements", href: "/announcements", icon: Megaphone },
+  { label: "Announcements", href: "/announcements", icon: Megaphone, allowedRoles: ALL_ROLES },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const role = useRole();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ "/finance": true, "/staff-hr": true });
+
+  const filteredEntries = useMemo(() => {
+    if (!role) return navEntries;
+
+    return navEntries
+      .map((entry) => {
+        if (isNavGroup(entry)) {
+          if (entry.allowedRoles && !entry.allowedRoles.includes(role)) return null;
+          const filteredChildren = entry.children.filter(
+            (child) => !child.allowedRoles || child.allowedRoles.includes(role)
+          );
+          if (filteredChildren.length === 0) return null;
+          return { ...entry, children: filteredChildren };
+        }
+        if (entry.allowedRoles && !entry.allowedRoles.includes(role)) return null;
+        return entry;
+      })
+      .filter((entry): entry is NavEntry => entry !== null);
+  }, [role]);
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -181,7 +211,7 @@ export function Sidebar() {
       <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-text-muted">
         Menu
       </p>
-      {navEntries.map((entry) =>
+      {filteredEntries.map((entry) =>
         isNavGroup(entry) ? renderNavGroup(entry) : renderNavItem(entry)
       )}
     </nav>
@@ -243,7 +273,7 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-sidebar-border-color">
-          <p className="text-[10px] text-text-muted font-medium">Phase 5 — Communications v5.0</p>
+          <p className="text-[10px] text-text-muted font-medium">Phase 5 -- Communications v5.0</p>
         </div>
       </aside>
     </>
