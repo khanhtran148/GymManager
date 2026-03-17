@@ -31,6 +31,36 @@ public enum Permission : long
     // Reports
     ViewReports = 1L << 11,
 
+    // Bookings
+    ManageBookings = 1L << 12,
+    ViewBookings = 1L << 13,
+
+    // Schedule
+    ManageSchedule = 1L << 14,
+    ViewSchedule = 1L << 15,
+
+    // Finance
+    ManageFinance = 1L << 16,
+    ViewFinance = 1L << 17,
+
+    // Staff
+    ManageStaff = 1L << 18,
+    ViewStaff = 1L << 19,
+
+    // Announcements
+    ManageAnnouncements = 1L << 20,
+    ViewAnnouncements = 1L << 21,
+
+    // Payroll
+    ApprovePayroll = 1L << 22,
+
+    // Shifts
+    ManageShifts = 1L << 23,
+    ViewShifts = 1L << 24,
+
+    // Waitlist
+    ManageWaitlist = 1L << 25,
+
     // Admin
     Admin = ~0L
 }

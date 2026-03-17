@@ -11,6 +11,42 @@ public abstract class ApiControllerBase(ISender sender) : ControllerBase
 {
     protected ISender Sender { get; } = sender;
 
+    protected IActionResult HandleResult<T>(Result<T> result)
+    {
+        if (result.IsSuccess)
+            return Ok(result.Value);
+
+        return result.Error switch
+        {
+            var e when e.Contains("not found", StringComparison.OrdinalIgnoreCase) =>
+                NotFound(ToProblem(e, 404)),
+            var e when e.Contains("Access denied", StringComparison.OrdinalIgnoreCase) ||
+                       e.Contains("Forbidden", StringComparison.OrdinalIgnoreCase) =>
+                StatusCode(403, ToProblem(e, 403)),
+            var e when e.Contains("already", StringComparison.OrdinalIgnoreCase) =>
+                Conflict(ToProblem(e, 409)),
+            var e => BadRequest(ToProblem(e, 400))
+        };
+    }
+
+    protected IActionResult HandleResult(Result result)
+    {
+        if (result.IsSuccess)
+            return NoContent();
+
+        return result.Error switch
+        {
+            var e when e.Contains("not found", StringComparison.OrdinalIgnoreCase) =>
+                NotFound(ToProblem(e, 404)),
+            var e when e.Contains("Access denied", StringComparison.OrdinalIgnoreCase) ||
+                       e.Contains("Forbidden", StringComparison.OrdinalIgnoreCase) =>
+                StatusCode(403, ToProblem(e, 403)),
+            var e when e.Contains("already", StringComparison.OrdinalIgnoreCase) =>
+                Conflict(ToProblem(e, 409)),
+            var e => BadRequest(ToProblem(e, 400))
+        };
+    }
+
     protected IActionResult HandleResult<T>(Result<T, NotFoundError> result) =>
         result.IsSuccess ? Ok(result.Value) : NotFound(ToProblem(result.Error.ToString(), 404));
 

@@ -1,4 +1,7 @@
+using GymManager.Application.Common.Interfaces;
+using GymManager.Infrastructure.Auth;
 using GymManager.Infrastructure.Persistence;
+using GymManager.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +18,18 @@ public static class DependencyInjection
             options.UseNpgsql(
                 configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly(typeof(GymManagerDbContext).Assembly.FullName)));
+
+        // Repositories
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IGymHouseRepository, GymHouseRepository>();
+        services.AddScoped<IMemberRepository, MemberRepository>();
+        services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+
+        // Auth Services
+        services.AddScoped<ITokenService, JwtTokenService>();
+        services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
+        services.AddScoped<ICurrentUser, CurrentUser>();
+        services.AddScoped<IPermissionChecker, PermissionChecker>();
 
         return services;
     }

@@ -1,5 +1,10 @@
+using GymManager.Application;
+using GymManager.Application.Common.Interfaces;
+using GymManager.Infrastructure.Auth;
 using GymManager.Infrastructure.Persistence;
+using GymManager.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 using Xunit;
@@ -24,8 +29,36 @@ public abstract class IntegrationTestBase : IAsyncLifetime
 
         var services = new ServiceCollection();
 
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Jwt:Secret"] = "test-secret-key-that-is-at-least-32-chars-long!",
+                ["Jwt:Issuer"] = "gymmanager-test",
+                ["Jwt:Audience"] = "gymmanager-test"
+            })
+            .Build();
+
+        services.AddSingleton<IConfiguration>(config);
+
         services.AddDbContext<GymManagerDbContext>(options =>
             options.UseNpgsql(_postgres.GetConnectionString()));
+
+        // Application layer
+        services.AddApplication();
+
+        // Repositories
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IGymHouseRepository, GymHouseRepository>();
+        services.AddScoped<IMemberRepository, MemberRepository>();
+        services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+
+        // Auth services
+        services.AddScoped<ITokenService, JwtTokenService>();
+        services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
+        services.AddScoped<IPermissionChecker, PermissionChecker>();
+
+        // Logging
+        services.AddLogging();
 
         ConfigureServices(services);
 

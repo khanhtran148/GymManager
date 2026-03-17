@@ -13,7 +13,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Testcontainers" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\core\GymManager.Application\GymManager.Application.csproj" />
+    <ProjectReference Include="..\..\src\core\GymManager.Infrastructure\GymManager.Infrastructure.csproj" />
     <ProjectReference Include="..\GymManager.Tests.Common\GymManager.Tests.Common.csproj" />
   </ItemGroup>
 
