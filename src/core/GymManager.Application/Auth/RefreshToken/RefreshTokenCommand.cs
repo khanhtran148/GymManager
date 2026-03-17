@@ -4,4 +4,4 @@ using MediatR;
 
 namespace GymManager.Application.Auth.RefreshToken;
 
-public sealed record RefreshTokenCommand(string Token) : IRequest<Result<AuthResponse>>;
+public sealed record RefreshTokenCommand(string AccessToken, string RefreshToken) : IRequest<Result<AuthResponse>>;

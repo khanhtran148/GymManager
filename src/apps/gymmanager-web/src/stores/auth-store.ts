@@ -12,6 +12,15 @@ interface AuthState {
   logout: () => void;
 }
 
+function setAuthCookie(isAuthenticated: boolean): void {
+  if (typeof document === "undefined") return;
+  if (isAuthenticated) {
+    document.cookie = "is_authenticated=1; path=/; max-age=604800; SameSite=Lax";
+  } else {
+    document.cookie = "is_authenticated=; path=/; max-age=0; SameSite=Lax";
+  }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -24,8 +33,9 @@ export const useAuthStore = create<AuthState>()(
           localStorage.setItem("access_token", response.accessToken);
           localStorage.setItem("refresh_token", response.refreshToken);
         }
+        setAuthCookie(true);
         set({
-          user: { userId: response.userId, email: "" },
+          user: { userId: response.userId, email: response.email, fullName: response.fullName },
           token: response.accessToken,
           isAuthenticated: true,
         });
@@ -37,6 +47,7 @@ export const useAuthStore = create<AuthState>()(
           localStorage.removeItem("refresh_token");
           localStorage.removeItem("user");
         }
+        setAuthCookie(false);
         set({ user: null, token: null, isAuthenticated: false });
       },
     }),

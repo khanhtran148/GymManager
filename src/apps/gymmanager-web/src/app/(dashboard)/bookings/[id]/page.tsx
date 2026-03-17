@@ -2,6 +2,7 @@
 
 import { use, useState } from "react";
 import { useBooking, useCancelBooking, useCheckIn, useMarkNoShow } from "@/hooks/use-bookings";
+import { useActiveGymHouse } from "@/hooks/use-active-gym-house";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,9 +18,6 @@ import {
   checkInSourceLabel,
 } from "@/lib/booking-utils";
 
-// TODO: Get from gym house selector/context
-const gymHouseId = "placeholder-gym-id";
-
 const statusBadgeMap: Record<string, string> = {
   Confirmed: "Active",
   Cancelled: "Cancelled",
@@ -34,10 +32,11 @@ interface BookingDetailPageProps {
 
 export default function BookingDetailPage({ params }: BookingDetailPageProps) {
   const { id } = use(params);
-  const { data: booking, isLoading, error } = useBooking(gymHouseId, id);
-  const cancelBooking = useCancelBooking(gymHouseId);
-  const checkIn = useCheckIn(gymHouseId);
-  const markNoShow = useMarkNoShow(gymHouseId);
+  const { gymHouseId, isLoading: gymHouseLoading } = useActiveGymHouse();
+  const { data: booking, isLoading, error } = useBooking(gymHouseId ?? "", id);
+  const cancelBooking = useCancelBooking(gymHouseId ?? "");
+  const checkIn = useCheckIn(gymHouseId ?? "");
+  const markNoShow = useMarkNoShow(gymHouseId ?? "");
 
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showNoShowDialog, setShowNoShowDialog] = useState(false);
@@ -123,11 +122,19 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
     }
   }
 
-  if (isLoading) {
+  if (gymHouseLoading || isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
         <Spinner label="Loading booking..." />
       </div>
+    );
+  }
+
+  if (!gymHouseId) {
+    return (
+      <Alert variant="error">
+        Please create a gym house first before viewing bookings.
+      </Alert>
     );
   }
 

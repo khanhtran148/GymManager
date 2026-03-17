@@ -59,7 +59,7 @@ export default function DashboardPage() {
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
             {greeting()}
-            {user?.email ? `, ${user.email.split("@")[0]}` : ""}
+            {user?.fullName ? `, ${user.fullName}` : ""}
           </h2>
           <p className="text-primary-100 mt-1 text-sm sm:text-base max-w-lg">
             Here&apos;s what&apos;s happening with your gyms today. Stay on track and keep growing.

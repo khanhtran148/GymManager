@@ -13,7 +13,11 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
 // Controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Conventions.Add(new Microsoft.AspNetCore.Mvc.ApplicationModels.RouteTokenTransformerConvention(
+        new GymManager.Api.Common.SlugifyParameterTransformer()));
+});
 
 // API Versioning
 builder.Services.AddApiVersioning(options =>
@@ -74,13 +78,15 @@ builder.Services.AddAuthorization();
 
 // SignalR
 builder.Services.AddSignalR();
+builder.Services.AddScoped<GymManager.Application.Common.Interfaces.INotificationHub,
+    GymManager.Infrastructure.Notifications.SignalRNotificationHub<GymManager.Api.Hubs.NotificationHub>>();
 
 // Rate Limiting
 builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter(RateLimitPolicies.Default, o =>
     {
-        o.PermitLimit = 100;
+        o.PermitLimit = builder.Configuration.GetValue("RateLimiting:DefaultPermitLimit", 100);
         o.Window = TimeSpan.FromMinutes(1);
         o.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         o.QueueLimit = 5;
@@ -88,7 +94,7 @@ builder.Services.AddRateLimiter(options =>
 
     options.AddFixedWindowLimiter(RateLimitPolicies.Auth, o =>
     {
-        o.PermitLimit = 10;
+        o.PermitLimit = builder.Configuration.GetValue("RateLimiting:AuthPermitLimit", 10);
         o.Window = TimeSpan.FromMinutes(1);
         o.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         o.QueueLimit = 0;

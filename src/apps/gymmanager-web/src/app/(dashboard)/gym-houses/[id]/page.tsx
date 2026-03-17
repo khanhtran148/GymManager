@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useGymHouse, useUpdateGymHouse } from "@/hooks/use-gym-houses";
+import { useGymHouse, useUpdateGymHouse, useDeleteGymHouse } from "@/hooks/use-gym-houses";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/ui/form-field";
@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const gymHouseSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -40,8 +41,10 @@ export default function GymHouseDetailPage() {
   const router = useRouter();
   const { data: gymHouse, isLoading, error } = useGymHouse(params.id);
   const updateGymHouse = useUpdateGymHouse();
+  const deleteGymHouse = useDeleteGymHouse();
   const [serverError, setServerError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const {
     register,
@@ -101,6 +104,11 @@ export default function GymHouseDetailPage() {
     }
   }
 
+  async function handleDelete() {
+    await deleteGymHouse.mutateAsync(params.id);
+    router.push("/gym-houses");
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -122,7 +130,29 @@ export default function GymHouseDetailPage() {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <PageHeader backHref="/gym-houses" breadcrumb="Gym Houses" title={gymHouse.name} />
+      <div className="flex items-center justify-between gap-4">
+        <PageHeader backHref="/gym-houses" breadcrumb="Gym Houses" title={gymHouse.name} />
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            onClick={() => {
+              document.getElementById("name")?.focus();
+            }}
+          >
+            Edit
+          </Button>
+          <Button
+            type="button"
+            variant="danger"
+            size="md"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            Delete
+          </Button>
+        </div>
+      </div>
 
       <Card>
         {serverError && (
@@ -230,6 +260,17 @@ export default function GymHouseDetailPage() {
           </div>
         </form>
       </Card>
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete Gym House"
+        description={`Are you sure you want to delete "${gymHouse.name}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+        isLoading={deleteGymHouse.isPending}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }

@@ -50,7 +50,7 @@ public static class DependencyInjection
 
         // Notification Services
         services.AddScoped<IFirebaseMessagingService, FirebaseMessagingService>();
-        services.AddScoped<INotificationHub, SignalRNotificationHub>();
+        // INotificationHub is registered in the API layer with the concrete Hub type
 
         // Auth Services
         services.AddScoped<ITokenService, JwtTokenService>();

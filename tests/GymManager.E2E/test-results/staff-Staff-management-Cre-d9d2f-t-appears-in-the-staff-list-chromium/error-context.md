@@ -1,0 +1,150 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - img [ref=e6]
+        - generic [ref=e12]:
+          - generic [ref=e13]: GymManager
+          - text: Pro Dashboard
+      - navigation "Main navigation" [ref=e14]:
+        - paragraph [ref=e15]: Menu
+        - link "Dashboard" [ref=e16] [cursor=pointer]:
+          - /url: /
+          - img [ref=e18]
+          - text: Dashboard
+        - link "Gym Houses" [ref=e23] [cursor=pointer]:
+          - /url: /gym-houses
+          - img [ref=e25]
+          - text: Gym Houses
+        - link "Members" [ref=e29] [cursor=pointer]:
+          - /url: /members
+          - img [ref=e31]
+          - text: Members
+        - link "Bookings" [ref=e36] [cursor=pointer]:
+          - /url: /bookings
+          - img [ref=e38]
+          - text: Bookings
+        - link "Class Schedules" [ref=e41] [cursor=pointer]:
+          - /url: /class-schedules
+          - img [ref=e43]
+          - text: Class Schedules
+        - link "Time Slots" [ref=e46] [cursor=pointer]:
+          - /url: /time-slots
+          - img [ref=e48]
+          - text: Time Slots
+        - link "Check-in" [ref=e51] [cursor=pointer]:
+          - /url: /check-in
+          - img [ref=e53]
+          - text: Check-in
+        - generic [ref=e58]:
+          - button "Finance" [expanded] [ref=e59]:
+            - img [ref=e61]
+            - generic [ref=e64]: Finance
+            - img [ref=e65]
+          - generic [ref=e67]:
+            - link "Dashboard" [ref=e68] [cursor=pointer]:
+              - /url: /finance
+              - img [ref=e70]
+              - text: Dashboard
+            - link "Transactions" [ref=e73] [cursor=pointer]:
+              - /url: /finance/transactions
+              - img [ref=e75]
+              - text: Transactions
+            - link "P&L Report" [ref=e78] [cursor=pointer]:
+              - /url: /finance/pnl
+              - img [ref=e80]
+              - text: P&L Report
+        - generic [ref=e83]:
+          - button "Staff & HR" [expanded] [ref=e84]:
+            - img [ref=e86]
+            - generic [ref=e98]: Staff & HR
+            - img [ref=e99]
+          - generic [ref=e101]:
+            - link "Staff" [ref=e102] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e104]
+              - text: Staff
+            - link "Shifts" [ref=e110] [cursor=pointer]:
+              - /url: /shifts
+              - img [ref=e112]
+              - text: Shifts
+            - link "Payroll" [ref=e114] [cursor=pointer]:
+              - /url: /payroll
+              - img [ref=e116]
+              - text: Payroll
+        - link "Announcements" [ref=e119] [cursor=pointer]:
+          - /url: /announcements
+          - img [ref=e121]
+          - text: Announcements
+      - paragraph [ref=e125]: Phase 5 — Communications v5.0
+    - generic [ref=e126]:
+      - banner [ref=e127]:
+        - heading "GymManager" [level=1] [ref=e130]
+        - generic [ref=e131]:
+          - button "Search" [ref=e132]:
+            - img [ref=e133]
+          - button "Notifications" [ref=e137]:
+            - img [ref=e138]
+          - 'button "Toggle theme. Current: System preference" [ref=e141]':
+            - img [ref=e142]
+          - button "User menu" [ref=e146]:
+            - generic [ref=e148]: US
+            - generic [ref=e149]: user.mmuuutfexp3g@test.example
+            - img [ref=e150]
+      - main [ref=e152]:
+        - generic [ref=e153]:
+          - generic [ref=e154]:
+            - link "Back to staff list" [ref=e155] [cursor=pointer]:
+              - /url: /staff
+              - button "Back" [ref=e156]:
+                - img [ref=e157]
+                - text: Back
+            - generic [ref=e159]:
+              - paragraph [ref=e160]: Staff & HR
+              - heading "Add Staff" [level=2] [ref=e161]
+          - generic [ref=e162]:
+            - generic [ref=e163]:
+              - generic [ref=e164]: User ID*
+              - textbox "User ID" [ref=e165]:
+                - /placeholder: Enter user UUID
+            - generic [ref=e166]:
+              - generic [ref=e167]: Gym House*
+              - combobox "Gym House" [ref=e168]:
+                - option "Select gym house" [selected]
+            - generic [ref=e169]:
+              - generic [ref=e170]: Staff Type*
+              - combobox "Staff Type" [ref=e171]:
+                - option "Trainer" [selected]
+                - option "Security Guard"
+                - option "Cleaning Staff"
+                - option "Reception"
+            - generic [ref=e172]:
+              - generic [ref=e173]: Base Salary (monthly)*
+              - spinbutton "Base Salary (monthly)" [ref=e174]
+            - generic [ref=e175]:
+              - generic [ref=e176]: Per-Class Bonus*
+              - spinbutton "Per-Class Bonus" [ref=e177]
+              - paragraph [ref=e178]: Amount earned per class taught (applies to Trainers)
+            - generic [ref=e179]:
+              - link "Cancel" [ref=e180] [cursor=pointer]:
+                - /url: /staff
+                - button "Cancel" [ref=e181]
+              - button "Add Staff" [ref=e182]
+  - generic [ref=e187] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e188]:
+      - img [ref=e189]
+    - generic [ref=e192]:
+      - button "Open issues overlay" [ref=e193]:
+        - generic [ref=e194]:
+          - generic [ref=e195]: "1"
+          - generic [ref=e196]: "2"
+        - generic [ref=e197]:
+          - text: Issue
+          - generic [ref=e198]: s
+      - button "Collapse issues badge" [ref=e199]:
+        - img [ref=e200]
+  - alert [ref=e202]
+```

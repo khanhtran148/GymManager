@@ -1,0 +1,158 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - img [ref=e6]
+        - generic [ref=e12]:
+          - generic [ref=e13]: GymManager
+          - text: Pro Dashboard
+      - navigation "Main navigation" [ref=e14]:
+        - paragraph [ref=e15]: Menu
+        - link "Dashboard" [ref=e16] [cursor=pointer]:
+          - /url: /
+          - img [ref=e18]
+          - text: Dashboard
+        - link "Gym Houses" [ref=e23] [cursor=pointer]:
+          - /url: /gym-houses
+          - img [ref=e25]
+          - text: Gym Houses
+        - link "Members" [ref=e29] [cursor=pointer]:
+          - /url: /members
+          - img [ref=e31]
+          - text: Members
+        - link "Bookings" [ref=e36] [cursor=pointer]:
+          - /url: /bookings
+          - img [ref=e38]
+          - text: Bookings
+        - link "Class Schedules" [ref=e41] [cursor=pointer]:
+          - /url: /class-schedules
+          - img [ref=e43]
+          - text: Class Schedules
+        - link "Time Slots" [ref=e46] [cursor=pointer]:
+          - /url: /time-slots
+          - img [ref=e48]
+          - text: Time Slots
+        - link "Check-in" [ref=e51] [cursor=pointer]:
+          - /url: /check-in
+          - img [ref=e53]
+          - text: Check-in
+        - generic [ref=e58]:
+          - button "Finance" [expanded] [ref=e59]:
+            - img [ref=e61]
+            - generic [ref=e64]: Finance
+            - img [ref=e65]
+          - generic [ref=e67]:
+            - link "Dashboard" [ref=e68] [cursor=pointer]:
+              - /url: /finance
+              - img [ref=e70]
+              - text: Dashboard
+            - link "Transactions" [ref=e73] [cursor=pointer]:
+              - /url: /finance/transactions
+              - img [ref=e75]
+              - text: Transactions
+            - link "P&L Report" [ref=e78] [cursor=pointer]:
+              - /url: /finance/pnl
+              - img [ref=e80]
+              - text: P&L Report
+        - generic [ref=e83]:
+          - button "Staff & HR" [expanded] [ref=e84]:
+            - img [ref=e86]
+            - generic [ref=e98]: Staff & HR
+            - img [ref=e99]
+          - generic [ref=e101]:
+            - link "Staff" [ref=e102] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e104]
+              - text: Staff
+            - link "Shifts" [ref=e109] [cursor=pointer]:
+              - /url: /shifts
+              - img [ref=e111]
+              - text: Shifts
+            - link "Payroll" [ref=e113] [cursor=pointer]:
+              - /url: /payroll
+              - img [ref=e115]
+              - text: Payroll
+        - link "Announcements" [ref=e118] [cursor=pointer]:
+          - /url: /announcements
+          - img [ref=e120]
+          - text: Announcements
+      - paragraph [ref=e125]: Phase 5 — Communications v5.0
+    - generic [ref=e126]:
+      - banner [ref=e127]:
+        - generic [ref=e129]:
+          - heading "Announcements" [level=1] [ref=e130]
+          - paragraph [ref=e131]: Create and manage announcements
+        - generic [ref=e132]:
+          - button "Search" [ref=e133]:
+            - img [ref=e134]
+          - button "Notifications" [ref=e138]:
+            - img [ref=e139]
+          - 'button "Toggle theme. Current: System preference" [ref=e142]':
+            - img [ref=e143]
+          - button "User menu" [ref=e147]:
+            - generic [ref=e149]: US
+            - generic [ref=e150]: user.mmuupwczj9l5@test.example
+            - img [ref=e151]
+      - main [ref=e153]:
+        - generic [ref=e154]:
+          - generic [ref=e155]:
+            - link "Back to Announcements" [ref=e156] [cursor=pointer]:
+              - /url: /announcements
+              - img [ref=e157]
+            - generic [ref=e159]:
+              - paragraph [ref=e160]: Announcements
+              - heading "New Announcement" [level=2] [ref=e161]
+          - generic [ref=e163]:
+            - generic [ref=e164]:
+              - checkbox "Chain-wide announcement (Owner only — visible across all gym houses)" [ref=e165]
+              - generic [ref=e166] [cursor=pointer]: Chain-wide announcement (Owner only — visible across all gym houses)
+            - generic [ref=e167]:
+              - generic [ref=e168]: Gym House*
+              - combobox "Gym House" [ref=e169]:
+                - option "Select a gym house" [selected]
+            - generic [ref=e170]:
+              - generic [ref=e171]: Title*
+              - textbox "Title" [ref=e172]:
+                - /placeholder: e.g. Grand Opening Promo
+                - text: Announcement mmuupxfav8ij
+            - generic [ref=e173]:
+              - generic [ref=e174]: Content*
+              - textbox "Content" [active] [ref=e175]:
+                - /placeholder: Write your announcement content here…
+                - text: Test announcement content mmuupxfav8ij. Please read carefully.
+              - paragraph [ref=e176]: 62/5000 characters
+            - generic [ref=e177]:
+              - generic [ref=e178]: Target Audience*
+              - combobox "Target Audience" [ref=e179]:
+                - option "All Members" [selected]
+                - option "Active Members"
+                - option "Staff"
+                - option "Trainers"
+                - option "Everyone"
+            - generic [ref=e180]:
+              - generic [ref=e181]: Publish At*
+              - textbox "Publish At" [ref=e182]
+              - paragraph [ref=e183]: Schedule when this announcement should go live (UTC)
+            - generic [ref=e184]:
+              - link "Cancel" [ref=e185] [cursor=pointer]:
+                - /url: /announcements
+                - button "Cancel" [ref=e186]
+              - button "Create Announcement" [ref=e187]
+  - generic [ref=e192] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e193]:
+      - img [ref=e194]
+    - generic [ref=e197]:
+      - button "Open issues overlay" [ref=e198]:
+        - generic [ref=e199]:
+          - generic [ref=e200]: "1"
+          - generic [ref=e201]: "2"
+        - generic [ref=e202]:
+          - text: Issue
+          - generic [ref=e203]: s
+      - button "Collapse issues badge" [ref=e204]:
+        - img [ref=e205]
+  - alert [ref=e207]
+```

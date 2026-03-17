@@ -9,28 +9,14 @@ export function middleware(request: NextRequest): NextResponse {
     (path) => pathname === path || pathname.startsWith(path + "/")
   );
 
-  const token = request.cookies.get("access_token")?.value;
-  const authStorage = request.cookies.get("auth-storage")?.value;
+  const isAuthenticated = request.cookies.get("is_authenticated")?.value === "1";
 
-  let isAuthenticated = false;
-  if (authStorage) {
-    try {
-      const parsed = JSON.parse(decodeURIComponent(authStorage)) as {
-        state?: { isAuthenticated?: boolean };
-      };
-      isAuthenticated = parsed?.state?.isAuthenticated === true;
-    } catch {
-      isAuthenticated = false;
-    }
+  if (!isAuthenticated && !isPublic) {
+    const loginUrl = new URL("/login", request.url);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // TODO: Re-enable auth guard after UI review
-  // if (!token && !isAuthenticated && !isPublic) {
-  //   const loginUrl = new URL("/login", request.url);
-  //   return NextResponse.redirect(loginUrl);
-  // }
-
-  if ((token || isAuthenticated) && isPublic) {
+  if (isAuthenticated && isPublic) {
     const homeUrl = new URL("/", request.url);
     return NextResponse.redirect(homeUrl);
   }

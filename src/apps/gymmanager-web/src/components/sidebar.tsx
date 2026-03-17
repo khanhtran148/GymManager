@@ -11,8 +11,6 @@ import {
   Menu,
   X,
   Dumbbell,
-  Crown,
-  Zap,
   CalendarCheck,
   GraduationCap,
   Clock,
@@ -242,23 +240,6 @@ export function Sidebar() {
         </div>
 
         {navContent}
-
-        {/* Upgrade card */}
-        <div className="px-3 pb-3">
-          <div className="rounded-xl bg-upgrade-bg border border-upgrade-border p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Crown className="w-4 h-4 text-nav-active-text" aria-hidden="true" />
-              <span className="text-xs font-semibold text-nav-active-text">Go Premium</span>
-            </div>
-            <p className="text-[11px] text-text-muted leading-relaxed mb-3">
-              Unlock analytics, reports, and advanced features.
-            </p>
-            <button className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white text-xs font-semibold shadow-sm shadow-primary-500/25 hover:from-primary-600 hover:to-primary-700 transition-all">
-              <Zap className="w-3 h-3" aria-hidden="true" />
-              Upgrade Now
-            </button>
-          </div>
-        </div>
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-sidebar-border-color">

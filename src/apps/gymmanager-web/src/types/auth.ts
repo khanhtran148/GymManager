@@ -1,5 +1,7 @@
 export interface AuthResponse {
   userId: string;
+  email: string;
+  fullName: string;
   accessToken: string;
   refreshToken: string;
   expiresAt: string;
@@ -25,4 +27,5 @@ export interface RefreshRequest {
 export interface AuthUser {
   userId: string;
   email: string;
+  fullName: string;
 }

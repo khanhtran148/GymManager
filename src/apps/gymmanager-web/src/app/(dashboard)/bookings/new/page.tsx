@@ -7,6 +7,7 @@ import { z } from "zod";
 import { useState } from "react";
 import Link from "next/link";
 import { useCreateBooking } from "@/hooks/use-bookings";
+import { useActiveGymHouse } from "@/hooks/use-active-gym-house";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -14,9 +15,7 @@ import { FormField } from "@/components/ui/form-field";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { Alert } from "@/components/ui/alert";
-
-// TODO: Get from gym house selector/context
-const gymHouseId = "placeholder-gym-id";
+import { Spinner } from "@/components/ui/spinner";
 
 const bookingSchema = z
   .object({
@@ -42,7 +41,8 @@ type BookingFormData = z.infer<typeof bookingSchema>;
 
 export default function NewBookingPage() {
   const router = useRouter();
-  const createBooking = useCreateBooking(gymHouseId);
+  const { gymHouseId, isLoading: gymHouseLoading } = useActiveGymHouse();
+  const createBooking = useCreateBooking(gymHouseId ?? "");
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -88,6 +88,22 @@ export default function NewBookingPage() {
         setServerError("Something went wrong. Please try again.");
       }
     }
+  }
+
+  if (gymHouseLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Spinner label="Loading gym house..." />
+      </div>
+    );
+  }
+
+  if (!gymHouseId) {
+    return (
+      <Alert variant="error">
+        Please create a gym house first before creating bookings.
+      </Alert>
+    );
   }
 
   return (

@@ -11,25 +11,31 @@ import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/ui/form-field";
 import { AuthCard } from "@/components/ui/auth-card";
 
-const registerSchema = z.object({
-  fullName: z
-    .string()
-    .min(2, "Full name must be at least 2 characters")
-    .max(100, "Full name is too long"),
-  email: z.string().email("Please enter a valid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must include an uppercase letter")
-    .regex(/[0-9]/, "Password must include a number"),
-  phone: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || /^\+?[\d\s\-()]{7,20}$/.test(val),
-      "Please enter a valid phone number"
-    ),
-});
+const registerSchema = z
+  .object({
+    fullName: z
+      .string()
+      .min(2, "Full name must be at least 2 characters")
+      .max(100, "Full name is too long"),
+    email: z.string().email("Please enter a valid email address"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must include an uppercase letter")
+      .regex(/[0-9]/, "Password must include a number"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+    phone: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || /^\+?[\d\s\-()]{7,20}$/.test(val),
+        "Please enter a valid phone number"
+      ),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -136,6 +142,23 @@ export default function RegisterPage() {
             error={!!errors.password}
             className="input-auth"
             {...register("password")}
+          />
+        </FormField>
+
+        <FormField
+          label="Confirm password"
+          htmlFor="confirmPassword"
+          error={errors.confirmPassword?.message}
+          required
+        >
+          <Input
+            id="confirmPassword"
+            type="password"
+            autoComplete="new-password"
+            placeholder="Re-enter your password"
+            error={!!errors.confirmPassword}
+            className="input-auth"
+            {...register("confirmPassword")}
           />
         </FormField>
 

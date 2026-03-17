@@ -28,6 +28,8 @@ public sealed class LoginCommandHandler(
 
         return Result.Success(new AuthResponse(
             user.Id,
+            user.Email,
+            user.FullName,
             accessToken,
             refreshToken,
             DateTime.UtcNow.AddMinutes(15)));

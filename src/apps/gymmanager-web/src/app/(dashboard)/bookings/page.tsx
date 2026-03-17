@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { useBookings, useCancelBooking } from "@/hooks/use-bookings";
+import { useActiveGymHouse } from "@/hooks/use-active-gym-house";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,14 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormField } from "@/components/ui/form-field";
+import { Spinner } from "@/components/ui/spinner";
 import {
   bookingTypeLabel,
   bookingStatusLabel,
 } from "@/lib/booking-utils";
 import type { BookingDto } from "@/types/booking";
-
-// TODO: Get from gym house selector/context
-const gymHouseId = "placeholder-gym-id";
 
 const statusBadgeMap: Record<string, string> = {
   Confirmed: "Active",
@@ -29,6 +28,7 @@ const statusBadgeMap: Record<string, string> = {
 };
 
 export default function BookingsPage() {
+  const { gymHouseId, isLoading: gymHouseLoading } = useActiveGymHouse();
   const [page, setPage] = useState(1);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -37,12 +37,12 @@ export default function BookingsPage() {
   const [cancelId, setCancelId] = useState<string | null>(null);
 
   const { data, isLoading, error } = useBookings(
-    gymHouseId,
+    gymHouseId ?? "",
     page,
     appliedFrom || undefined,
     appliedTo || undefined
   );
-  const cancelBooking = useCancelBooking(gymHouseId);
+  const cancelBooking = useCancelBooking(gymHouseId ?? "");
 
   function handleFilterSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -136,6 +136,22 @@ export default function BookingsPage() {
       ),
     },
   ];
+
+  if (gymHouseLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Spinner label="Loading gym house..." />
+      </div>
+    );
+  }
+
+  if (!gymHouseId) {
+    return (
+      <Alert variant="error">
+        Please create a gym house first before managing bookings.
+      </Alert>
+    );
+  }
 
   if (error) {
     return (

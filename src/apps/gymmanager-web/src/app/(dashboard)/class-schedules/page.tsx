@@ -4,23 +4,23 @@ import Link from "next/link";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useClassSchedules } from "@/hooks/use-class-schedules";
+import { useActiveGymHouse } from "@/hooks/use-active-gym-house";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { FormField } from "@/components/ui/form-field";
+import { Spinner } from "@/components/ui/spinner";
 import { dayOfWeekLabel } from "@/lib/booking-utils";
 import type { ClassScheduleDto } from "@/types/booking";
 
-// TODO: Get from gym house selector/context
-const gymHouseId = "placeholder-gym-id";
-
 export default function ClassSchedulesPage() {
+  const { gymHouseId, isLoading: gymHouseLoading } = useActiveGymHouse();
   const [dayFilter, setDayFilter] = useState<string>("");
 
   const { data, isLoading, error } = useClassSchedules(
-    gymHouseId,
+    gymHouseId ?? "",
     dayFilter !== "" ? Number(dayFilter) : undefined
   );
 
@@ -98,6 +98,22 @@ export default function ClassSchedulesPage() {
         ),
     },
   ];
+
+  if (gymHouseLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Spinner label="Loading gym house..." />
+      </div>
+    );
+  }
+
+  if (!gymHouseId) {
+    return (
+      <Alert variant="error">
+        Please create a gym house first before managing class schedules.
+      </Alert>
+    );
+  }
 
   if (error) {
     return (

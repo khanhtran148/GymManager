@@ -1,0 +1,141 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - img [ref=e6]
+        - generic [ref=e12]:
+          - generic [ref=e13]: GymManager
+          - text: Pro Dashboard
+      - navigation "Main navigation" [ref=e14]:
+        - paragraph [ref=e15]: Menu
+        - link "Dashboard" [ref=e16] [cursor=pointer]:
+          - /url: /
+          - img [ref=e18]
+          - text: Dashboard
+        - link "Gym Houses" [ref=e23] [cursor=pointer]:
+          - /url: /gym-houses
+          - img [ref=e25]
+          - text: Gym Houses
+        - link "Members" [ref=e29] [cursor=pointer]:
+          - /url: /members
+          - img [ref=e31]
+          - text: Members
+        - link "Bookings" [ref=e37] [cursor=pointer]:
+          - /url: /bookings
+          - img [ref=e39]
+          - text: Bookings
+        - link "Class Schedules" [ref=e42] [cursor=pointer]:
+          - /url: /class-schedules
+          - img [ref=e44]
+          - text: Class Schedules
+        - link "Time Slots" [ref=e47] [cursor=pointer]:
+          - /url: /time-slots
+          - img [ref=e49]
+          - text: Time Slots
+        - link "Check-in" [ref=e52] [cursor=pointer]:
+          - /url: /check-in
+          - img [ref=e54]
+          - text: Check-in
+        - generic [ref=e59]:
+          - button "Finance" [expanded] [ref=e60]:
+            - img [ref=e62]
+            - generic [ref=e65]: Finance
+            - img [ref=e66]
+          - generic [ref=e68]:
+            - link "Dashboard" [ref=e69] [cursor=pointer]:
+              - /url: /finance
+              - img [ref=e71]
+              - text: Dashboard
+            - link "Transactions" [ref=e74] [cursor=pointer]:
+              - /url: /finance/transactions
+              - img [ref=e76]
+              - text: Transactions
+            - link "P&L Report" [ref=e79] [cursor=pointer]:
+              - /url: /finance/pnl
+              - img [ref=e81]
+              - text: P&L Report
+        - generic [ref=e84]:
+          - button "Staff & HR" [expanded] [ref=e85]:
+            - img [ref=e87]
+            - generic [ref=e99]: Staff & HR
+            - img [ref=e100]
+          - generic [ref=e102]:
+            - link "Staff" [ref=e103] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e105]
+              - text: Staff
+            - link "Shifts" [ref=e110] [cursor=pointer]:
+              - /url: /shifts
+              - img [ref=e112]
+              - text: Shifts
+            - link "Payroll" [ref=e114] [cursor=pointer]:
+              - /url: /payroll
+              - img [ref=e116]
+              - text: Payroll
+        - link "Announcements" [ref=e119] [cursor=pointer]:
+          - /url: /announcements
+          - img [ref=e121]
+          - text: Announcements
+      - paragraph [ref=e125]: Phase 5 — Communications v5.0
+    - generic [ref=e126]:
+      - banner [ref=e127]:
+        - generic [ref=e129]:
+          - heading "Members" [level=1] [ref=e130]
+          - paragraph [ref=e131]: Manage gym members
+        - generic [ref=e132]:
+          - button "Search" [ref=e133]:
+            - img [ref=e134]
+          - button "Notifications" [ref=e138]:
+            - img [ref=e139]
+          - 'button "Toggle theme. Current: System preference" [ref=e142]':
+            - img [ref=e143]
+          - button "User menu" [ref=e147]:
+            - generic [ref=e149]: US
+            - generic [ref=e150]: user.mmuuuibk1jmr@test.example
+            - img [ref=e151]
+      - main [ref=e153]:
+        - generic [ref=e154]:
+          - generic [ref=e155]:
+            - search [ref=e156]:
+              - generic [ref=e157]:
+                - img [ref=e158]
+                - searchbox "Search members" [ref=e161]
+              - button "Search" [ref=e162]
+            - link "Add Member" [ref=e163] [cursor=pointer]:
+              - /url: /members/new
+              - button "Add Member" [ref=e164]:
+                - img [ref=e165]
+                - text: Add Member
+          - table [ref=e168]:
+            - rowgroup [ref=e169]:
+              - row "Code Name Email Phone Status Joined" [ref=e170]:
+                - columnheader "Code" [ref=e171]
+                - columnheader "Name" [ref=e172]
+                - columnheader "Email" [ref=e173]
+                - columnheader "Phone" [ref=e174]
+                - columnheader "Status" [ref=e175]
+                - columnheader "Joined" [ref=e176]
+            - rowgroup [ref=e177]:
+              - row "Loading... Loading..." [ref=e178]:
+                - cell "Loading... Loading..." [ref=e179]:
+                  - generic [ref=e180]:
+                    - status "Loading..." [ref=e181]
+                    - generic [ref=e182]: Loading...
+  - generic [ref=e187] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e188]:
+      - img [ref=e189]
+    - generic [ref=e192]:
+      - button "Open issues overlay" [ref=e193]:
+        - generic [ref=e194]:
+          - generic [ref=e195]: "1"
+          - generic [ref=e196]: "2"
+        - generic [ref=e197]:
+          - text: Issue
+          - generic [ref=e198]: s
+      - button "Collapse issues badge" [ref=e199]:
+        - img [ref=e200]
+  - alert [ref=e202]
+```
