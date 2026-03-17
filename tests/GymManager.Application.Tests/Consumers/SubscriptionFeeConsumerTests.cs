@@ -70,7 +70,7 @@ public sealed class SubscriptionFeeConsumerTests : ApplicationTestBase
 
         await transactionRepo.RecordAsync(transaction);
 
-        var saved = await transactionRepo.GetByIdAsync(transaction.Id);
+        var saved = await transactionRepo.GetByIdAsync(transaction.Id, gymHouseId);
 
         saved.Should().NotBeNull();
         saved!.TransactionType.Should().Be(TransactionType.MembershipFee);

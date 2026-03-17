@@ -44,23 +44,6 @@ public sealed class RecordTransactionCommandHandler(
             new TransactionRecordedEvent(transaction.Id, transaction.GymHouseId, transaction.TransactionType, transaction.Amount),
             ct);
 
-        return Result.Success(ToDto(transaction));
+        return Result.Success(TransactionDto.FromEntity(transaction));
     }
-
-    internal static TransactionDto ToDto(Transaction t) => new(
-        t.Id,
-        t.GymHouseId,
-        t.TransactionType,
-        t.Direction,
-        t.Amount,
-        t.Category,
-        t.Description,
-        t.TransactionDate,
-        t.RelatedEntityId,
-        t.ReversesTransactionId,
-        t.ReversedByTransactionId,
-        t.ApprovedById,
-        t.PaymentMethod,
-        t.ExternalReference,
-        t.CreatedAt);
 }

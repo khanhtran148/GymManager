@@ -1,7 +1,6 @@
 using CSharpFunctionalExtensions;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
-using GymManager.Application.Transactions.RecordTransaction;
 using GymManager.Application.Transactions.Shared;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
@@ -24,8 +23,8 @@ public sealed class ReverseTransactionCommandHandler(
         if (!canManage)
             return Result.Failure<TransactionDto>(new ForbiddenError().ToString());
 
-        var original = await transactionRepository.GetByIdAsync(request.TransactionId, ct);
-        if (original is null || original.GymHouseId != request.GymHouseId)
+        var original = await transactionRepository.GetByIdAsync(request.TransactionId, request.GymHouseId, ct);
+        if (original is null)
             return Result.Failure<TransactionDto>(new NotFoundError("Transaction", request.TransactionId).ToString());
 
         if (original.ReversedByTransactionId.HasValue)
@@ -45,6 +44,6 @@ public sealed class ReverseTransactionCommandHandler(
             new TransactionRecordedEvent(reversal.Id, reversal.GymHouseId, reversal.TransactionType, reversal.Amount),
             ct);
 
-        return Result.Success(RecordTransactionCommandHandler.ToDto(reversal));
+        return Result.Success(TransactionDto.FromEntity(reversal));
     }
 }

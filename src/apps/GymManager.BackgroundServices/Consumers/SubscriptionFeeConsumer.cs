@@ -19,6 +19,11 @@ public sealed class SubscriptionFeeConsumer(
         if (evt.Price <= 0)
             return;
 
+        var alreadyRecorded = await transactionRepository.ExistsByRelatedEntityIdAsync(
+            evt.SubscriptionId, TransactionType.MembershipFee, ct);
+        if (alreadyRecorded)
+            return;
+
         var transaction = new Transaction
         {
             GymHouseId = evt.GymHouseId,

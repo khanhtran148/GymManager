@@ -1,7 +1,6 @@
 using CSharpFunctionalExtensions;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
-using GymManager.Application.Transactions.RecordTransaction;
 using GymManager.Application.Transactions.Shared;
 using GymManager.Domain.Enums;
 using MediatR;
@@ -32,7 +31,7 @@ public sealed class GetTransactionsQueryHandler(
             ct);
 
         var dtos = new PagedList<TransactionDto>(
-            paged.Items.Select(RecordTransactionCommandHandler.ToDto).ToList(),
+            paged.Items.Select(TransactionDto.FromEntity).ToList(),
             paged.TotalCount,
             paged.Page,
             paged.PageSize);

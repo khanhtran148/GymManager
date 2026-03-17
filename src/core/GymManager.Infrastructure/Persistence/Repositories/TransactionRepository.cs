@@ -14,10 +14,10 @@ public sealed class TransactionRepository(GymManagerDbContext db) : ITransaction
         await db.SaveChangesAsync(ct);
     }
 
-    public async Task<Transaction?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+    public async Task<Transaction?> GetByIdAsync(Guid id, Guid gymHouseId, CancellationToken ct = default) =>
         await db.Transactions
             .AsNoTracking()
-            .FirstOrDefaultAsync(t => t.Id == id, ct);
+            .FirstOrDefaultAsync(t => t.Id == id && t.GymHouseId == gymHouseId, ct);
 
     public async Task UpdateAsync(Transaction transaction, CancellationToken ct = default)
     {
@@ -71,6 +71,11 @@ public sealed class TransactionRepository(GymManagerDbContext db) : ITransaction
         return new PagedList<Transaction>(items, totalCount, page, pageSize);
     }
 
+    public async Task<bool> ExistsByRelatedEntityIdAsync(Guid relatedEntityId, TransactionType type, CancellationToken ct = default) =>
+        await db.Transactions
+            .AsNoTracking()
+            .AnyAsync(t => t.RelatedEntityId == relatedEntityId && t.TransactionType == type, ct);
+
     public async Task<decimal> GetRevenueAggregateAsync(
         Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default) =>
         await db.Transactions
@@ -81,15 +86,6 @@ public sealed class TransactionRepository(GymManagerDbContext db) : ITransaction
                 && t.TransactionDate <= to)
             .SumAsync(t => t.Amount, ct);
 
-    public async Task<decimal> GetExpenseAggregateAsync(
-        Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default) =>
-        await db.Transactions
-            .AsNoTracking()
-            .Where(t => t.GymHouseId == gymHouseId
-                && t.Direction == TransactionDirection.Debit
-                && t.TransactionDate >= from
-                && t.TransactionDate <= to)
-            .SumAsync(t => t.Amount, ct);
 
     public async Task<List<(TransactionDirection Direction, TransactionCategory Category, decimal Total)>> GetAggregateByDirectionAndCategoryAsync(
         Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default)
