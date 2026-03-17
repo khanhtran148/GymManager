@@ -1,16 +1,16 @@
-# Frontend Implementation Report — Phase 2: Booking
+# Frontend Implementation Report — Phase 2: Booking + Phase 3: Finance
 Date: 2026-03-17
 Status: COMPLETED
 
 ---
 
-## Summary
+## Phase 2 Summary
 
 Phase 2 Booking frontend implemented for Next.js App Router. All routes compile with zero TypeScript errors (`npm run build` passes, 18/18 routes).
 
 ---
 
-## Completed Components
+## Phase 2 Completed Components
 
 ### Types
 - `/src/types/booking.ts` — BookingDto, TimeSlotDto, ClassScheduleDto, all request types, string union types
@@ -41,7 +41,7 @@ Phase 2 Booking frontend implemented for Next.js App Router. All routes compile 
 
 ---
 
-## API Contract Usage
+## Phase 2 API Contract Usage
 
 | Endpoint | Component / Hook | Status |
 |---|---|---|
@@ -60,7 +60,7 @@ Phase 2 Booking frontend implemented for Next.js App Router. All routes compile 
 
 ---
 
-## Deviations from Contract
+## Phase 2 Deviations from Contract
 
 1. **gymHouseId**: No gym house context/store exists yet. All pages use `const gymHouseId = "placeholder-gym-id"` with a `// TODO: Get from gym house selector/context` comment. This must be replaced when a gym house selector is added in a later phase.
 
@@ -74,21 +74,75 @@ Phase 2 Booking frontend implemented for Next.js App Router. All routes compile 
 
 ---
 
-## Type Errors Fixed
+---
 
-- `z.coerce.number()` on `bookingType` field caused `Resolver<unknown>` vs `Resolver<number>` mismatch. Fixed by using `z.number()` with controlled component pattern.
-- Same fix applied to `dayOfWeek` and `maxCapacity` in the class schedule form.
+## Phase 3 Finance Summary
+
+Phase 3 Finance frontend implemented. Build passes with 0 errors, 4 new routes generated.
+
+---
+
+## Phase 3 Completed Components
+
+| File | Description |
+|------|-------------|
+| `src/types/transaction.ts` | TransactionDto, PnLReportDto, RevenueMetricsDto, RecordTransactionRequest, ReverseTransactionRequest, TransactionFilters — all types matching API contract exactly |
+| `src/hooks/use-transactions.ts` | useTransactions, useRecordTransaction, useReverseTransaction, usePnLReport, useRevenueMetrics |
+| `src/components/charts/revenue-line-chart.tsx` | Recharts LineChart, dynamic import (SSR disabled), orange primary color, CSS variable tooltips for dark mode |
+| `src/components/charts/expense-pie-chart.tsx` | Recharts donut PieChart, category color palette, dynamic import (SSR disabled) |
+| `src/components/pnl-table.tsx` | Reusable income/expense table with footer totals row, color-coded variant |
+| `src/app/(dashboard)/finance/page.tsx` | Financial Dashboard: 4 StatCards (MRR, Total Revenue, Total Expenses, Net Profit), RevenueLineChart, ExpensePieChart, metrics detail panel, Quick Actions |
+| `src/app/(dashboard)/finance/transactions/page.tsx` | Transaction List with DataTable, type/direction/date range filters, pagination, gym house selector |
+| `src/app/(dashboard)/finance/transactions/new/page.tsx` | Record Transaction: React Hook Form + Zod, all required fields + optional payment method/external reference |
+| `src/app/(dashboard)/finance/pnl/page.tsx` | P&L Report: date range picker with Apply, income table, expense table, net profit/loss summary card (green/red) |
+| `src/components/sidebar.tsx` | Added Finance collapsible nav group (Wallet icon) with Dashboard, Transactions, P&L sub-items; updated footer to "Phase 3 — Finance v3.0" |
+
+---
+
+## Phase 3 API Contract Usage
+
+| Endpoint | Component | Status |
+|----------|-----------|--------|
+| `GET /gymhouses/{id}/transactions` | useTransactions, TransactionsPage | Implemented |
+| `POST /gymhouses/{id}/transactions` | useRecordTransaction, NewTransactionPage | Implemented |
+| `POST /gymhouses/{id}/transactions/{id}/reverse` | useReverseTransaction hook | Hook ready, no UI trigger per spec |
+| `GET /gymhouses/{id}/reports/pnl` | usePnLReport, PnLPage, FinanceDashboard | Implemented |
+| `GET /gymhouses/{id}/reports/revenue-metrics` | useRevenueMetrics, FinanceDashboard | Implemented |
+
+---
+
+## Phase 3 Type Errors Fixed
+
+1. **zodResolver + zod v4 + amount field**: `z.coerce.number()` caused a resolver type incompatibility between react-hook-form v7, @hookform/resolvers v5, and zod v4. Fixed by using `z.string()` with `.refine()` validation and `parseFloat()` conversion on submit.
+
+2. **recharts Tooltip formatter**: `ValueType` can be `undefined`; fixed by casting formatter via `TooltipProps<ValueType, NameType>["formatter"]` type assertion.
+
+3. **Alert variant="info"**: Alert component only has "error" | "success" variants. Replaced all `variant="info"` with `variant="error"` for no-gym-house warnings.
+
+---
+
+## Phase 3 Deviations / Notes
+
+- **Revenue time-series chart**: The API does not expose a time-series endpoint. The chart derives weekly cumulative data points from `PnLReport.totalIncome`. A dedicated time-series endpoint would improve accuracy.
+- **Reverse transaction UI**: The hook is implemented. A per-row Reverse button in the transaction list was not requested in the spec and was deferred.
+- **Gym house selector**: Using `useGymHouses()` on all finance pages; defaults to first house when only one exists.
 
 ---
 
 ## Vitest TFD Status
 
-N/A — No logic-bearing hooks or stores introduced beyond standard TanStack Query wrappers that delegate all logic to the API. The utility functions in `booking-utils.ts` are pure mapping functions with no branching complexity warranting unit tests beyond the build verification.
+N/A — No logic-bearing hooks or stores added beyond standard TanStack Query wrappers that delegate all logic to the API. Chart components have no testable business logic.
 
 ---
 
 ## Unresolved Questions for Implementer Orchestrator
 
-1. **gymHouseId source**: Where should the active gym house ID come from? A Zustand store? A URL segment? Required to make all booking pages functional end-to-end.
-2. **Check-in search scale**: The current client-side search only covers the first page (20 bookings) of today. Should the backend expose a member-search endpoint that returns bookings by member name/code?
-3. **Badge token extension**: Booking statuses map awkwardly to Phase 1 badge tokens. Should Phase 2 introduce dedicated booking status badge CSS tokens?
+### Phase 2
+1. **gymHouseId source** (Phase 2 pages): Where should the active gym house ID come from for booking pages? A Zustand store? A URL segment?
+2. **Check-in search scale**: Current client-side search only covers first page (20 bookings) of today.
+3. **Badge token extension**: Booking statuses map awkwardly to Phase 1 badge tokens.
+
+### Phase 3
+1. Should the Transaction List page have a per-row "Reverse" action button? Hook is ready.
+2. Do the P&L and revenue-metrics APIs accept `YYYY-MM-DD` date strings or full ISO 8601 UTC timestamps in query params?
+3. A dedicated revenue time-series endpoint would improve the finance dashboard chart accuracy.

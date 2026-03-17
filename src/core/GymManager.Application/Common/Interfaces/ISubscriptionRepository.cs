@@ -9,4 +9,6 @@ public interface ISubscriptionRepository
     Task<List<Subscription>> GetByMemberIdAsync(Guid memberId, CancellationToken ct = default);
     Task CreateAsync(Subscription subscription, CancellationToken ct = default);
     Task UpdateAsync(Subscription subscription, CancellationToken ct = default);
+    Task<int> GetActiveCountByGymHouseAsync(Guid gymHouseId, CancellationToken ct = default);
+    Task<int> GetCancelledCountByGymHouseAsync(Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default);
 }
