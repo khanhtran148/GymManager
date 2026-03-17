@@ -22,18 +22,14 @@ public sealed class GetRevenueMetricsQueryHandler(
 
         var totalRevenue = await transactionRepository.GetRevenueAggregateAsync(
             request.GymHouseId, request.From, request.To, ct);
-
         var activeMembers = await subscriptionRepository.GetActiveCountByGymHouseAsync(request.GymHouseId, ct);
-
         var cancelledSubscriptions = await subscriptionRepository.GetCancelledCountByGymHouseAsync(
             request.GymHouseId, request.From, request.To, ct);
 
-        // MRR: total revenue divided by number of months in range (at least 1)
         var months = Math.Max(1,
             (int)Math.Ceiling((request.To - request.From).TotalDays / 30.0));
-        var mrr = months > 0 ? totalRevenue / months : 0;
+        var mrr = totalRevenue / months;
 
-        // Churn rate: cancelled / (active + cancelled) expressed as percentage
         var totalSubscriptions = activeMembers + cancelledSubscriptions;
         var churnRate = totalSubscriptions > 0
             ? (decimal)cancelledSubscriptions / totalSubscriptions * 100m

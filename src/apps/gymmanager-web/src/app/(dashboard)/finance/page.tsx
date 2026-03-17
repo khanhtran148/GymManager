@@ -274,7 +274,7 @@ export default function FinanceDashboardPage() {
             <div>
               <p className="text-xs text-text-muted font-medium">Churn Rate</p>
               <p className="text-lg font-bold text-text-primary tabular-nums">
-                {(metrics.churnRate * 100).toFixed(1)}%
+                {metrics.churnRate.toFixed(1)}%
               </p>
             </div>
           </div>

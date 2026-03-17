@@ -20,5 +20,6 @@ public interface ITransactionRepository
         CancellationToken ct = default);
     Task<decimal> GetRevenueAggregateAsync(Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default);
     Task<decimal> GetExpenseAggregateAsync(Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default);
-    Task<List<Transaction>> GetByGymHouseForReportAsync(Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default);
+    Task<List<(TransactionDirection Direction, TransactionCategory Category, decimal Total)>> GetAggregateByDirectionAndCategoryAsync(
+        Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default);
 }

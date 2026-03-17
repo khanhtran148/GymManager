@@ -19,20 +19,18 @@ public sealed class GetPnLReportQueryHandler(
         if (!canView)
             return Result.Failure<PnLReportDto>(new ForbiddenError().ToString());
 
-        var transactions = await transactionRepository.GetByGymHouseForReportAsync(
+        var aggregates = await transactionRepository.GetAggregateByDirectionAndCategoryAsync(
             request.GymHouseId, request.From, request.To, ct);
 
-        var incomeLines = transactions
-            .Where(t => t.Direction == TransactionDirection.Credit)
-            .GroupBy(t => t.Category)
-            .Select(g => new PnLLineDto(g.Key, g.Sum(t => t.Amount)))
+        var incomeLines = aggregates
+            .Where(a => a.Direction == TransactionDirection.Credit)
+            .Select(a => new PnLLineDto(a.Category, a.Total))
             .OrderBy(l => l.Category)
             .ToList();
 
-        var expenseLines = transactions
-            .Where(t => t.Direction == TransactionDirection.Debit)
-            .GroupBy(t => t.Category)
-            .Select(g => new PnLLineDto(g.Key, g.Sum(t => t.Amount)))
+        var expenseLines = aggregates
+            .Where(a => a.Direction == TransactionDirection.Debit)
+            .Select(a => new PnLLineDto(a.Category, a.Total))
             .OrderBy(l => l.Category)
             .ToList();
 

@@ -16,6 +16,9 @@ public sealed class SubscriptionFeeConsumer(
         var evt = context.Message;
         var ct = context.CancellationToken;
 
+        if (evt.Price <= 0)
+            return;
+
         var transaction = new Transaction
         {
             GymHouseId = evt.GymHouseId,

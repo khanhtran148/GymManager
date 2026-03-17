@@ -91,13 +91,18 @@ public sealed class TransactionRepository(GymManagerDbContext db) : ITransaction
                 && t.TransactionDate <= to)
             .SumAsync(t => t.Amount, ct);
 
-    public async Task<List<Transaction>> GetByGymHouseForReportAsync(
-        Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default) =>
-        await db.Transactions
+    public async Task<List<(TransactionDirection Direction, TransactionCategory Category, decimal Total)>> GetAggregateByDirectionAndCategoryAsync(
+        Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default)
+    {
+        var results = await db.Transactions
             .AsNoTracking()
             .Where(t => t.GymHouseId == gymHouseId
                 && t.TransactionDate >= from
                 && t.TransactionDate <= to)
-            .OrderBy(t => t.TransactionDate)
+            .GroupBy(t => new { t.Direction, t.Category })
+            .Select(g => new { g.Key.Direction, g.Key.Category, Total = g.Sum(t => t.Amount) })
             .ToListAsync(ct);
+
+        return [.. results.Select(r => (r.Direction, r.Category, r.Total))];
+    }
 }
