@@ -34,15 +34,22 @@ public sealed class CreatePayrollPeriodCommandHandler(
         var periodStartDateTime = request.PeriodStart.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var periodEndDateTime = request.PeriodEnd.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc);
 
+        var trainerUserIds = allStaff
+            .Where(s => s.StaffType == StaffType.Trainer)
+            .Select(s => s.UserId)
+            .ToList();
+
+        var trainerClassCounts = trainerUserIds.Count > 0
+            ? await bookingRepository.CountCompletedByTrainersBatchAsync(
+                trainerUserIds, request.GymHouseId, periodStartDateTime, periodEndDateTime, ct)
+            : new Dictionary<Guid, int>();
+
         var entries = new List<PayrollEntry>();
         foreach (var staff in allStaff)
         {
-            var classesTaught = 0;
-            if (staff.StaffType == StaffType.Trainer)
-            {
-                classesTaught = await bookingRepository.CountCompletedByTrainerAsync(
-                    staff.UserId, request.GymHouseId, periodStartDateTime, periodEndDateTime, ct);
-            }
+            var classesTaught = staff.StaffType == StaffType.Trainer
+                ? trainerClassCounts.GetValueOrDefault(staff.UserId, 0)
+                : 0;
 
             var basePay = staff.BaseSalary;
             var classBonus = classesTaught * staff.PerClassBonus;
@@ -71,9 +78,6 @@ public sealed class CreatePayrollPeriodCommandHandler(
 
         await payrollPeriodRepository.CreateAsync(payrollPeriod, ct);
 
-        var created = await payrollPeriodRepository.GetByIdWithEntriesAsync(
-            payrollPeriod.Id, request.GymHouseId, ct);
-
-        return Result.Success(PayrollPeriodDetailDto.FromEntity(created!));
+        return Result.Success(PayrollPeriodDetailDto.FromEntity(payrollPeriod));
     }
 }

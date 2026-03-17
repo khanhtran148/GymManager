@@ -61,7 +61,7 @@ public sealed class ApprovePayrollCommandHandlerTests : ApplicationTestBase
         var secondApproval = await Sender.Send(new ApprovePayrollCommand(created.Value.Id, gymHouseId));
 
         secondApproval.IsFailure.Should().BeTrue();
-        secondApproval.Error.Should().Contain("already approved");
+        secondApproval.Error.Should().Contain("must be in Draft status");
     }
 
     [Fact]

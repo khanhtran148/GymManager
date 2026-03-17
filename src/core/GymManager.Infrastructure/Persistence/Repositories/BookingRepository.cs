@@ -78,11 +78,24 @@ public sealed class BookingRepository(GymManagerDbContext db) : IBookingReposito
         return new PagedList<Booking>(items, totalCount, page, pageSize);
     }
 
+    public async Task<Dictionary<Guid, int>> CountCompletedByTrainersBatchAsync(
+        List<Guid> trainerIds, Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default) =>
+        await db.Bookings
+            .AsNoTracking()
+            .Where(b =>
+                b.GymHouseId == gymHouseId
+                && b.Status == BookingStatus.Completed
+                && b.ClassSchedule != null
+                && trainerIds.Contains(b.ClassSchedule.TrainerId)
+                && b.BookedAt >= from
+                && b.BookedAt <= to)
+            .GroupBy(b => b.ClassSchedule!.TrainerId)
+            .ToDictionaryAsync(g => g.Key, g => g.Count(), ct);
+
     public async Task<int> CountCompletedByTrainerAsync(
         Guid trainerId, Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default) =>
         await db.Bookings
             .AsNoTracking()
-            .Include(b => b.ClassSchedule)
             .CountAsync(b =>
                 b.GymHouseId == gymHouseId
                 && b.Status == BookingStatus.Completed

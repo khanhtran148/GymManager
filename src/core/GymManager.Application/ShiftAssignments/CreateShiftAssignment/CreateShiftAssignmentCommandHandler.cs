@@ -10,6 +10,7 @@ namespace GymManager.Application.ShiftAssignments.CreateShiftAssignment;
 
 public sealed class CreateShiftAssignmentCommandHandler(
     IShiftAssignmentRepository shiftRepository,
+    IStaffRepository staffRepository,
     IPermissionChecker permissions,
     ICurrentUser currentUser)
     : IRequestHandler<CreateShiftAssignmentCommand, Result<ShiftAssignmentDto>>
@@ -20,6 +21,10 @@ public sealed class CreateShiftAssignmentCommandHandler(
             currentUser.UserId, request.GymHouseId, Permission.ManageShifts, ct);
         if (!canManage)
             return Result.Failure<ShiftAssignmentDto>(new ForbiddenError().ToString());
+
+        var staff = await staffRepository.GetByIdAsync(request.StaffId, request.GymHouseId, ct);
+        if (staff is null)
+            return Result.Failure<ShiftAssignmentDto>(new NotFoundError("Staff", request.StaffId).ToString());
 
         var shift = new ShiftAssignment
         {

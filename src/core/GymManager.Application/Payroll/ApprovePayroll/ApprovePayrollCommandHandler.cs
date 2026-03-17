@@ -26,13 +26,9 @@ public sealed class ApprovePayrollCommandHandler(
         if (payrollPeriod is null)
             return Result.Failure<PayrollPeriodDetailDto>(new NotFoundError("PayrollPeriod", request.Id).ToString());
 
-        if (payrollPeriod.Status == PayrollStatus.Approved || payrollPeriod.Status == PayrollStatus.Paid)
-            return Result.Failure<PayrollPeriodDetailDto>(
-                new ConflictError("Payroll period is already approved.").ToString());
-
         if (payrollPeriod.Status != PayrollStatus.Draft)
             return Result.Failure<PayrollPeriodDetailDto>(
-                "Payroll period must be in Draft status to approve.");
+                new ConflictError($"Payroll period must be in Draft status to approve. Current status: {payrollPeriod.Status}.").ToString());
 
         payrollPeriod.Status = PayrollStatus.Approved;
         payrollPeriod.ApprovedById = currentUser.UserId;

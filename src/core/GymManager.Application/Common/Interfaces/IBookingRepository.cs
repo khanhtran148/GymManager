@@ -11,4 +11,5 @@ public interface IBookingRepository
     Task<PagedList<Booking>> GetByMemberAsync(Guid memberId, int page, int pageSize, CancellationToken ct = default);
     Task<PagedList<Booking>> GetByGymHouseAsync(Guid gymHouseId, int page, int pageSize, DateTime? from, DateTime? to, CancellationToken ct = default);
     Task<int> CountCompletedByTrainerAsync(Guid trainerId, Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default);
+    Task<Dictionary<Guid, int>> CountCompletedByTrainersBatchAsync(List<Guid> trainerIds, Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default);
 }

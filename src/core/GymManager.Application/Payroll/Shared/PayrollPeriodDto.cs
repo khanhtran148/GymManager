@@ -20,7 +20,7 @@ public sealed record PayrollEntryDto(
         e.PayrollPeriodId,
         e.StaffId,
         e.Staff?.User?.FullName ?? string.Empty,
-        e.Staff?.StaffType ?? StaffType.Reception,
+        e.Staff?.StaffType ?? default,
         e.BasePay,
         e.ClassBonus,
         e.Deductions,
@@ -65,15 +65,19 @@ public sealed record PayrollPeriodDetailDto(
     decimal TotalNetPay,
     DateTime CreatedAt)
 {
-    internal static PayrollPeriodDetailDto FromEntity(PayrollPeriod p) => new(
-        p.Id,
-        p.GymHouseId,
-        p.PeriodStart,
-        p.PeriodEnd,
-        p.Status,
-        p.ApprovedById,
-        p.ApprovedAt,
-        p.Entries.Select(PayrollEntryDto.FromEntity).ToList(),
-        p.Entries.Sum(e => e.NetPay),
-        p.CreatedAt);
+    internal static PayrollPeriodDetailDto FromEntity(PayrollPeriod p)
+    {
+        var entries = p.Entries.Select(PayrollEntryDto.FromEntity).ToList();
+        return new(
+            p.Id,
+            p.GymHouseId,
+            p.PeriodStart,
+            p.PeriodEnd,
+            p.Status,
+            p.ApprovedById,
+            p.ApprovedAt,
+            entries,
+            entries.Sum(e => e.NetPay),
+            p.CreatedAt);
+    }
 }

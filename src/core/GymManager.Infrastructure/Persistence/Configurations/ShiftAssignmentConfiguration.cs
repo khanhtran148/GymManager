@@ -32,5 +32,8 @@ public sealed class ShiftAssignmentConfiguration : IEntityTypeConfiguration<Shif
 
         builder.HasIndex(sa => new { sa.StaffId, sa.ShiftDate })
             .HasDatabaseName("ix_shift_assignments_staff_id_shift_date");
+
+        builder.HasIndex(sa => new { sa.GymHouseId, sa.ShiftDate })
+            .HasDatabaseName("ix_shift_assignments_gym_house_id_shift_date");
     }
 }

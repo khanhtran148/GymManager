@@ -42,5 +42,8 @@ public sealed class StaffConfiguration : IEntityTypeConfiguration<Staff>
         builder.HasIndex(s => new { s.UserId, s.GymHouseId })
             .IsUnique()
             .HasDatabaseName("ix_staff_user_id_gym_house_id");
+
+        builder.HasIndex(s => s.GymHouseId)
+            .HasDatabaseName("ix_staff_gym_house_id");
     }
 }

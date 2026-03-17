@@ -42,12 +42,12 @@ public sealed class CreateClassScheduleCommandHandler(
             EndTime = request.EndTime,
             MaxCapacity = request.MaxCapacity,
             CurrentEnrollment = 0,
-            IsRecurring = request.IsRecurring,
-            Trainer = trainer
+            IsRecurring = request.IsRecurring
         };
 
         await classScheduleRepository.CreateAsync(classSchedule, ct);
 
-        return Result.Success(ToDto(classSchedule));
+        var created = await classScheduleRepository.GetByIdAsync(classSchedule.Id, ct);
+        return Result.Success(ToDto(created!));
     }
 }

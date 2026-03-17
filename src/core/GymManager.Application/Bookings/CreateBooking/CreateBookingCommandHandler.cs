@@ -74,8 +74,7 @@ public sealed class CreateBookingCommandHandler(
                 BookingType = BookingType.TimeSlot,
                 TimeSlotId = request.TimeSlotId,
                 Status = BookingStatus.WaitListed,
-                BookedAt = DateTime.UtcNow,
-                Member = member
+                BookedAt = DateTime.UtcNow
             };
             await bookingRepository.CreateAsync(waitlistedBooking, ct);
 
@@ -92,8 +91,7 @@ public sealed class CreateBookingCommandHandler(
             BookingType = BookingType.TimeSlot,
             TimeSlotId = request.TimeSlotId,
             Status = BookingStatus.Confirmed,
-            BookedAt = DateTime.UtcNow,
-            Member = member
+            BookedAt = DateTime.UtcNow
         };
         await bookingRepository.CreateAsync(booking, ct);
 
@@ -133,8 +131,7 @@ public sealed class CreateBookingCommandHandler(
                 BookingType = BookingType.ClassSession,
                 ClassScheduleId = request.ClassScheduleId,
                 Status = BookingStatus.WaitListed,
-                BookedAt = DateTime.UtcNow,
-                Member = member
+                BookedAt = DateTime.UtcNow
             };
             await bookingRepository.CreateAsync(waitlistedBooking, ct);
 
@@ -151,8 +148,7 @@ public sealed class CreateBookingCommandHandler(
             BookingType = BookingType.ClassSession,
             ClassScheduleId = request.ClassScheduleId,
             Status = BookingStatus.Confirmed,
-            BookedAt = DateTime.UtcNow,
-            Member = member
+            BookedAt = DateTime.UtcNow
         };
         await bookingRepository.CreateAsync(booking, ct);
 

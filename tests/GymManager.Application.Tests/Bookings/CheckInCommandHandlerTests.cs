@@ -77,7 +77,7 @@ public sealed class CheckInCommandHandlerTests : ApplicationTestBase
         var second = await Sender.Send(new CheckInCommand(bookingResult.Value.Id, gymHouseId, CheckInSource.QRScan));
 
         second.IsFailure.Should().BeTrue();
-        second.Error.Should().Contain("already checked in");
+        second.Error.Should().Contain("Cannot check in");
     }
 
     [Fact]

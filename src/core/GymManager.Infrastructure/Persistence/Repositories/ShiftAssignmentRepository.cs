@@ -52,6 +52,7 @@ public sealed class ShiftAssignmentRepository(GymManagerDbContext db) : IShiftAs
         return await query
             .OrderBy(sa => sa.ShiftDate)
             .ThenBy(sa => sa.StartTime)
+            .Take(500)
             .ToListAsync(ct);
     }
 }

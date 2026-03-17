@@ -19,19 +19,10 @@ public sealed class ClassScheduleRepository(GymManagerDbContext db) : IClassSche
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id, ct);
 
-    public async Task<ClassSchedule?> GetByIdForUpdateAsync(Guid id, CancellationToken ct = default)
-    {
-        var classSchedule = await db.ClassSchedules
+    public async Task<ClassSchedule?> GetByIdForUpdateAsync(Guid id, CancellationToken ct = default) =>
+        await db.ClassSchedules
             .FromSqlInterpolated($"SELECT * FROM class_schedules WHERE id = {id} AND deleted_at IS NULL FOR UPDATE")
             .FirstOrDefaultAsync(ct);
-
-        if (classSchedule is not null)
-        {
-            await db.Entry(classSchedule).Reference(c => c.Trainer).LoadAsync(ct);
-        }
-
-        return classSchedule;
-    }
 
     public async Task UpdateAsync(ClassSchedule classSchedule, CancellationToken ct = default)
     {

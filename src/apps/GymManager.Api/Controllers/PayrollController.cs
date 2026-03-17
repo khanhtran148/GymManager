@@ -20,6 +20,7 @@ namespace GymManager.Api.Controllers;
 public sealed class PayrollController(ISender sender) : ApiControllerBase(sender)
 {
     [HttpPost]
+    [EnableRateLimiting(RateLimitPolicies.Strict)]
     [ProducesResponseType(typeof(PayrollPeriodDetailDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
