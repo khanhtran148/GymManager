@@ -67,7 +67,9 @@ describe("canAccessRoute", () => {
 
   it("allows unknown routes by default (fail-open for UX, backend enforces)", () => {
     expect(canAccessRoute("/some-unknown-page", "Member")).toBe(true);
-    expect(canAccessRoute("/settings/notifications", "Member")).toBe(true);
+    // /settings and sub-paths are Owner-only (added in Phase 3)
+    expect(canAccessRoute("/settings/notifications", "Member")).toBe(false);
+    expect(canAccessRoute("/settings/notifications", "Owner")).toBe(true);
   });
 
   it("matches sub-routes correctly", () => {

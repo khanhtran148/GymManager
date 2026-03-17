@@ -1,3 +1,4 @@
+using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
 
 namespace GymManager.Infrastructure.Persistence.Seeding;
@@ -43,4 +44,13 @@ public static class RoleSeedData
             Permission.ViewAnnouncements,
         _ => Permission.None
     };
+
+    public static List<RolePermission> GetDefaultRolePermissions(Guid tenantId) =>
+    [
+        new RolePermission { TenantId = tenantId, Role = Role.Owner,        Permissions = GetDefaultPermissions(Role.Owner) },
+        new RolePermission { TenantId = tenantId, Role = Role.HouseManager, Permissions = GetDefaultPermissions(Role.HouseManager) },
+        new RolePermission { TenantId = tenantId, Role = Role.Trainer,      Permissions = GetDefaultPermissions(Role.Trainer) },
+        new RolePermission { TenantId = tenantId, Role = Role.Staff,        Permissions = GetDefaultPermissions(Role.Staff) },
+        new RolePermission { TenantId = tenantId, Role = Role.Member,       Permissions = GetDefaultPermissions(Role.Member) },
+    ];
 }

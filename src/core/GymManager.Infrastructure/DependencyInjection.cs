@@ -47,10 +47,14 @@ public static class DependencyInjection
         services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
         services.AddScoped<INotificationDeliveryRepository, NotificationDeliveryRepository>();
         services.AddScoped<INotificationPreferenceRepository, NotificationPreferenceRepository>();
+        services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
 
         // Notification Services
         services.AddScoped<IFirebaseMessagingService, FirebaseMessagingService>();
         // INotificationHub is registered in the API layer with the concrete Hub type
+
+        // In-memory cache for role-permission lookups during token issuance
+        services.AddMemoryCache();
 
         // Auth Services
         services.AddScoped<ITokenService, JwtTokenService>();

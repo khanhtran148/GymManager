@@ -8,11 +8,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace GymManager.Infrastructure.Persistence.Migrations;
-
-[DbContext(typeof(GymManagerDbContext))]
-partial class GymManagerDbContextModelSnapshot : ModelSnapshot
+namespace GymManager.Infrastructure.Persistence.Migrations
 {
+    [DbContext(typeof(GymManagerDbContext))]
+    partial class GymManagerDbContextModelSnapshot : ModelSnapshot
+    {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
@@ -536,6 +536,25 @@ partial class GymManagerDbContextModelSnapshot : ModelSnapshot
                         .HasDatabaseName("ix_payroll_periods_gym_house_id_period_start");
 
                     b.ToTable("payroll_periods", (string)null);
+                });
+
+            modelBuilder.Entity("GymManager.Domain.Entities.RolePermission", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer")
+                        .HasColumnName("role");
+
+                    b.Property<long>("Permissions")
+                        .HasColumnType("bigint")
+                        .HasColumnName("permissions");
+
+                    b.HasKey("TenantId", "Role");
+
+                    b.ToTable("role_permissions", (string)null);
                 });
 
             modelBuilder.Entity("GymManager.Domain.Entities.ShiftAssignment", b =>
@@ -1259,4 +1278,5 @@ partial class GymManagerDbContextModelSnapshot : ModelSnapshot
                 });
 #pragma warning restore 612, 618
         }
+    }
 }

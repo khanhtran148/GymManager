@@ -22,6 +22,7 @@ public sealed class RegisterCommandHandler(
 
         var passwordHash = passwordHasher.Hash(request.Password);
 
+#pragma warning disable CS0618 // Permissions kept in sync during migration period; JwtTokenService reads from role_permissions
         var user = new User
         {
             Email = request.Email.ToLowerInvariant(),
@@ -31,8 +32,9 @@ public sealed class RegisterCommandHandler(
             Role = Role.Owner,
             Permissions = Permission.Admin
         };
+#pragma warning restore CS0618
 
-        var accessToken = tokenService.GenerateAccessToken(user);
+        var accessToken = await tokenService.GenerateAccessTokenAsync(user, ct);
         var refreshToken = tokenService.GenerateRefreshToken();
         user.SetRefreshToken(refreshToken, DateTime.UtcNow.AddDays(7));
 

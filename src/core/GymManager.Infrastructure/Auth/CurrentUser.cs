@@ -34,6 +34,15 @@ public sealed class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICur
         }
     }
 
+    public Role Role
+    {
+        get
+        {
+            var raw = Principal?.FindFirst("role")?.Value;
+            return Enum.TryParse<Role>(raw, out var role) ? role : Role.Member;
+        }
+    }
+
     public bool IsAuthenticated =>
         Principal?.Identity?.IsAuthenticated ?? false;
 }

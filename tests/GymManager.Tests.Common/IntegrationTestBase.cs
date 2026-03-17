@@ -6,6 +6,7 @@ using GymManager.Infrastructure.Payments;
 using GymManager.Infrastructure.Persistence;
 using GymManager.Infrastructure.Persistence.Interceptors;
 using GymManager.Infrastructure.Persistence.Repositories;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -80,6 +81,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
         services.AddScoped<INotificationDeliveryRepository, NotificationDeliveryRepository>();
         services.AddScoped<INotificationPreferenceRepository, NotificationPreferenceRepository>();
+        services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
 
         // Notification services
         services.AddScoped<IFirebaseMessagingService, FirebaseMessagingService>();
@@ -92,6 +94,9 @@ public abstract class IntegrationTestBase : IAsyncLifetime
 
         // Payment Gateway — stub for tests
         services.AddScoped<IPaymentGatewayService, StubPaymentGatewayService>();
+
+        // Memory cache (for JwtTokenService role-permission lookup)
+        services.AddMemoryCache();
 
         // Logging
         services.AddLogging();

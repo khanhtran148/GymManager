@@ -72,6 +72,7 @@ public sealed class CreateAnnouncementCommandHandlerTests : ApplicationTestBase
     public async Task CreateAnnouncement_ChainWide_WithoutOwnerRole_ReturnsForbidden()
     {
         // Create a Staff user directly (not via Register, which always sets Owner)
+#pragma warning disable CS0618 // Direct Permissions assignment used in test setup for test isolation
         var staffUser = new User
         {
             Email = $"staff{Guid.NewGuid()}@example.com",
@@ -80,6 +81,7 @@ public sealed class CreateAnnouncementCommandHandlerTests : ApplicationTestBase
             Role = Role.Staff,
             Permissions = Permission.ManageAnnouncements
         };
+#pragma warning restore CS0618
         DbContext.Users.Add(staffUser);
         await DbContext.SaveChangesAsync();
 

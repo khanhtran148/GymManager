@@ -15,4 +15,10 @@ public interface IUserRepository
     /// When gymHouseId is null, returns all users with the given role (chain-wide).
     /// </summary>
     Task<List<User>> GetByRoleAndHouseAsync(Role role, Guid? gymHouseId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Returns all users with the given role that belong to gym houses owned by the specified tenant.
+    /// Scopes results to the tenant to prevent cross-tenant user enumeration.
+    /// </summary>
+    Task<List<User>> GetByTenantAndRoleAsync(Guid tenantId, Role role, CancellationToken ct = default);
 }

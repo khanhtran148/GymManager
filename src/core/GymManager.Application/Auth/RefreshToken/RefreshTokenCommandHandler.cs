@@ -38,7 +38,7 @@ public sealed class RefreshTokenCommandHandler(
         if (user is null || !user.IsRefreshTokenValid(request.RefreshToken))
             return Result.Failure<AuthResponse>("Invalid or expired refresh token.");
 
-        var newAccessToken = tokenService.GenerateAccessToken(user);
+        var newAccessToken = await tokenService.GenerateAccessTokenAsync(user, ct);
         var newRefreshToken = tokenService.GenerateRefreshToken();
         user.SetRefreshToken(newRefreshToken, DateTime.UtcNow.AddDays(7));
 

@@ -2,6 +2,7 @@ using CSharpFunctionalExtensions;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Application.Members.Shared;
+using GymManager.Application.Roles.Shared;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
 using GymManager.Domain.Events;
@@ -16,6 +17,7 @@ public sealed class CreateMemberCommandHandler(
     IGymHouseRepository gymHouseRepository,
     IPermissionChecker permissions,
     ICurrentUser currentUser,
+    IRolePermissionRepository rolePermissionRepository,
     IPublisher publisher)
     : IRequestHandler<CreateMemberCommand, Result<MemberDto>>
 {
@@ -38,6 +40,14 @@ public sealed class CreateMemberCommandHandler(
         var user = await userRepository.GetByEmailAsync(request.Email.ToLowerInvariant(), ct);
         if (user is null)
         {
+            // Look up Member permissions from the role_permissions table for this tenant.
+            // Falls back to the application-layer defaults when no row exists yet (e.g., first-time setup).
+            var memberRolePermission = await rolePermissionRepository
+                .GetByTenantAndRoleAsync(currentUser.TenantId, Role.Member, ct);
+            var memberPermissions = memberRolePermission?.Permissions
+                ?? RolePermissionDefaults.GetDefaultPermissions(Role.Member);
+
+#pragma warning disable CS0618 // Kept in sync for backward compatibility during migration period
             user = new User
             {
                 Email = request.Email.ToLowerInvariant(),
@@ -45,8 +55,9 @@ public sealed class CreateMemberCommandHandler(
                 FullName = request.FullName,
                 Phone = request.Phone,
                 Role = Role.Member,
-                Permissions = Permission.ViewMembers | Permission.ViewSubscriptions
+                Permissions = memberPermissions
             };
+#pragma warning restore CS0618
             await userRepository.CreateAsync(user, ct);
         }
 

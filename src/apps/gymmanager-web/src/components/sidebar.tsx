@@ -26,6 +26,8 @@ import {
   CalendarDays,
   Banknote,
   Megaphone,
+  Settings,
+  Shield,
 } from "lucide-react";
 
 type IconComponent = React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" | "false" }>;
@@ -83,13 +85,23 @@ const navEntries: NavEntry[] = [
     ],
   },
   { label: "Announcements", href: "/announcements", icon: Megaphone, allowedRoles: getAllowedRolesForRoute("/announcements") },
+  {
+    label: "Settings",
+    icon: Settings,
+    prefix: "/settings",
+    allowedRoles: getAllowedRolesForRoute("/settings"),
+    children: [
+      { label: "Role Permissions", href: "/settings/roles", icon: Shield, allowedRoles: getAllowedRolesForRoute("/settings/roles") },
+      { label: "User Roles", href: "/settings/roles/users", icon: UserCog, allowedRoles: getAllowedRolesForRoute("/settings/roles/users") },
+    ],
+  },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const role = useRole();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ "/finance": true, "/staff-hr": true });
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ "/finance": true, "/staff-hr": true, "/settings": true });
 
   const filteredEntries = useMemo(() => {
     if (!role) return navEntries;

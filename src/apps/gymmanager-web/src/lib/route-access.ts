@@ -14,6 +14,9 @@ const VALID_ROLES = new Set<string>(Object.values(Role));
  * Unknown routes default to allowed (fail-open for UX; backend enforces security).
  */
 const routeAccessMap: RouteAccess[] = [
+  { path: "/settings/roles/users", allowedRoles: ["Owner"] },
+  { path: "/settings/roles", allowedRoles: ["Owner"] },
+  { path: "/settings", allowedRoles: ["Owner"] },
   { path: "/finance/pnl", allowedRoles: ["Owner", "HouseManager"] },
   { path: "/finance/transactions", allowedRoles: ["Owner", "HouseManager", "Staff"] },
   { path: "/finance", allowedRoles: ["Owner", "HouseManager", "Staff"] },

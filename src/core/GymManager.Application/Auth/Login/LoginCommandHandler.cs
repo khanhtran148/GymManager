@@ -20,7 +20,7 @@ public sealed class LoginCommandHandler(
         if (!passwordHasher.Verify(request.Password, user.PasswordHash))
             return Result.Failure<AuthResponse>("Invalid credentials.");
 
-        var accessToken = tokenService.GenerateAccessToken(user);
+        var accessToken = await tokenService.GenerateAccessTokenAsync(user, ct);
         var refreshToken = tokenService.GenerateRefreshToken();
         user.SetRefreshToken(refreshToken, DateTime.UtcNow.AddDays(7));
 
