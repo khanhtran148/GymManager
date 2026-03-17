@@ -1,12 +1,12 @@
-import { test, expect } from "../fixtures/auth.fixture.js";
-import { MemberDetailPage } from "../pages/members.page.js";
-import { GymHouseDto, MemberDto } from "../helpers/api-client.js";
+import { test, expect } from "../../fixtures/auth.fixture.js";
+import { MemberDetailPage } from "../../pages/members.page.js";
+import { GymHouseDto, MemberDto } from "../../helpers/api-client.js";
 import {
   generateGymHouse,
   generateMember,
   generateSubscription,
   offsetDate,
-} from "../helpers/test-data.js";
+} from "../../helpers/test-data.js";
 
 const API_BASE = process.env.API_URL ?? "http://localhost:5000/api/v1";
 

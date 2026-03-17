@@ -1,7 +1,7 @@
-import { test, expect } from "../fixtures/auth.fixture.js";
-import { GymHouseDto, AuthResponse } from "../helpers/api-client.js";
-import { generateGymHouse, generateStaff, generateUser } from "../helpers/test-data.js";
-import { register } from "../helpers/api-client.js";
+import { test, expect } from "../../fixtures/auth.fixture.js";
+import { GymHouseDto, AuthResponse } from "../../helpers/api-client.js";
+import { generateGymHouse, generateStaff, generateUser } from "../../helpers/test-data.js";
+import { register } from "../../helpers/api-client.js";
 
 test.describe("Staff management", () => {
   let gymHouse: GymHouseDto;

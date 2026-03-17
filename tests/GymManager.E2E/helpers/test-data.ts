@@ -23,6 +23,11 @@ import type {
   TransactionCategory,
   StaffType,
   TargetAudience,
+  CreateShiftAssignmentRequest,
+  ShiftType,
+  CreatePayrollPeriodRequest,
+  UpdateGymHouseRequest,
+  RenewSubscriptionRequest,
 } from "./api-client.js";
 
 // ---------------------------------------------------------------------------
@@ -272,6 +277,76 @@ export function generateAnnouncement(
     content: `Test announcement content ${id}. Please read carefully.`,
     targetAudience: "AllMembers" as TargetAudience,
     publishAt,
+    ...overrides,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Shift Assignment
+// ---------------------------------------------------------------------------
+
+export function generateShiftAssignment(
+  overrides: Partial<CreateShiftAssignmentRequest> = {},
+): CreateShiftAssignmentRequest {
+  return {
+    staffId: "00000000-0000-0000-0000-000000000000",
+    gymHouseId: "00000000-0000-0000-0000-000000000000",
+    shiftDate: offsetDate(1),
+    startTime: "06:00:00",
+    endTime: "14:00:00",
+    shiftType: 0 as ShiftType, // Morning
+    ...overrides,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Payroll Period
+// ---------------------------------------------------------------------------
+
+export function generatePayrollPeriod(
+  overrides: Partial<CreatePayrollPeriodRequest> = {},
+): CreatePayrollPeriodRequest {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  return {
+    gymHouseId: "00000000-0000-0000-0000-000000000000",
+    periodStart: start.toISOString().slice(0, 10),
+    periodEnd: end.toISOString().slice(0, 10),
+    ...overrides,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Update helpers
+// ---------------------------------------------------------------------------
+
+export function generateUpdateGymHouse(
+  overrides: Partial<UpdateGymHouseRequest> = {},
+): UpdateGymHouseRequest {
+  const id = uid();
+  return {
+    name: `Updated Gym ${id}`,
+    address: `${id} New Street, District 2, Ho Chi Minh City`,
+    phone: null,
+    operatingHours: "05:00-23:00",
+    hourlyCapacity: 50,
+    ...overrides,
+  };
+}
+
+export function generateRenewSubscription(
+  overrides: Partial<RenewSubscriptionRequest> = {},
+): RenewSubscriptionRequest {
+  const start = new Date();
+  start.setMonth(start.getMonth() + 1);
+  const end = new Date(start);
+  end.setMonth(end.getMonth() + 1);
+  return {
+    gymHouseId: "00000000-0000-0000-0000-000000000000",
+    startDate: start.toISOString(),
+    endDate: end.toISOString(),
+    price: 600_000,
     ...overrides,
   };
 }

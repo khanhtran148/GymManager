@@ -1,5 +1,5 @@
-import { test, expect } from "../fixtures/auth.fixture.js";
-import { DashboardPage } from "../pages/dashboard.page.js";
+import { test, expect } from "../../fixtures/auth.fixture.js";
+import { DashboardPage } from "../../pages/dashboard.page.js";
 
 /**
  * All navigation tests require an authenticated user so we use the

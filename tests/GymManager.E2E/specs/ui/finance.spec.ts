@@ -1,9 +1,9 @@
-import { test, expect } from "../fixtures/auth.fixture.js";
-import { GymHouseDto } from "../helpers/api-client.js";
+import { test, expect } from "../../fixtures/auth.fixture.js";
+import { GymHouseDto } from "../../helpers/api-client.js";
 import {
   generateGymHouse,
   generateTransaction,
-} from "../helpers/test-data.js";
+} from "../../helpers/test-data.js";
 
 test.describe("Finance features", () => {
   let gymHouse: GymHouseDto;

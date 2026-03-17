@@ -1,6 +1,6 @@
-import { test, expect } from "../fixtures/auth.fixture.js";
-import { GymHouseDto } from "../helpers/api-client.js";
-import { generateGymHouse, generateAnnouncement } from "../helpers/test-data.js";
+import { test, expect } from "../../fixtures/auth.fixture.js";
+import { GymHouseDto } from "../../helpers/api-client.js";
+import { generateGymHouse, generateAnnouncement } from "../../helpers/test-data.js";
 
 test.describe("Announcements", () => {
   let gymHouse: GymHouseDto;

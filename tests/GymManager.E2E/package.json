@@ -13,7 +13,13 @@
     "test:staff": "npx playwright test specs/staff.spec.ts",
     "test:announcements": "npx playwright test specs/announcements.spec.ts",
     "test:navigation": "npx playwright test specs/navigation.spec.ts",
-    "test:ui": "npx playwright test --ui",
+    "test:api": "npx playwright test --project=api",
+    "test:ui": "npx playwright test --project=ui",
+    "test:journeys": "npx playwright test --project=journeys",
+    "test:smoke": "npx playwright test --project=api --grep @smoke",
+    "test:full": "npx playwright test --project=api --project=ui",
+    "test:nightly": "npx playwright test",
+    "test:ui-mode": "npx playwright test --ui",
     "report": "npx playwright show-report"
   },
   "devDependencies": {

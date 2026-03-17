@@ -1,8 +1,8 @@
-import { test, expect } from "../fixtures/auth.fixture.js";
-import { MembersPage, MemberFormPage } from "../pages/members.page.js";
-import { MemberDetailPage } from "../pages/members.page.js";
-import { GymHouseDto } from "../helpers/api-client.js";
-import { generateGymHouse, generateMember } from "../helpers/test-data.js";
+import { test, expect } from "../../fixtures/auth.fixture.js";
+import { MembersPage, MemberFormPage } from "../../pages/members.page.js";
+import { MemberDetailPage } from "../../pages/members.page.js";
+import { GymHouseDto } from "../../helpers/api-client.js";
+import { generateGymHouse, generateMember } from "../../helpers/test-data.js";
 
 test.describe("Member management", () => {
   let gymHouse: GymHouseDto;

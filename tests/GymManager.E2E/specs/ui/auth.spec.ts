@@ -1,9 +1,9 @@
-import { test, expect } from "../fixtures/auth.fixture.js";
-import { RegisterPage } from "../pages/register.page.js";
-import { LoginPage } from "../pages/login.page.js";
-import { DashboardPage } from "../pages/dashboard.page.js";
-import { generateUser } from "../helpers/test-data.js";
-import { register } from "../helpers/api-client.js";
+import { test, expect } from "../../fixtures/auth.fixture.js";
+import { RegisterPage } from "../../pages/register.page.js";
+import { LoginPage } from "../../pages/login.page.js";
+import { DashboardPage } from "../../pages/dashboard.page.js";
+import { generateUser } from "../../helpers/test-data.js";
+import { register } from "../../helpers/api-client.js";
 
 test.describe("Authentication flows", () => {
   test.describe("Registration", () => {

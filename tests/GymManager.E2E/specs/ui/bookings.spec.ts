@@ -1,12 +1,12 @@
-import { test, expect } from "../fixtures/auth.fixture.js";
-import { GymHouseDto, MemberDto, TimeSlotDto } from "../helpers/api-client.js";
+import { test, expect } from "../../fixtures/auth.fixture.js";
+import { GymHouseDto, MemberDto, TimeSlotDto } from "../../helpers/api-client.js";
 import {
   generateGymHouse,
   generateMember,
   generateTimeSlot,
   generateBooking,
   offsetDate,
-} from "../helpers/test-data.js";
+} from "../../helpers/test-data.js";
 
 test.describe("Booking management", () => {
   let gymHouse: GymHouseDto;

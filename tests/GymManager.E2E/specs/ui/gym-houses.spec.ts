@@ -1,6 +1,6 @@
-import { test, expect } from "../fixtures/auth.fixture.js";
-import { GymHousesPage, GymHouseFormPage } from "../pages/gym-houses.page.js";
-import { generateGymHouse } from "../helpers/test-data.js";
+import { test, expect } from "../../fixtures/auth.fixture.js";
+import { GymHousesPage, GymHouseFormPage } from "../../pages/gym-houses.page.js";
+import { generateGymHouse } from "../../helpers/test-data.js";
 
 test.describe("Gym House management", () => {
   test.describe("Create gym house", () => {
