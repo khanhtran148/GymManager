@@ -5,6 +5,7 @@ using GymManager.Application.Members.Shared;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
 using GymManager.Domain.Events;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Members.CreateMember;
@@ -67,17 +68,6 @@ public sealed class CreateMemberCommandHandler(
 
         await publisher.Publish(new MemberCreatedEvent(member.Id, request.GymHouseId), ct);
 
-        return Result.Success(ToDto(member));
+        return Result.Success(member.Adapt<MemberDto>());
     }
-
-    internal static MemberDto ToDto(Member m) => new(
-        m.Id,
-        m.GymHouseId,
-        m.UserId,
-        m.MemberCode,
-        m.User.FullName,
-        m.User.Email,
-        m.User.Phone,
-        m.Status,
-        m.JoinedAt);
 }

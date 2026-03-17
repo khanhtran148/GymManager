@@ -4,7 +4,6 @@ using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Domain.Enums;
 using MediatR;
-using static GymManager.Application.Bookings.Shared.BookingMapper;
 
 namespace GymManager.Application.Bookings.GetBookingById;
 
@@ -31,6 +30,6 @@ public sealed class GetBookingByIdQueryHandler(
 
         var member = booking.Member ?? await memberRepository.GetByIdAsync(booking.MemberId, ct);
 
-        return Result.Success(ToDto(booking, member!));
+        return Result.Success(BookingMapper.ToDto(booking, member!));
     }
 }

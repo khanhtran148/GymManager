@@ -20,7 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\core\GymManager.Application\GymManager.Application.csproj" />
     <ProjectReference Include="..\..\src\core\GymManager.Infrastructure\GymManager.Infrastructure.csproj" />
-    <ProjectReference Include="..\GymManager.Tests.Common\GymManager.Tests.Common.csproj" />
+<ProjectReference Include="..\GymManager.Tests.Common\GymManager.Tests.Common.csproj" />
   </ItemGroup>
 
 </Project>

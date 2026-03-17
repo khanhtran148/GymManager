@@ -5,6 +5,7 @@ using GymManager.Application.Transactions.Shared;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
 using GymManager.Domain.Events;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Transactions.ReverseTransaction;
@@ -44,6 +45,6 @@ public sealed class ReverseTransactionCommandHandler(
             new TransactionRecordedEvent(reversal.Id, reversal.GymHouseId, reversal.TransactionType, reversal.Amount),
             ct);
 
-        return Result.Success(TransactionDto.FromEntity(reversal));
+        return Result.Success(reversal.Adapt<TransactionDto>());
     }
 }

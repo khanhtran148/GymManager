@@ -5,6 +5,7 @@ using GymManager.Application.Subscriptions.Shared;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
 using GymManager.Domain.Events;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Subscriptions.CreateSubscription;
@@ -48,19 +49,6 @@ public sealed class CreateSubscriptionCommandHandler(
         await publisher.Publish(new SubscriptionCreatedEvent(
             subscription.Id, request.MemberId, request.GymHouseId, request.Price), ct);
 
-        return Result.Success(ToDto(subscription));
+        return Result.Success(subscription.Adapt<SubscriptionDto>());
     }
-
-    internal static SubscriptionDto ToDto(Subscription s) => new(
-        s.Id,
-        s.MemberId,
-        s.GymHouseId,
-        s.Type,
-        s.Status,
-        s.Price,
-        s.StartDate,
-        s.EndDate,
-        s.FrozenAt,
-        s.FrozenUntil,
-        s.CreatedAt);
 }

@@ -1,9 +1,9 @@
 using CSharpFunctionalExtensions;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
-using GymManager.Application.Members.CreateMember;
 using GymManager.Application.Members.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Members.UpdateMember;
@@ -37,6 +37,6 @@ public sealed class UpdateMemberCommandHandler(
         member.User = user;
         await memberRepository.UpdateAsync(member, ct);
 
-        return Result.Success(CreateMemberCommandHandler.ToDto(member));
+        return Result.Success(member.Adapt<MemberDto>());
     }
 }

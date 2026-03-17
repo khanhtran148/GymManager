@@ -6,7 +6,6 @@ using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
 using GymManager.Domain.Events;
 using MediatR;
-using static GymManager.Application.Bookings.Shared.BookingMapper;
 
 namespace GymManager.Application.Bookings.CreateBooking;
 
@@ -74,12 +73,11 @@ public sealed class CreateBookingCommandHandler(
                 BookingType = BookingType.TimeSlot,
                 TimeSlotId = request.TimeSlotId,
                 Status = BookingStatus.WaitListed,
-                BookedAt = DateTime.UtcNow,
-                Member = member
+                BookedAt = DateTime.UtcNow
             };
             await bookingRepository.CreateAsync(waitlistedBooking, ct);
 
-            return Result.Success(ToDto(waitlistedBooking, member));
+            return Result.Success(BookingMapper.ToDto(waitlistedBooking, member));
         }
 
         timeSlot.CurrentBookings++;
@@ -92,14 +90,13 @@ public sealed class CreateBookingCommandHandler(
             BookingType = BookingType.TimeSlot,
             TimeSlotId = request.TimeSlotId,
             Status = BookingStatus.Confirmed,
-            BookedAt = DateTime.UtcNow,
-            Member = member
+            BookedAt = DateTime.UtcNow
         };
         await bookingRepository.CreateAsync(booking, ct);
 
         await publisher.Publish(new BookingConfirmedEvent(booking.Id, request.MemberId, request.GymHouseId), ct);
 
-        return Result.Success(ToDto(booking, member));
+        return Result.Success(BookingMapper.ToDto(booking, member));
     }
 
     private async Task<Result<BookingDto>> HandleClassSessionBookingAsync(
@@ -133,12 +130,11 @@ public sealed class CreateBookingCommandHandler(
                 BookingType = BookingType.ClassSession,
                 ClassScheduleId = request.ClassScheduleId,
                 Status = BookingStatus.WaitListed,
-                BookedAt = DateTime.UtcNow,
-                Member = member
+                BookedAt = DateTime.UtcNow
             };
             await bookingRepository.CreateAsync(waitlistedBooking, ct);
 
-            return Result.Success(ToDto(waitlistedBooking, member));
+            return Result.Success(BookingMapper.ToDto(waitlistedBooking, member));
         }
 
         classSchedule.CurrentEnrollment++;
@@ -151,14 +147,12 @@ public sealed class CreateBookingCommandHandler(
             BookingType = BookingType.ClassSession,
             ClassScheduleId = request.ClassScheduleId,
             Status = BookingStatus.Confirmed,
-            BookedAt = DateTime.UtcNow,
-            Member = member
+            BookedAt = DateTime.UtcNow
         };
         await bookingRepository.CreateAsync(booking, ct);
 
         await publisher.Publish(new BookingConfirmedEvent(booking.Id, request.MemberId, request.GymHouseId), ct);
 
-        return Result.Success(ToDto(booking, member));
+        return Result.Success(BookingMapper.ToDto(booking, member));
     }
-
 }

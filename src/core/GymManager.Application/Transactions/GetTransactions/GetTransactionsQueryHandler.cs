@@ -3,6 +3,7 @@ using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Application.Transactions.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Transactions.GetTransactions;
@@ -31,7 +32,7 @@ public sealed class GetTransactionsQueryHandler(
             ct);
 
         var dtos = new PagedList<TransactionDto>(
-            paged.Items.Select(TransactionDto.FromEntity).ToList(),
+            paged.Items.Adapt<List<TransactionDto>>(),
             paged.TotalCount,
             paged.Page,
             paged.PageSize);

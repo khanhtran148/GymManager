@@ -1,9 +1,9 @@
 using CSharpFunctionalExtensions;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
-using GymManager.Application.Subscriptions.CreateSubscription;
 using GymManager.Application.Subscriptions.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Subscriptions.GetSubscriptionsByMember;
@@ -24,6 +24,6 @@ public sealed class GetSubscriptionsByMemberQueryHandler(
 
         var subs = await subscriptionRepository.GetByMemberIdAsync(request.MemberId, ct);
 
-        return Result.Success(subs.Select(CreateSubscriptionCommandHandler.ToDto).ToList());
+        return Result.Success(subs.Adapt<List<SubscriptionDto>>());
     }
 }

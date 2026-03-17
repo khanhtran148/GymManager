@@ -1,9 +1,9 @@
 using CSharpFunctionalExtensions;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
-using GymManager.Application.Members.CreateMember;
 using GymManager.Application.Members.Shared;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Members.GetMemberById;
@@ -25,6 +25,6 @@ public sealed class GetMemberByIdQueryHandler(
         if (member is null)
             return Result.Failure<MemberDto>(new NotFoundError("Member", request.Id).ToString());
 
-        return Result.Success(CreateMemberCommandHandler.ToDto(member));
+        return Result.Success(member.Adapt<MemberDto>());
     }
 }

@@ -5,6 +5,7 @@ using GymManager.Application.Transactions.Shared;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
 using GymManager.Domain.Events;
+using Mapster;
 using MediatR;
 
 namespace GymManager.Application.Transactions.RecordTransaction;
@@ -44,6 +45,6 @@ public sealed class RecordTransactionCommandHandler(
             new TransactionRecordedEvent(transaction.Id, transaction.GymHouseId, transaction.TransactionType, transaction.Amount),
             ct);
 
-        return Result.Success(TransactionDto.FromEntity(transaction));
+        return Result.Success(transaction.Adapt<TransactionDto>());
     }
 }

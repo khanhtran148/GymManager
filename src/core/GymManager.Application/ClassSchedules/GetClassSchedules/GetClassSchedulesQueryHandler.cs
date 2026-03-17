@@ -3,8 +3,8 @@ using GymManager.Application.ClassSchedules.Shared;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Domain.Enums;
+using Mapster;
 using MediatR;
-using static GymManager.Application.ClassSchedules.Shared.ClassScheduleMapper;
 
 namespace GymManager.Application.ClassSchedules.GetClassSchedules;
 
@@ -24,6 +24,6 @@ public sealed class GetClassSchedulesQueryHandler(
         var schedules = await classScheduleRepository.GetByGymHouseIdAsync(
             request.GymHouseId, request.DayOfWeek, ct);
 
-        return Result.Success(schedules.Select(ToDto).ToList());
+        return Result.Success(schedules.Adapt<List<ClassScheduleDto>>());
     }
 }
