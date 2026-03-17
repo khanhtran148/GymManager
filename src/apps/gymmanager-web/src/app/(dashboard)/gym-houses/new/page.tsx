@@ -6,12 +6,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { useCreateGymHouse } from "@/hooks/use-gym-houses";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/ui/form-field";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
+import { Alert } from "@/components/ui/alert";
 
 const gymHouseSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -81,28 +82,11 @@ export default function NewGymHousePage() {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <div className="flex items-center gap-3">
-        <Link
-          href="/gym-houses"
-          className="text-gray-400 hover:text-gray-600 transition-colors"
-          aria-label="Back to gym houses"
-        >
-          <ChevronLeft className="w-5 h-5" aria-hidden="true" />
-        </Link>
-        <div>
-          <p className="text-sm text-gray-500">Gym Houses</p>
-          <h2 className="text-xl font-bold text-gray-900">Add New Gym House</h2>
-        </div>
-      </div>
+      <PageHeader backHref="/gym-houses" breadcrumb="Gym Houses" title="Add New Gym House" />
 
       <Card>
         {serverError && (
-          <div
-            role="alert"
-            className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
-          >
-            {serverError}
-          </div>
+          <Alert variant="error" className="mb-5">{serverError}</Alert>
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
@@ -174,12 +158,12 @@ export default function NewGymHousePage() {
             label="Operating Hours"
             htmlFor="operatingHours"
             error={errors.operatingHours?.message}
-            hint="Optional — e.g. Mon–Fri 6am–10pm"
+            hint="Optional — e.g. Mon-Fri 6am-10pm"
           >
             <Input
               id="operatingHours"
               type="text"
-              placeholder="Mon–Fri 6:00am–10:00pm, Sat–Sun 8:00am–8:00pm"
+              placeholder="Mon-Fri 6:00am-10:00pm, Sat-Sun 8:00am-8:00pm"
               error={!!errors.operatingHours}
               {...register("operatingHours")}
             />

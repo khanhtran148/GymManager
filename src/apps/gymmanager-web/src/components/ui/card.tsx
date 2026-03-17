@@ -3,6 +3,7 @@ import type { HTMLAttributes } from "react";
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   padding?: "none" | "sm" | "md" | "lg";
+  hover?: boolean;
 }
 
 const paddingClasses = {
@@ -12,11 +13,13 @@ const paddingClasses = {
   lg: "p-8",
 };
 
-export function Card({ className, padding = "md", children, ...props }: CardProps) {
+export function Card({ className, padding = "md", hover = false, children, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "bg-white rounded-xl shadow-sm border border-gray-100",
+        "bg-card rounded-2xl shadow-sm",
+        "border border-border",
+        hover && "card-hover cursor-pointer",
         paddingClasses[padding],
         className
       )}
@@ -37,7 +40,7 @@ export function CardHeader({ className, children, ...props }: HTMLAttributes<HTM
 
 export function CardTitle({ className, children, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={cn("text-lg font-semibold text-gray-900", className)} {...props}>
+    <h3 className={cn("text-base font-semibold text-text-primary", className)} {...props}>
       {children}
     </h3>
   );

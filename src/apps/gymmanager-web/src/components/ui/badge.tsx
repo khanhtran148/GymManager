@@ -9,24 +9,48 @@ interface BadgeProps {
   className?: string;
 }
 
-const statusStyles: Record<string, string> = {
-  Active: "bg-green-100 text-green-700 border-green-200",
-  Frozen: "bg-blue-100 text-blue-700 border-blue-200",
-  Expired: "bg-gray-100 text-gray-600 border-gray-200",
-  Cancelled: "bg-red-100 text-red-700 border-red-200",
+const statusStyles: Record<string, { bg: string; text: string; dot: string }> = {
+  Active: {
+    bg: "bg-badge-active-bg",
+    text: "text-badge-active-text",
+    dot: "bg-badge-active-dot",
+  },
+  Frozen: {
+    bg: "bg-badge-frozen-bg",
+    text: "text-badge-frozen-text",
+    dot: "bg-badge-frozen-dot",
+  },
+  Expired: {
+    bg: "bg-badge-expired-bg",
+    text: "text-badge-expired-text",
+    dot: "bg-badge-expired-dot",
+  },
+  Cancelled: {
+    bg: "bg-badge-cancelled-bg",
+    text: "text-badge-cancelled-text",
+    dot: "bg-badge-cancelled-dot",
+  },
+};
+
+const defaultStyle = {
+  bg: "bg-badge-expired-bg",
+  text: "text-badge-expired-text",
+  dot: "bg-badge-expired-dot",
 };
 
 export function Badge({ status, className }: BadgeProps) {
-  const styles = statusStyles[status] ?? "bg-gray-100 text-gray-600 border-gray-200";
+  const styles = statusStyles[status] ?? defaultStyle;
 
   return (
     <span
       className={cn(
-        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
-        styles,
+        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold",
+        styles.bg,
+        styles.text,
         className
       )}
     >
+      <span className={cn("w-1.5 h-1.5 rounded-full", styles.dot)} aria-hidden="true" />
       {status}
     </span>
   );

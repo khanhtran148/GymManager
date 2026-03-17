@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { useCreateMember } from "@/hooks/use-members";
 import { useGymHouses } from "@/hooks/use-gym-houses";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { FormField } from "@/components/ui/form-field";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
+import { Alert } from "@/components/ui/alert";
 
 const memberSchema = z.object({
   userId: z.string().uuid("Must be a valid UUID"),
@@ -82,28 +83,11 @@ export default function NewMemberPage() {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <div className="flex items-center gap-3">
-        <Link
-          href="/members"
-          className="text-gray-400 hover:text-gray-600 transition-colors"
-          aria-label="Back to members"
-        >
-          <ChevronLeft className="w-5 h-5" aria-hidden="true" />
-        </Link>
-        <div>
-          <p className="text-sm text-gray-500">Members</p>
-          <h2 className="text-xl font-bold text-gray-900">Add New Member</h2>
-        </div>
-      </div>
+      <PageHeader backHref="/members" breadcrumb="Members" title="Add New Member" />
 
       <Card>
         {serverError && (
-          <div
-            role="alert"
-            className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
-          >
-            {serverError}
-          </div>
+          <Alert variant="error" className="mb-5">{serverError}</Alert>
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">

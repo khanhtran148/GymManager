@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Plus, User, Mail, Phone, Calendar, Building2 } from "lucide-react";
+import { Plus, Mail, Phone, Calendar, Building2, Hash } from "lucide-react";
 import { useMember } from "@/hooks/use-members";
 import { useSubscriptions } from "@/hooks/use-subscriptions";
 import { useGymHouses } from "@/hooks/use-gym-houses";
@@ -10,6 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SubscriptionCard } from "@/components/subscription-card";
+import { PageHeader } from "@/components/ui/page-header";
+import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function MemberDetailPage() {
   const params = useParams<{ id: string }>();
@@ -22,106 +25,105 @@ export default function MemberDetailPage() {
 
   if (memberLoading) {
     return (
-      <div className="flex items-center justify-center py-12 text-gray-400">
-        <svg
-          className="h-6 w-6 animate-spin mr-2"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-        <span>Loading member...</span>
+      <div className="flex items-center justify-center py-16">
+        <Spinner label="Loading member..." />
       </div>
     );
   }
 
   if (memberError || !member) {
     return (
-      <div role="alert" className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+      <Alert variant="error">
         Member not found or failed to load.{" "}
-        <Link href="/members" className="underline">Back to members</Link>
-      </div>
+        <Link href="/members" className="underline font-medium">Back to members</Link>
+      </Alert>
     );
   }
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="flex items-center gap-3">
-        <Link
-          href="/members"
-          className="text-gray-400 hover:text-gray-600 transition-colors"
-          aria-label="Back to members"
-        >
-          <ChevronLeft className="w-5 h-5" aria-hidden="true" />
-        </Link>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-500">Members</p>
-          <h2 className="text-xl font-bold text-gray-900 truncate">{member.fullName}</h2>
-        </div>
-        <Link href={`/members/${member.id}/subscriptions/new`}>
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4" aria-hidden="true" />
-            Add Subscription
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        backHref="/members"
+        breadcrumb="Members"
+        title={member.fullName}
+        actions={
+          <Link href={`/members/${member.id}/subscriptions/new`}>
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              Add Subscription
+            </Button>
+          </Link>
+        }
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Member info */}
         <Card className="lg:col-span-1">
           <div className="flex items-center gap-4 mb-5">
-            <div className="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
-              <span className="text-indigo-700 font-bold text-xl">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shrink-0 shadow-lg shadow-primary-500/20">
+              <span className="text-white font-bold text-lg">
                 {member.fullName.slice(0, 2).toUpperCase()}
               </span>
             </div>
             <div className="min-w-0">
-              <h3 className="font-semibold text-gray-900 truncate">{member.fullName}</h3>
-              <div className="mt-1">
+              <h3 className="font-semibold text-text-primary truncate">{member.fullName}</h3>
+              <div className="mt-1.5">
                 <Badge status={member.status} />
               </div>
             </div>
           </div>
 
-          <dl className="space-y-3">
+          <dl className="space-y-3.5">
             <div className="flex items-start gap-3">
-              <Mail className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" aria-hidden="true" />
-              <div>
+              <div className="w-8 h-8 rounded-lg bg-card-inset flex items-center justify-center shrink-0">
+                <Mail className="w-3.5 h-3.5 text-surface-400" aria-hidden="true" />
+              </div>
+              <div className="min-w-0 pt-1">
                 <dt className="sr-only">Email</dt>
-                <dd className="text-sm text-gray-700 break-all">{member.email}</dd>
+                <dd className="text-sm text-text-secondary break-all">{member.email}</dd>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <Phone className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" aria-hidden="true" />
-              <div>
+              <div className="w-8 h-8 rounded-lg bg-card-inset flex items-center justify-center shrink-0">
+                <Phone className="w-3.5 h-3.5 text-surface-400" aria-hidden="true" />
+              </div>
+              <div className="pt-1">
                 <dt className="sr-only">Phone</dt>
-                <dd className="text-sm text-gray-700">{member.phone ?? "—"}</dd>
+                <dd className="text-sm text-text-secondary">{member.phone ?? "—"}</dd>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <Building2 className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" aria-hidden="true" />
-              <div>
-                <dt className="text-xs text-gray-400">Gym House</dt>
-                <dd className="text-sm text-gray-700">{gymHouse?.name ?? "—"}</dd>
+              <div className="w-8 h-8 rounded-lg bg-card-inset flex items-center justify-center shrink-0">
+                <Building2 className="w-3.5 h-3.5 text-surface-400" aria-hidden="true" />
+              </div>
+              <div className="pt-1">
+                <dt className="text-[10px] font-medium text-text-muted uppercase tracking-wider">Gym House</dt>
+                <dd className="text-sm text-text-secondary">{gymHouse?.name ?? "—"}</dd>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <Calendar className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" aria-hidden="true" />
-              <div>
-                <dt className="text-xs text-gray-400">Joined</dt>
-                <dd className="text-sm text-gray-700">
+              <div className="w-8 h-8 rounded-lg bg-card-inset flex items-center justify-center shrink-0">
+                <Calendar className="w-3.5 h-3.5 text-surface-400" aria-hidden="true" />
+              </div>
+              <div className="pt-1">
+                <dt className="text-[10px] font-medium text-text-muted uppercase tracking-wider">Joined</dt>
+                <dd className="text-sm text-text-secondary">
                   {new Date(member.joinedAt).toLocaleDateString()}
                 </dd>
               </div>
             </div>
-            <div className="pt-2 border-t border-gray-50">
-              <dt className="text-xs text-gray-400 mb-1">Member Code</dt>
-              <dd className="font-mono text-sm text-gray-700 bg-gray-50 px-2 py-1 rounded">
-                {member.memberCode}
-              </dd>
+            <div className="pt-3 border-t border-border-muted">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-card-inset flex items-center justify-center shrink-0">
+                  <Hash className="w-3.5 h-3.5 text-surface-400" aria-hidden="true" />
+                </div>
+                <div className="pt-1">
+                  <dt className="text-[10px] font-medium text-text-muted uppercase tracking-wider">Member Code</dt>
+                  <dd className="font-mono text-sm text-text-secondary bg-card-inset px-2.5 py-1 rounded-lg mt-1 inline-block">
+                    {member.memberCode}
+                  </dd>
+                </div>
+              </div>
             </div>
           </dl>
         </Card>
@@ -129,36 +131,26 @@ export default function MemberDetailPage() {
         {/* Subscriptions */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900">Subscriptions</h3>
-            <span className="text-sm text-gray-500">
+            <h3 className="font-semibold text-text-primary">Subscriptions</h3>
+            <span className="text-sm text-text-muted tabular-nums">
               {subsLoading ? "..." : `${subscriptions?.length ?? 0} total`}
             </span>
           </div>
 
           {subsLoading ? (
-            <div className="flex items-center justify-center py-8 text-gray-400">
-              <svg
-                className="h-5 w-5 animate-spin mr-2"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              <span className="text-sm">Loading subscriptions...</span>
+            <div className="flex items-center justify-center py-12">
+              <Spinner label="Loading subscriptions..." />
             </div>
           ) : subscriptions?.length === 0 ? (
-            <div className="text-center py-10 text-gray-400 bg-white rounded-xl border border-gray-100">
-              <p className="text-sm">No subscriptions yet.</p>
+            <Card className="text-center py-12">
+              <p className="text-sm text-text-muted mb-3">No subscriptions yet.</p>
               <Link href={`/members/${member.id}/subscriptions/new`}>
-                <Button variant="primary" size="sm" className="mt-3">
+                <Button variant="primary" size="sm">
                   <Plus className="w-4 h-4" aria-hidden="true" />
                   Add First Subscription
                 </Button>
               </Link>
-            </div>
+            </Card>
           ) : (
             <div className="space-y-3">
               {subscriptions?.map((sub) => (

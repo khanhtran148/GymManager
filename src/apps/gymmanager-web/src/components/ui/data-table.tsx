@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
+import { Spinner } from "./spinner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Column<T> {
@@ -46,16 +47,16 @@ export function DataTable<T>({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <div className="overflow-x-auto rounded-xl border border-gray-100 shadow-sm">
-        <table className="min-w-full divide-y divide-gray-100">
-          <thead className="bg-gray-50">
-            <tr>
+      <div className="overflow-x-auto rounded-2xl border border-border shadow-sm bg-card">
+        <table className="min-w-full divide-y divide-border-muted">
+          <thead>
+            <tr className="bg-table-header">
               {columns.map((col) => (
                 <th
                   key={col.key}
                   scope="col"
                   className={cn(
-                    "px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider",
+                    "px-4 py-3.5 text-left text-xs font-semibold text-text-muted uppercase tracking-wider",
                     col.className
                   )}
                 >
@@ -64,41 +65,18 @@ export function DataTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-50">
+          <tbody className="divide-y divide-table-divider">
             {isLoading ? (
               <tr>
-                <td colSpan={columns.length} className="py-12 text-center">
-                  <div className="flex items-center justify-center gap-2 text-gray-400">
-                    <svg
-                      className="h-5 w-5 animate-spin"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      />
-                    </svg>
-                    <span className="text-sm">Loading...</span>
-                  </div>
+                <td colSpan={columns.length} className="py-16 text-center">
+                  <Spinner label="Loading..." />
                 </td>
               </tr>
             ) : data.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="py-12 text-center text-sm text-gray-400"
+                  className="py-16 text-center text-sm text-text-muted"
                 >
                   {emptyMessage}
                 </td>
@@ -107,13 +85,13 @@ export function DataTable<T>({
               data.map((item, rowIndex) => (
                 <tr
                   key={rowIndex}
-                  className="hover:bg-gray-50/50 transition-colors"
+                  className="hover:bg-table-row-hover transition-colors"
                 >
                   {columns.map((col) => (
                     <td
                       key={col.key}
                       className={cn(
-                        "px-4 py-3 text-sm text-gray-700 whitespace-nowrap",
+                        "px-4 py-3.5 text-sm text-text-secondary whitespace-nowrap",
                         col.className
                       )}
                     >
@@ -129,15 +107,14 @@ export function DataTable<T>({
 
       {pagination && pagination.totalCount > 0 && (
         <div className="flex items-center justify-between px-1">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-secondary">
             Showing{" "}
-            <span className="font-medium text-gray-700">{startItem}</span>
-            {" – "}
-            <span className="font-medium text-gray-700">{endItem}</span> of{" "}
-            <span className="font-medium text-gray-700">
+            <span className="font-semibold text-text-secondary">{startItem}</span>
+            {" - "}
+            <span className="font-semibold text-text-secondary">{endItem}</span> of{" "}
+            <span className="font-semibold text-text-secondary">
               {pagination.totalCount}
-            </span>{" "}
-            results
+            </span>
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -150,8 +127,8 @@ export function DataTable<T>({
               <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               Prev
             </Button>
-            <span className="text-sm text-gray-600 px-2">
-              Page {pagination.page} of {totalPages}
+            <span className="text-sm text-text-secondary px-2 tabular-nums">
+              {pagination.page} / {totalPages}
             </span>
             <Button
               variant="secondary"

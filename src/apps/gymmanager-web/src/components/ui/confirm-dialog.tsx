@@ -58,8 +58,10 @@ export function ConfirmDialog({
     <dialog
       ref={dialogRef}
       className={cn(
-        "fixed inset-0 z-50 m-auto w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl",
-        "backdrop:bg-black/50 backdrop:backdrop-blur-sm",
+        "fixed inset-0 z-50 m-auto w-full max-w-md rounded-2xl p-6 shadow-2xl",
+        "bg-card",
+        "border border-border",
+        "backdrop:bg-black/60 backdrop:backdrop-blur-sm",
         "open:flex open:flex-col open:gap-4"
       )}
       aria-modal="true"
@@ -71,20 +73,20 @@ export function ConfirmDialog({
     >
       <div className="flex items-start gap-4">
         {variant === "danger" && (
-          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-            <AlertTriangle className="w-5 h-5 text-red-600" aria-hidden="true" />
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-danger-bg flex items-center justify-center">
+            <AlertTriangle className="w-5 h-5 text-red-500" aria-hidden="true" />
           </div>
         )}
         <div className="flex-1 min-w-0">
           <h2
             id="dialog-title"
-            className="text-base font-semibold text-gray-900"
+            className="text-base font-semibold text-text-primary"
           >
             {title}
           </h2>
           <p
             id="dialog-description"
-            className="mt-1 text-sm text-gray-500"
+            className="mt-1.5 text-sm text-text-muted leading-relaxed"
           >
             {description}
           </p>
@@ -92,10 +94,10 @@ export function ConfirmDialog({
         <button
           type="button"
           onClick={onCancel}
-          className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+          className="flex-shrink-0 p-1 rounded-lg text-text-muted hover:text-text-secondary hover:bg-hover transition-all"
           aria-label="Close dialog"
         >
-          <X className="w-5 h-5" aria-hidden="true" />
+          <X className="w-4 h-4" aria-hidden="true" />
         </button>
       </div>
 
