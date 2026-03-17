@@ -13,6 +13,10 @@ import {
   Dumbbell,
   Crown,
   Zap,
+  CalendarCheck,
+  GraduationCap,
+  Clock,
+  ScanLine,
 } from "lucide-react";
 
 interface NavItem {
@@ -25,6 +29,10 @@ const navItems: NavItem[] = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Gym Houses", href: "/gym-houses", icon: Building2 },
   { label: "Members", href: "/members", icon: Users },
+  { label: "Bookings", href: "/bookings", icon: CalendarCheck },
+  { label: "Class Schedules", href: "/class-schedules", icon: GraduationCap },
+  { label: "Time Slots", href: "/time-slots", icon: Clock },
+  { label: "Check-in", href: "/check-in", icon: ScanLine },
 ];
 
 export function Sidebar() {
@@ -150,7 +158,7 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-sidebar-border-color">
-          <p className="text-[10px] text-text-muted font-medium">Phase 1 — Foundation v1.0</p>
+          <p className="text-[10px] text-text-muted font-medium">Phase 2 — Booking v2.0</p>
         </div>
       </aside>
     </>
