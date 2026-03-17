@@ -28,7 +28,7 @@ public sealed class AnnouncementSignalRConsumer(
         }
 
         // Resolve recipient users by audience + house
-        var recipients = await ResolveRecipientsAsync(evt, ct);
+        var recipients = await RecipientResolver.ResolveAsync(userRepository, evt, ct);
         if (recipients.Count == 0)
         {
             logger.LogDebug("AnnouncementSignalRConsumer: no recipients for announcement {Id}", evt.AnnouncementId);
@@ -63,28 +63,23 @@ public sealed class AnnouncementSignalRConsumer(
             await deliveryRepository.CreateBatchAsync(deliveries, ct);
         }
 
-        // Send SignalR notification to tenant group
-        var groupName = evt.GymHouseId.HasValue
-            ? $"tenant:{evt.GymHouseId}"
-            : "tenant:all";
-
-        var payload = new
-        {
-            announcementId = evt.AnnouncementId,
-            title = announcement.Title,
-            content = announcement.Content,
-            channel = NotificationChannel.InApp.ToString()
-        };
-
+        // Send SignalR notification
         if (evt.GymHouseId.HasValue)
         {
+            var payload = new
+            {
+                announcementId = evt.AnnouncementId,
+                title = announcement.Title,
+                content = announcement.Content,
+                channel = NotificationChannel.InApp.ToString()
+            };
+
             await notificationHub.SendToGroupAsync(
                 $"tenant:{evt.GymHouseId}", "ReceiveNotification", payload, ct);
         }
         else
         {
-            // Chain-wide: send delivery records per recipient; SignalR broadcast is not feasible
-            // without enumerating all tenant groups. Log and let individual user groups receive.
+            // Chain-wide: per-user delivery via individual user groups.
             logger.LogInformation(
                 "AnnouncementSignalRConsumer: chain-wide announcement {Id}; SignalR per-user delivery created",
                 evt.AnnouncementId);
@@ -109,22 +104,5 @@ public sealed class AnnouncementSignalRConsumer(
             "AnnouncementSignalRConsumer: created {Count} InApp deliveries for announcement {Id}",
             deliveries.Count,
             evt.AnnouncementId);
-    }
-
-    private async Task<List<GymManager.Domain.Entities.User>> ResolveRecipientsAsync(
-        AnnouncementPublishedEvent evt, CancellationToken ct)
-    {
-        // Simplified: return users filtered by role matching the audience.
-        // Full implementation would query Members/Staff tables by house + audience.
-        return evt.Audience switch
-        {
-            TargetAudience.Everyone or TargetAudience.AllMembers or TargetAudience.ActiveMembers =>
-                await userRepository.GetByRoleAndHouseAsync(Role.Member, evt.GymHouseId, ct),
-            TargetAudience.Staff =>
-                await userRepository.GetByRoleAndHouseAsync(Role.Staff, evt.GymHouseId, ct),
-            TargetAudience.Trainers =>
-                await userRepository.GetByRoleAndHouseAsync(Role.Trainer, evt.GymHouseId, ct),
-            _ => []
-        };
     }
 }

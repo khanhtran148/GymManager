@@ -25,19 +25,15 @@ public sealed class CreateAnnouncementCommandHandler(
         if (!canManage)
             return Result.Failure<AnnouncementDto>(new ForbiddenError().ToString());
 
-        // 2. Chain-wide announcements require Owner role
-        if (request.GymHouseId is null)
-        {
-            var author = await userRepository.GetByIdAsync(request.AuthorId, ct);
-            if (author is null || author.Role != Role.Owner)
-                return Result.Failure<AnnouncementDto>(
-                    new ForbiddenError("Only Owners can create chain-wide announcements.").ToString());
-        }
-
-        // 3. Resolve author name
+        // 2. Resolve author
         var authorUser = await userRepository.GetByIdAsync(request.AuthorId, ct);
         if (authorUser is null)
             return Result.Failure<AnnouncementDto>(new NotFoundError("User", request.AuthorId).ToString());
+
+        // 3. Chain-wide announcements require Owner role
+        if (request.GymHouseId is null && authorUser.Role != Role.Owner)
+            return Result.Failure<AnnouncementDto>(
+                new ForbiddenError("Only Owners can create chain-wide announcements.").ToString());
 
         // 4. Create entity
         var announcement = new Announcement

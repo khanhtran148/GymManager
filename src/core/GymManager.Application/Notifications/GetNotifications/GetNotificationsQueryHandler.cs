@@ -7,12 +7,16 @@ using MediatR;
 namespace GymManager.Application.Notifications.GetNotifications;
 
 public sealed class GetNotificationsQueryHandler(
-    INotificationDeliveryRepository deliveryRepository)
+    INotificationDeliveryRepository deliveryRepository,
+    ICurrentUser currentUser)
     : IRequestHandler<GetNotificationsQuery, Result<PagedList<NotificationDto>>>
 {
     public async Task<Result<PagedList<NotificationDto>>> Handle(
         GetNotificationsQuery request, CancellationToken ct)
     {
+        if (request.RecipientId != currentUser.UserId)
+            return Result.Failure<PagedList<NotificationDto>>(new ForbiddenError().ToString());
+
         var paged = await deliveryRepository.GetByRecipientAsync(
             request.RecipientId, request.Page, request.PageSize, ct);
 

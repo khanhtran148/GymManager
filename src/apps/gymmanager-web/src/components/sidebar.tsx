@@ -24,6 +24,7 @@ import {
   UserCog,
   CalendarDays,
   Banknote,
+  Megaphone,
 } from "lucide-react";
 
 type IconComponent = React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" | "false" }>;
@@ -75,6 +76,7 @@ const navEntries: NavEntry[] = [
       { label: "Payroll", href: "/payroll", icon: Banknote },
     ],
   },
+  { label: "Announcements", href: "/announcements", icon: Megaphone },
 ];
 
 export function Sidebar() {
@@ -260,7 +262,7 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-sidebar-border-color">
-          <p className="text-[10px] text-text-muted font-medium">Phase 4 — Staff/HR v4.0</p>
+          <p className="text-[10px] text-text-muted font-medium">Phase 5 — Communications v5.0</p>
         </div>
       </aside>
     </>

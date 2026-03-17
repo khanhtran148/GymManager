@@ -54,4 +54,18 @@ public sealed class AnnouncementRepository(GymManagerDbContext db) : IAnnounceme
 
         await db.SaveChangesAsync(ct);
     }
+
+    public async Task UpdateBatchAsync(IReadOnlyList<Announcement> announcements, CancellationToken ct = default)
+    {
+        foreach (var announcement in announcements)
+        {
+            var tracked = await db.Announcements.FindAsync([announcement.Id], ct);
+            if (tracked is not null)
+                db.Entry(tracked).CurrentValues.SetValues(announcement);
+            else
+                db.Announcements.Update(announcement);
+        }
+
+        await db.SaveChangesAsync(ct);
+    }
 }

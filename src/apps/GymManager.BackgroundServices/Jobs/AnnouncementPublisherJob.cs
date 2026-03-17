@@ -31,11 +31,16 @@ public sealed class AnnouncementPublisherJob(
         logger.LogInformation(
             "AnnouncementPublisherJob: publishing {Count} due announcement(s)", dueAnnouncements.Count);
 
+        var publishedAt = DateTime.UtcNow;
         foreach (var announcement in dueAnnouncements)
         {
-            announcement.Publish(DateTime.UtcNow);
-            await announcementRepo.UpdateAsync(announcement, ct);
+            announcement.Publish(publishedAt);
+        }
 
+        await announcementRepo.UpdateBatchAsync(dueAnnouncements, ct);
+
+        foreach (var announcement in dueAnnouncements)
+        {
             await publishEndpoint.Publish(
                 new AnnouncementPublishedEvent(
                     announcement.Id,

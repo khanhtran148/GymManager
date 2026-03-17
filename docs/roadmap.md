@@ -1,7 +1,7 @@
 # GymManager — Product Roadmap
 
 **Last updated:** 2026-03-17
-**Current version:** 0.2.0
+**Current version:** 0.5.0
 
 ---
 
@@ -13,9 +13,9 @@ Six sequential phases, each independently deployable. Run `dotnet test` after ea
 |-------|-------|--------|----------|----------|---------------|-----------|
 | 1 | Foundation | COMPLETE | User, GymHouse, Member, Subscription | 16 | 14 | 12 |
 | 2 | Booking | COMPLETE | TimeSlot, ClassSchedule, Booking, Waitlist | 14 | 11 | 5 |
-| 3 | Finance | PLANNED | Transaction | 6 | 5 | 4 |
-| 4 | Staff/HR | PLANNED | Staff, ShiftAssignment, PayrollPeriod, PayrollEntry | 11 | 9 | 5 |
-| 5 | Communications | PLANNED | Announcement, NotificationDelivery, NotificationPreference | 8 | 7 | 4 |
+| 3 | Finance | COMPLETE | Transaction | 6 | 5 | 4 |
+| 4 | Staff/HR | COMPLETE | Staff, ShiftAssignment, PayrollPeriod, PayrollEntry | 11 | 9 | 5 |
+| 5 | Communications | COMPLETE | Announcement, NotificationDelivery, NotificationPreference | 8 | 7 | 4 |
 | 6 | Hardening | PLANNED | — | 1 | — | — |
 | **Total** | | | **16 entities** | **56 handlers** | **46 endpoints** | **30 pages** |
 
@@ -60,11 +60,11 @@ Members can book gym slots and class sessions, get waitlisted when full, and che
 
 ---
 
-## Phase 3: Finance — PLANNED
+## Phase 3: Finance — COMPLETE
 
-**Target:** TBD
+**Delivered:** 2026-03-17
 
-Deliver the transaction ledger, revenue dashboards, P&L reports, and automatic fee recording on subscription events.
+Delivered the transaction ledger, revenue dashboards, P&L reports, and automatic fee recording on subscription events.
 
 ### Scope
 
@@ -85,12 +85,12 @@ Deliver the transaction ledger, revenue dashboards, P&L reports, and automatic f
 
 ---
 
-## Phase 4: Staff/HR — PLANNED
+## Phase 4: Staff/HR — COMPLETE
 
-**Target:** TBD
+**Delivered:** 2026-03-17
 **Depends on:** Phase 1, Phase 3
 
-Deliver staff management per gym house, shift scheduling, and payroll with approval workflow.
+Delivered staff management per gym house, shift scheduling, and payroll with approval workflow.
 
 ### Scope
 
@@ -106,23 +106,33 @@ Deliver staff management per gym house, shift scheduling, and payroll with appro
 
 ---
 
-## Phase 5: Communications — PLANNED
+## Phase 5: Communications — COMPLETE
 
-**Target:** TBD
+**Delivered:** 2026-03-17
 **Depends on:** Phase 1
 
-Deliver scheduled announcements, real-time SignalR notifications, Firebase push, and per-user notification preferences.
+Delivered scheduled announcements, real-time SignalR notifications, Firebase push, and per-user notification preferences.
 
-### Scope
+### Delivered
 
-- `Announcement` entity: title, content, target audience, scheduled publish time; chain-wide (null `GymHouseId`) requires Owner role
-- `NotificationDelivery` entity: per-recipient delivery record with channel and read receipt
-- `NotificationPreference` entity: per-user channel toggles (InApp, Push, Email)
-- Quartz job `AnnouncementPublisherJob`: runs every 30 seconds, sets `IsPublished` on due announcements
-- `AnnouncementSignalRConsumer`: pushes to connected clients in tenant SignalR group
-- `AnnouncementFcmConsumer`: sends Firebase push notifications, respects user preferences
-- Web: announcement composer with rich text and audience selector, notification bell with unread count, preferences page
-- API: `AnnouncementsController`, `NotificationsController`
+- `Announcement`, `NotificationDelivery`, `NotificationPreference` entities with EF configurations
+- 3 new enums: `TargetAudience`, `NotificationChannel`, `DeliveryStatus`
+- `AnnouncementPublishedEvent` domain event (immutable contract)
+- 7 CQRS handlers: CreateAnnouncement, GetAnnouncements, GetAnnouncementById, GetNotifications, MarkNotificationRead, UpdateNotificationPreferences, GetNotificationPreferences
+- Quartz job `AnnouncementPublisherJob` (30-second polling interval)
+- MassTransit consumers: `AnnouncementSignalRConsumer`, `AnnouncementFcmConsumer`
+- 7 API endpoints across `AnnouncementsController`, `NotificationsController`, `NotificationPreferencesController`
+- Web pages: `/announcements`, `/announcements/new`, `/notifications`, `/settings/notifications`
+- `NotificationBell` component with real-time Zustand store and SignalR subscription
+- `NotificationFeed` component with read receipts
+- SignalR connection factory with exponential backoff reconnect
+- 176 .NET tests passing, 17 Vitest tests passing
+
+### Known Deferred Tasks
+
+- `dotnet ef migrations add AddCommunicationEntities` — requires running PostgreSQL at deploy time
+- Firebase Admin SDK credentials — `FirebaseMessagingService` is a no-op stub until credentials are provisioned
+- FCM device token storage — `DeviceToken` entity not yet created; `AnnouncementFcmConsumer.GetDeviceToken()` returns null
 
 ---
 

@@ -76,6 +76,7 @@ public sealed class MarkNotificationReadCommandHandlerTests : ApplicationTestBas
         var deliveryId = await CreateNotificationDeliveryAsync(userId, gymHouseId);
 
         var otherUserId = Guid.NewGuid();
+        CurrentUser.UserId = otherUserId;
         var command = new MarkNotificationReadCommand(deliveryId, otherUserId);
         var result = await Sender.Send(command);
 

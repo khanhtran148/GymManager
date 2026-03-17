@@ -10,4 +10,5 @@ public interface IAnnouncementRepository
     Task<List<Announcement>> GetDueForPublishingAsync(DateTime asOf, CancellationToken ct = default);
     Task CreateAsync(Announcement announcement, CancellationToken ct = default);
     Task UpdateAsync(Announcement announcement, CancellationToken ct = default);
+    Task UpdateBatchAsync(IReadOnlyList<Announcement> announcements, CancellationToken ct = default);
 }

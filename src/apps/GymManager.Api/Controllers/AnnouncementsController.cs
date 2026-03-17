@@ -16,6 +16,7 @@ public sealed class AnnouncementsController(ISender sender, ICurrentUser current
     : ApiControllerBase(sender)
 {
     [HttpPost]
+    [EnableRateLimiting(RateLimitPolicies.Strict)]
     [ProducesResponseType(typeof(GymManager.Application.Announcements.Shared.AnnouncementDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]

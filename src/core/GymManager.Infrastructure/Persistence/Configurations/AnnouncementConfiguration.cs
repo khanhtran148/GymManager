@@ -32,6 +32,9 @@ public sealed class AnnouncementConfiguration : IEntityTypeConfiguration<Announc
         // Chain-wide: GymHouseId is NULL — no FK to GymHouse for null case
         builder.HasIndex(a => new { a.GymHouseId, a.PublishAt });
 
+        // Index for Quartz publisher job: filters on IsPublished + PublishAt
+        builder.HasIndex(a => new { a.IsPublished, a.PublishAt });
+
         builder.HasQueryFilter(a => a.DeletedAt == null);
     }
 }

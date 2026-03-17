@@ -1100,7 +1100,7 @@ Add Staff, Shifts, Payroll nav items.
 
 ---
 
-## Phase 5: Communications
+## Phase 5: Communications — Status: completed
 
 ### Objective
 
@@ -1299,14 +1299,14 @@ Add Announcements nav item.
 
 ### 5.7 Acceptance Criteria
 
-- [ ] Announcement created with scheduled publish time
-- [ ] Quartz job publishes due announcements every 30s
-- [ ] SignalR pushes notification to connected web clients in tenant group
-- [ ] FCM sends push to mobile devices of targeted recipients
-- [ ] Per-user notification preferences respected (disabled channels skipped)
-- [ ] Read receipts tracked (ReadAt set on mark-read)
-- [ ] Chain-wide announcements require Owner permission
-- [ ] Web: announcement composer, notification bell with real-time updates, preferences page
+- [x] Announcement created with scheduled publish time
+- [x] Quartz job publishes due announcements every 30s
+- [x] SignalR pushes notification to connected web clients in tenant group
+- [x] FCM sends push to mobile devices of targeted recipients
+- [x] Per-user notification preferences respected (disabled channels skipped)
+- [x] Read receipts tracked (ReadAt set on mark-read)
+- [x] Chain-wide announcements require Owner permission
+- [x] Web: announcement composer, notification bell with real-time updates, preferences page
 
 ---
 

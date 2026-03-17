@@ -6,7 +6,8 @@ using MediatR;
 namespace GymManager.Application.Notifications.MarkNotificationRead;
 
 public sealed class MarkNotificationReadCommandHandler(
-    INotificationDeliveryRepository deliveryRepository)
+    INotificationDeliveryRepository deliveryRepository,
+    ICurrentUser currentUser)
     : IRequestHandler<MarkNotificationReadCommand, Result>
 {
     public async Task<Result> Handle(
@@ -16,7 +17,7 @@ public sealed class MarkNotificationReadCommandHandler(
         if (delivery is null)
             return Result.Failure(new NotFoundError("NotificationDelivery", request.NotificationId).ToString());
 
-        if (delivery.RecipientId != request.CurrentUserId)
+        if (delivery.RecipientId != currentUser.UserId)
             return Result.Failure(new ForbiddenError().ToString());
 
         delivery.MarkRead(DateTime.UtcNow);

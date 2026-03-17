@@ -2,7 +2,7 @@
 type: api-reference
 updated: 2026-03-17
 version: v1
-phases-covered: Phase 1 (Foundation), Phase 2 (Booking)
+phases-covered: Phase 1 (Foundation), Phase 2 (Booking), Phase 3 (Finance), Phase 4 (Staff/HR), Phase 5 (Communications)
 ---
 
 # API Reference
@@ -675,11 +675,121 @@ Update a class schedule. `trainerId` cannot be changed via this endpoint.
 
 ---
 
+---
+
+## Announcements
+
+### POST /api/v1/announcements
+
+Creates a new announcement, optionally scheduled for future publishing.
+
+**Permissions required:** `ManageAnnouncements`. Chain-wide announcements (`gymHouseId: null`) additionally require `Owner` role.
+
+**Request body:**
+```json
+{
+  "gymHouseId": "uuid | null",
+  "title": "string",
+  "content": "string",
+  "targetAudience": "AllMembers | ActiveMembers | Staff | Trainers | Everyone",
+  "publishAt": "2026-03-20T09:00:00Z"
+}
+```
+
+**Responses:** 201 `AnnouncementDto`, 400, 403, 422
+
+---
+
+### GET /api/v1/announcements
+
+Returns paginated announcements, optionally filtered by gym house.
+
+**Query params:** `gymHouseId` (optional), `page`, `pageSize`
+
+**Responses:** 200 `{ items: AnnouncementDto[], totalCount, page, pageSize }`
+
+---
+
+### GET /api/v1/announcements/{id}
+
+**Responses:** 200 `AnnouncementDto`, 404
+
+---
+
+## Notifications
+
+### GET /api/v1/notifications
+
+Returns paginated notification deliveries for the authenticated user.
+
+**Query params:** `page`, `pageSize`
+
+**Responses:** 200 `{ items: NotificationDto[], totalCount, page, pageSize }`
+
+---
+
+### PATCH /api/v1/notifications/{id}/read
+
+Marks a notification as read. Sets `status = Read` and `readAt = utcNow`.
+
+**Permissions:** Must own the notification (recipient check enforced in handler).
+
+**Responses:** 204, 403, 404
+
+---
+
+## Notification Preferences
+
+### GET /api/v1/notification-preferences
+
+Returns the authenticated user's notification channel preferences. Created with defaults on first access.
+
+**Responses:** 200 `NotificationPreferenceDto`
+
+---
+
+### PUT /api/v1/notification-preferences
+
+Updates channel toggle settings.
+
+**Request body:**
+```json
+{
+  "inAppEnabled": true,
+  "pushEnabled": true,
+  "emailEnabled": false
+}
+```
+
+**Responses:** 200 `NotificationPreferenceDto`, 422
+
+---
+
 ## SignalR
 
 **Endpoint:** `wss://{host}/hubs/notifications`
 **Auth:** Bearer token required (sent during WebSocket handshake).
 
-On connect, the client is added to the group `tenant:{gymHouseId}`. Messages published to that group reach all connected clients for the same gym house.
+On connect, the client is added to two groups:
+- `tenant:{gymHouseId}` — broadcast to all clients in the same gym house
+- `user:{userId}` — targeted delivery to a single user (used by notification fan-out)
+
+### Server → Client method: `ReceiveNotification`
+
+Payload:
+```json
+{
+  "id": "uuid",
+  "announcementId": "uuid",
+  "title": "string",
+  "content": "string",
+  "channel": "InApp",
+  "status": "Sent",
+  "createdAt": "2026-03-17T18:00:00Z",
+  "readAt": null
+}
+```
+
+The web client stores incoming messages in the Zustand `notification-store` and increments the unread badge in `NotificationBell`.
 
 Used in Phase 5 (Communications) for real-time announcement delivery. REST endpoints provide full fallback — SignalR is a UX enhancement only.

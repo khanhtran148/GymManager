@@ -26,7 +26,7 @@ public sealed class AnnouncementFcmConsumer(
             return;
         }
 
-        var recipients = await ResolveRecipientsAsync(evt, ct);
+        var recipients = await RecipientResolver.ResolveAsync(userRepository, evt, ct);
         if (recipients.Count == 0)
         {
             logger.LogDebug("AnnouncementFcmConsumer: no recipients for announcement {Id}", evt.AnnouncementId);
@@ -87,19 +87,4 @@ public sealed class AnnouncementFcmConsumer(
 
     // Placeholder for device token lookup — replace with real storage lookup.
     private static string? GetDeviceToken(Guid userId) => null;
-
-    private async Task<List<GymManager.Domain.Entities.User>> ResolveRecipientsAsync(
-        AnnouncementPublishedEvent evt, CancellationToken ct)
-    {
-        return evt.Audience switch
-        {
-            TargetAudience.Everyone or TargetAudience.AllMembers or TargetAudience.ActiveMembers =>
-                await userRepository.GetByRoleAndHouseAsync(Role.Member, evt.GymHouseId, ct),
-            TargetAudience.Staff =>
-                await userRepository.GetByRoleAndHouseAsync(Role.Staff, evt.GymHouseId, ct),
-            TargetAudience.Trainers =>
-                await userRepository.GetByRoleAndHouseAsync(Role.Trainer, evt.GymHouseId, ct),
-            _ => []
-        };
-    }
 }
