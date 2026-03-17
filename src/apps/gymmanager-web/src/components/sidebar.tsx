@@ -38,7 +38,7 @@ export function Sidebar() {
 
   const navContent = (
     <nav aria-label="Main navigation" className="flex-1 px-3 py-4 space-y-1 sidebar-scroll overflow-y-auto">
-      <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-surface-400 dark:text-surface-500">
+      <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-text-muted">
         Menu
       </p>
       {navItems.map((item) => {
@@ -52,8 +52,8 @@ export function Sidebar() {
             className={cn(
               "group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
               active
-                ? "bg-primary-50 dark:bg-primary-500/15 text-primary-600 dark:text-primary-400 shadow-sm"
-                : "text-surface-500 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-white/5 hover:text-surface-700 dark:hover:text-surface-200"
+                ? "bg-nav-active-bg text-nav-active-text shadow-sm"
+                : "text-text-muted hover:bg-nav-hover-bg hover:text-text-secondary"
             )}
             aria-current={active ? "page" : undefined}
           >
@@ -61,8 +61,8 @@ export function Sidebar() {
               className={cn(
                 "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
                 active
-                  ? "bg-primary-100 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400"
-                  : "bg-surface-100 dark:bg-white/5 text-surface-400 dark:text-surface-500 group-hover:bg-surface-200 dark:group-hover:bg-white/10 group-hover:text-surface-600 dark:group-hover:text-surface-300"
+                  ? "bg-nav-active-icon-bg text-nav-active-text"
+                  : "bg-nav-icon-bg text-text-muted group-hover:bg-nav-icon-hover-bg group-hover:text-text-secondary"
               )}
             >
               <Icon className="w-4 h-4" aria-hidden={true} />
@@ -83,7 +83,7 @@ export function Sidebar() {
       <button
         type="button"
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 rounded-xl bg-sidebar-bg text-surface-600 dark:text-surface-200 shadow-lg border border-sidebar-border-color"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 rounded-xl bg-sidebar-bg text-text-secondary shadow-lg border border-sidebar-border-color"
         aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
         aria-expanded={mobileOpen}
         aria-controls="sidebar-nav"
@@ -120,10 +120,10 @@ export function Sidebar() {
             <Dumbbell className="w-4.5 h-4.5 text-white" aria-hidden="true" />
           </div>
           <div>
-            <span className="text-surface-900 dark:text-white font-bold text-base leading-tight block tracking-tight">
+            <span className="text-text-primary font-bold text-base leading-tight block tracking-tight">
               GymManager
             </span>
-            <span className="text-surface-400 dark:text-surface-500 text-[10px] font-medium uppercase tracking-wider">
+            <span className="text-text-muted text-[10px] font-medium uppercase tracking-wider">
               Pro Dashboard
             </span>
           </div>
@@ -133,12 +133,12 @@ export function Sidebar() {
 
         {/* Upgrade card */}
         <div className="px-3 pb-3">
-          <div className="rounded-xl bg-primary-50 dark:bg-primary-500/10 border border-primary-100 dark:border-primary-500/20 p-4">
+          <div className="rounded-xl bg-upgrade-bg border border-upgrade-border p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Crown className="w-4 h-4 text-primary-500 dark:text-primary-400" aria-hidden="true" />
-              <span className="text-xs font-semibold text-primary-600 dark:text-primary-400">Go Premium</span>
+              <Crown className="w-4 h-4 text-nav-active-text" aria-hidden="true" />
+              <span className="text-xs font-semibold text-nav-active-text">Go Premium</span>
             </div>
-            <p className="text-[11px] text-surface-500 dark:text-surface-400 leading-relaxed mb-3">
+            <p className="text-[11px] text-text-muted leading-relaxed mb-3">
               Unlock analytics, reports, and advanced features.
             </p>
             <button className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white text-xs font-semibold shadow-sm shadow-primary-500/25 hover:from-primary-600 hover:to-primary-700 transition-all">
@@ -150,7 +150,7 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-sidebar-border-color">
-          <p className="text-[10px] text-surface-400 dark:text-surface-600 font-medium">Phase 1 — Foundation v1.0</p>
+          <p className="text-[10px] text-text-muted font-medium">Phase 1 — Foundation v1.0</p>
         </div>
       </aside>
     </>

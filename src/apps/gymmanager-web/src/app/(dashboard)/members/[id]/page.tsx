@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Plus, Mail, Phone, Calendar, Building2, Hash } from "lucide-react";
+import { Plus, Mail, Phone, Calendar, Building2, Hash } from "lucide-react";
 import { useMember } from "@/hooks/use-members";
 import { useSubscriptions } from "@/hooks/use-subscriptions";
 import { useGymHouses } from "@/hooks/use-gym-houses";
@@ -10,6 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SubscriptionCard } from "@/components/subscription-card";
+import { PageHeader } from "@/components/ui/page-header";
+import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function MemberDetailPage() {
   const params = useParams<{ id: string }>();
@@ -22,43 +25,36 @@ export default function MemberDetailPage() {
 
   if (memberLoading) {
     return (
-      <div className="flex items-center justify-center py-16 text-surface-400 dark:text-surface-500">
-        <div className="w-6 h-6 border-2 border-primary-500/30 border-t-primary-500 rounded-full animate-spin mr-3" />
-        <span className="text-sm">Loading member...</span>
+      <div className="flex items-center justify-center py-16">
+        <Spinner label="Loading member..." />
       </div>
     );
   }
 
   if (memberError || !member) {
     return (
-      <div role="alert" className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-xl text-red-600 dark:text-red-400 text-sm">
+      <Alert variant="error">
         Member not found or failed to load.{" "}
         <Link href="/members" className="underline font-medium">Back to members</Link>
-      </div>
+      </Alert>
     );
   }
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="flex items-center gap-3">
-        <Link
-          href="/members"
-          className="p-1.5 rounded-lg text-surface-400 hover:text-surface-600 hover:bg-surface-100 dark:hover:text-surface-300 dark:hover:bg-surface-800 transition-all"
-          aria-label="Back to members"
-        >
-          <ChevronLeft className="w-5 h-5" aria-hidden="true" />
-        </Link>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-surface-400 dark:text-surface-500 uppercase tracking-wider">Members</p>
-          <h2 className="text-xl font-bold text-surface-900 dark:text-white truncate tracking-tight">{member.fullName}</h2>
-        </div>
-        <Link href={`/members/${member.id}/subscriptions/new`}>
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4" aria-hidden="true" />
-            Add Subscription
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        backHref="/members"
+        breadcrumb="Members"
+        title={member.fullName}
+        actions={
+          <Link href={`/members/${member.id}/subscriptions/new`}>
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              Add Subscription
+            </Button>
+          </Link>
+        }
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Member info */}
@@ -70,7 +66,7 @@ export default function MemberDetailPage() {
               </span>
             </div>
             <div className="min-w-0">
-              <h3 className="font-semibold text-surface-900 dark:text-white truncate">{member.fullName}</h3>
+              <h3 className="font-semibold text-text-primary truncate">{member.fullName}</h3>
               <div className="mt-1.5">
                 <Badge status={member.status} />
               </div>
@@ -79,51 +75,51 @@ export default function MemberDetailPage() {
 
           <dl className="space-y-3.5">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-surface-50 dark:bg-surface-700/50 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-card-inset flex items-center justify-center shrink-0">
                 <Mail className="w-3.5 h-3.5 text-surface-400" aria-hidden="true" />
               </div>
               <div className="min-w-0 pt-1">
                 <dt className="sr-only">Email</dt>
-                <dd className="text-sm text-surface-700 dark:text-surface-300 break-all">{member.email}</dd>
+                <dd className="text-sm text-text-secondary break-all">{member.email}</dd>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-surface-50 dark:bg-surface-700/50 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-card-inset flex items-center justify-center shrink-0">
                 <Phone className="w-3.5 h-3.5 text-surface-400" aria-hidden="true" />
               </div>
               <div className="pt-1">
                 <dt className="sr-only">Phone</dt>
-                <dd className="text-sm text-surface-700 dark:text-surface-300">{member.phone ?? "—"}</dd>
+                <dd className="text-sm text-text-secondary">{member.phone ?? "—"}</dd>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-surface-50 dark:bg-surface-700/50 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-card-inset flex items-center justify-center shrink-0">
                 <Building2 className="w-3.5 h-3.5 text-surface-400" aria-hidden="true" />
               </div>
               <div className="pt-1">
-                <dt className="text-[10px] font-medium text-surface-400 dark:text-surface-500 uppercase tracking-wider">Gym House</dt>
-                <dd className="text-sm text-surface-700 dark:text-surface-300">{gymHouse?.name ?? "—"}</dd>
+                <dt className="text-[10px] font-medium text-text-muted uppercase tracking-wider">Gym House</dt>
+                <dd className="text-sm text-text-secondary">{gymHouse?.name ?? "—"}</dd>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-surface-50 dark:bg-surface-700/50 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-card-inset flex items-center justify-center shrink-0">
                 <Calendar className="w-3.5 h-3.5 text-surface-400" aria-hidden="true" />
               </div>
               <div className="pt-1">
-                <dt className="text-[10px] font-medium text-surface-400 dark:text-surface-500 uppercase tracking-wider">Joined</dt>
-                <dd className="text-sm text-surface-700 dark:text-surface-300">
+                <dt className="text-[10px] font-medium text-text-muted uppercase tracking-wider">Joined</dt>
+                <dd className="text-sm text-text-secondary">
                   {new Date(member.joinedAt).toLocaleDateString()}
                 </dd>
               </div>
             </div>
-            <div className="pt-3 border-t border-surface-100 dark:border-surface-700">
+            <div className="pt-3 border-t border-border-muted">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-surface-50 dark:bg-surface-700/50 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-card-inset flex items-center justify-center shrink-0">
                   <Hash className="w-3.5 h-3.5 text-surface-400" aria-hidden="true" />
                 </div>
                 <div className="pt-1">
-                  <dt className="text-[10px] font-medium text-surface-400 dark:text-surface-500 uppercase tracking-wider">Member Code</dt>
-                  <dd className="font-mono text-sm text-surface-700 dark:text-surface-300 bg-surface-50 dark:bg-surface-700/50 px-2.5 py-1 rounded-lg mt-1 inline-block">
+                  <dt className="text-[10px] font-medium text-text-muted uppercase tracking-wider">Member Code</dt>
+                  <dd className="font-mono text-sm text-text-secondary bg-card-inset px-2.5 py-1 rounded-lg mt-1 inline-block">
                     {member.memberCode}
                   </dd>
                 </div>
@@ -135,20 +131,19 @@ export default function MemberDetailPage() {
         {/* Subscriptions */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-surface-900 dark:text-white">Subscriptions</h3>
-            <span className="text-sm text-surface-400 dark:text-surface-500 tabular-nums">
+            <h3 className="font-semibold text-text-primary">Subscriptions</h3>
+            <span className="text-sm text-text-muted tabular-nums">
               {subsLoading ? "..." : `${subscriptions?.length ?? 0} total`}
             </span>
           </div>
 
           {subsLoading ? (
-            <div className="flex items-center justify-center py-12 text-surface-400 dark:text-surface-500">
-              <div className="w-5 h-5 border-2 border-primary-500/30 border-t-primary-500 rounded-full animate-spin mr-2" />
-              <span className="text-sm">Loading subscriptions...</span>
+            <div className="flex items-center justify-center py-12">
+              <Spinner label="Loading subscriptions..." />
             </div>
           ) : subscriptions?.length === 0 ? (
             <Card className="text-center py-12">
-              <p className="text-sm text-surface-400 dark:text-surface-500 mb-3">No subscriptions yet.</p>
+              <p className="text-sm text-text-muted mb-3">No subscriptions yet.</p>
               <Link href={`/members/${member.id}/subscriptions/new`}>
                 <Button variant="primary" size="sm">
                   <Plus className="w-4 h-4" aria-hidden="true" />

@@ -8,6 +8,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
 import type { MemberDto } from "@/types/member";
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -47,7 +48,7 @@ export default function MembersPage() {
       key: "memberCode",
       header: "Code",
       render: (m: MemberDto) => (
-        <span className="font-mono text-xs text-surface-400 dark:text-surface-500">{m.memberCode}</span>
+        <span className="font-mono text-xs text-text-muted">{m.memberCode}</span>
       ),
     },
     {
@@ -66,14 +67,14 @@ export default function MembersPage() {
       key: "email",
       header: "Email",
       render: (m: MemberDto) => (
-        <span className="text-surface-600 dark:text-surface-300">{m.email}</span>
+        <span className="text-text-secondary">{m.email}</span>
       ),
     },
     {
       key: "phone",
       header: "Phone",
       render: (m: MemberDto) => (
-        <span className="text-surface-500 dark:text-surface-400">{m.phone ?? "—"}</span>
+        <span className="text-text-muted">{m.phone ?? "—"}</span>
       ),
     },
     {
@@ -85,7 +86,7 @@ export default function MembersPage() {
       key: "joinedAt",
       header: "Joined",
       render: (m: MemberDto) => (
-        <span className="text-surface-400 dark:text-surface-500 text-xs tabular-nums">
+        <span className="text-text-muted text-xs tabular-nums">
           {new Date(m.joinedAt).toLocaleDateString()}
         </span>
       ),
@@ -94,12 +95,7 @@ export default function MembersPage() {
 
   if (error) {
     return (
-      <div
-        role="alert"
-        className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-xl text-red-600 dark:text-red-400 text-sm"
-      >
-        Failed to load members. Please refresh the page.
-      </div>
+      <Alert variant="error">Failed to load members. Please refresh the page.</Alert>
     );
   }
 
@@ -113,7 +109,7 @@ export default function MembersPage() {
         >
           <div className="relative">
             <Search
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400 dark:text-surface-500"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted"
               aria-hidden="true"
             />
             <Input

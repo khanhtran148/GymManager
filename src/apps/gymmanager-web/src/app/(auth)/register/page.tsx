@@ -5,11 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
-import { Dumbbell } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/ui/form-field";
+import { AuthCard } from "@/components/ui/auth-card";
 
 const registerSchema = z.object({
   fullName: z
@@ -76,26 +76,11 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="bg-white/[0.04] backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/[0.06]">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
-          <Dumbbell className="w-5 h-5 text-white" aria-hidden="true" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">GymManager</h1>
-          <p className="text-surface-500 text-[10px] font-medium uppercase tracking-wider">Pro Dashboard</p>
-        </div>
-      </div>
-
-      <h2 className="text-2xl font-bold text-white mb-1.5 tracking-tight">Create your account</h2>
-      <p className="text-surface-400 text-sm mb-6">
-        Get started with GymManager today
-      </p>
-
+    <AuthCard title="Create your account" subtitle="Get started with GymManager today">
       {serverError && (
         <div
           role="alert"
-          className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm"
+          className="mb-4 px-4 py-3 bg-auth-error-bg border border-auth-error-border rounded-xl text-red-400 text-sm"
         >
           {serverError}
         </div>
@@ -114,7 +99,7 @@ export default function RegisterPage() {
             autoComplete="name"
             placeholder="John Doe"
             error={!!errors.fullName}
-            className="bg-white/[0.06] border-white/10 text-white placeholder-surface-500 focus:border-primary-500 focus:ring-primary-500/30"
+            className="input-auth"
             {...register("fullName")}
           />
         </FormField>
@@ -131,7 +116,7 @@ export default function RegisterPage() {
             autoComplete="email"
             placeholder="you@example.com"
             error={!!errors.email}
-            className="bg-white/[0.06] border-white/10 text-white placeholder-surface-500 focus:border-primary-500 focus:ring-primary-500/30"
+            className="input-auth"
             {...register("email")}
           />
         </FormField>
@@ -149,7 +134,7 @@ export default function RegisterPage() {
             autoComplete="new-password"
             placeholder="Create a strong password"
             error={!!errors.password}
-            className="bg-white/[0.06] border-white/10 text-white placeholder-surface-500 focus:border-primary-500 focus:ring-primary-500/30"
+            className="input-auth"
             {...register("password")}
           />
         </FormField>
@@ -166,7 +151,7 @@ export default function RegisterPage() {
             autoComplete="tel"
             placeholder="+1 (555) 000-0000"
             error={!!errors.phone}
-            className="bg-white/[0.06] border-white/10 text-white placeholder-surface-500 focus:border-primary-500 focus:ring-primary-500/30"
+            className="input-auth"
             {...register("phone")}
           />
         </FormField>
@@ -191,6 +176,6 @@ export default function RegisterPage() {
           Sign in
         </Link>
       </p>
-    </div>
+    </AuthCard>
   );
 }

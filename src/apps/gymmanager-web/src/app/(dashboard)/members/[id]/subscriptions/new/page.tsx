@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { useMember } from "@/hooks/use-members";
 import { useCreateSubscription } from "@/hooks/use-subscriptions";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { FormField } from "@/components/ui/form-field";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
+import { Alert } from "@/components/ui/alert";
 
 const subscriptionSchema = z
   .object({
@@ -89,32 +90,15 @@ export default function NewSubscriptionPage() {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <div className="flex items-center gap-3">
-        <Link
-          href={`/members/${params.id}`}
-          className="p-1.5 rounded-lg text-surface-400 hover:text-surface-600 hover:bg-surface-100 dark:hover:text-surface-300 dark:hover:bg-surface-800 transition-all"
-          aria-label="Back to member"
-        >
-          <ChevronLeft className="w-5 h-5" aria-hidden="true" />
-        </Link>
-        <div>
-          <p className="text-xs font-medium text-surface-400 dark:text-surface-500 uppercase tracking-wider">
-            {member ? member.fullName : "Member"} / Subscriptions
-          </p>
-          <h2 className="text-xl font-bold text-surface-900 dark:text-white tracking-tight">
-            Add New Subscription
-          </h2>
-        </div>
-      </div>
+      <PageHeader
+        backHref={`/members/${params.id}`}
+        breadcrumb={`${member ? member.fullName : "Member"} / Subscriptions`}
+        title="Add New Subscription"
+      />
 
       <Card>
         {serverError && (
-          <div
-            role="alert"
-            className="mb-5 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-xl text-red-600 dark:text-red-400 text-sm"
-          >
-            {serverError}
-          </div>
+          <Alert variant="error" className="mb-5">{serverError}</Alert>
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
@@ -144,7 +128,7 @@ export default function NewSubscriptionPage() {
           >
             <div className="relative">
               <span
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-surface-400 dark:text-surface-500 text-sm font-medium"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted text-sm font-medium"
                 aria-hidden="true"
               >
                 $

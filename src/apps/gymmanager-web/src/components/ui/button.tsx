@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { ButtonHTMLAttributes } from "react";
 import { forwardRef } from "react";
+import { Spinner } from "./spinner";
 
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost" | "accent";
 type ButtonSize = "sm" | "md" | "lg";
@@ -17,11 +18,11 @@ const variantClasses: Record<ButtonVariant, string> = {
   accent:
     "bg-gradient-to-r from-accent-500 to-accent-600 text-white shadow-sm shadow-accent-500/25 hover:from-accent-600 hover:to-accent-700 focus-visible:ring-accent-500 disabled:from-accent-300 disabled:to-accent-400 disabled:shadow-none",
   secondary:
-    "bg-card text-surface-700 dark:text-surface-200 border border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-700 focus-visible:ring-surface-400 disabled:opacity-50 shadow-sm",
+    "bg-card text-text-secondary border border-border-muted hover:bg-hover focus-visible:ring-surface-400 disabled:opacity-50 shadow-sm",
   danger:
     "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-sm shadow-red-500/25 hover:from-red-600 hover:to-red-700 focus-visible:ring-red-500 disabled:from-red-300 disabled:to-red-400 disabled:shadow-none",
   ghost:
-    "bg-transparent text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 focus-visible:ring-surface-400 disabled:opacity-50",
+    "bg-transparent text-text-muted hover:bg-hover focus-visible:ring-surface-400 disabled:opacity-50",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -48,7 +49,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(
           "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-900",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-page",
           "disabled:cursor-not-allowed active:scale-[0.98]",
           variantClasses[variant],
           sizeClasses[size],
@@ -58,29 +59,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         aria-busy={isLoading}
         {...props}
       >
-        {isLoading && (
-          <svg
-            className="h-4 w-4 animate-spin"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
-          </svg>
-        )}
+        {isLoading && <Spinner size="sm" />}
         {children}
       </button>
     );

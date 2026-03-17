@@ -29,7 +29,7 @@ export function StatCard({
     <div
       className={cn(
         "bg-card rounded-2xl shadow-sm",
-        "border border-surface-100 dark:border-transparent",
+        "border border-border",
         "p-5 card-hover",
         className
       )}
@@ -53,28 +53,28 @@ export function StatCard({
         )}
       </div>
 
-      <p className="text-2xl font-bold text-surface-900 dark:text-white tracking-tight">
+      <p className="text-2xl font-bold text-text-primary tracking-tight">
         {value}
       </p>
-      <p className="text-xs font-medium text-surface-500 dark:text-surface-400 mt-0.5">
+      <p className="text-xs font-medium text-text-muted mt-0.5">
         {label}
       </p>
 
       {trend && (
-        <p className="text-xs text-surface-400 dark:text-surface-500 mt-1">
+        <p className="text-xs text-text-muted mt-1">
           {trend.label}
         </p>
       )}
 
       {progress !== undefined && (
         <div className="mt-3">
-          <div className="h-1.5 bg-surface-100 dark:bg-surface-700 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-hover rounded-full overflow-hidden">
             <div
               className={cn("h-full rounded-full animate-progress", iconBg.includes("primary") ? "bg-primary-500" : iconBg.includes("accent") ? "bg-accent-500" : "bg-blue-500")}
               style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
             />
           </div>
-          <p className="text-xs text-surface-400 mt-1">{progress}% of goal</p>
+          <p className="text-xs text-text-muted mt-1">{progress}% of goal</p>
         </div>
       )}
     </div>

@@ -18,7 +18,7 @@ export function Card({ className, padding = "md", hover = false, children, ...pr
     <div
       className={cn(
         "bg-card rounded-2xl shadow-sm",
-        "border border-surface-100 dark:border-transparent",
+        "border border-border",
         hover && "card-hover cursor-pointer",
         paddingClasses[padding],
         className
@@ -40,7 +40,7 @@ export function CardHeader({ className, children, ...props }: HTMLAttributes<HTM
 
 export function CardTitle({ className, children, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={cn("text-base font-semibold text-surface-900 dark:text-surface-100", className)} {...props}>
+    <h3 className={cn("text-base font-semibold text-text-primary", className)} {...props}>
       {children}
     </h3>
   );

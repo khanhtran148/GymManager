@@ -104,9 +104,9 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Quick Actions */}
-        <div className="lg:col-span-2 bg-card rounded-2xl border border-surface-100 dark:border-transparent shadow-sm p-6">
+        <div className="lg:col-span-2 bg-card rounded-2xl border border-border shadow-sm p-6">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-base font-semibold text-surface-900 dark:text-white">Quick Actions</h3>
+            <h3 className="text-base font-semibold text-text-primary">Quick Actions</h3>
             <Activity className="w-4 h-4 text-surface-400" aria-hidden="true" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -154,7 +154,7 @@ export default function DashboardPage() {
                 className={cn(
                   "flex items-center gap-3.5 p-3.5 rounded-xl transition-all duration-200 group border border-transparent",
                   action.hoverBg,
-                  "hover:border-surface-100 dark:hover:border-surface-700/50"
+                  "hover:border-border-muted"
                 )}
               >
                 <div
@@ -166,13 +166,13 @@ export default function DashboardPage() {
                   <action.icon className={cn("w-4.5 h-4.5", action.color)} aria-hidden="true" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-surface-800 dark:text-surface-200">
+                  <p className="text-sm font-semibold text-text-primary">
                     {action.title}
                   </p>
-                  <p className="text-xs text-surface-400 dark:text-surface-500">{action.desc}</p>
+                  <p className="text-xs text-text-muted">{action.desc}</p>
                 </div>
                 <ArrowRight
-                  className="w-4 h-4 text-surface-300 dark:text-surface-600 group-hover:text-surface-500 dark:group-hover:text-surface-400 group-hover:translate-x-0.5 transition-all"
+                  className="w-4 h-4 text-text-muted group-hover:text-text-secondary group-hover:translate-x-0.5 transition-all"
                   aria-hidden="true"
                 />
               </Link>
@@ -181,11 +181,11 @@ export default function DashboardPage() {
         </div>
 
         {/* System Overview */}
-        <div className="bg-card rounded-2xl border border-surface-100 dark:border-transparent shadow-sm p-6">
-          <h3 className="text-base font-semibold text-surface-900 dark:text-white mb-5">System Overview</h3>
+        <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
+          <h3 className="text-base font-semibold text-text-primary mb-5">System Overview</h3>
           <div className="space-y-4">
-            <div className="flex justify-between items-center py-2.5 border-b border-surface-50 dark:border-surface-700">
-              <span className="text-sm text-surface-500 dark:text-surface-400">Status</span>
+            <div className="flex justify-between items-center py-2.5 border-b border-border-muted">
+              <span className="text-sm text-text-muted">Status</span>
               <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-600 dark:text-accent-400">
                 <span className="relative w-2 h-2 rounded-full bg-accent-500">
                   <span className="absolute inset-0 rounded-full bg-accent-500 animate-ping opacity-75" aria-hidden="true" />
@@ -193,29 +193,29 @@ export default function DashboardPage() {
                 Operational
               </span>
             </div>
-            <div className="flex justify-between items-center py-2.5 border-b border-surface-50 dark:border-surface-700">
-              <span className="text-sm text-surface-500 dark:text-surface-400">Phase</span>
-              <span className="text-sm font-semibold text-surface-800 dark:text-surface-200">
+            <div className="flex justify-between items-center py-2.5 border-b border-border-muted">
+              <span className="text-sm text-text-muted">Phase</span>
+              <span className="text-sm font-semibold text-text-primary">
                 1 — Foundation
               </span>
             </div>
-            <div className="flex justify-between items-center py-2.5 border-b border-surface-50 dark:border-surface-700">
-              <span className="text-sm text-surface-500 dark:text-surface-400">API Version</span>
-              <span className="text-sm font-semibold text-surface-800 dark:text-surface-200">v1</span>
+            <div className="flex justify-between items-center py-2.5 border-b border-border-muted">
+              <span className="text-sm text-text-muted">API Version</span>
+              <span className="text-sm font-semibold text-text-primary">v1</span>
             </div>
             <div className="flex justify-between items-center py-2.5">
-              <span className="text-sm text-surface-500 dark:text-surface-400">Uptime</span>
-              <span className="text-sm font-semibold text-surface-800 dark:text-surface-200">99.9%</span>
+              <span className="text-sm text-text-muted">Uptime</span>
+              <span className="text-sm font-semibold text-text-primary">99.9%</span>
             </div>
           </div>
 
           {/* Phase progress */}
-          <div className="mt-5 pt-4 border-t border-surface-100 dark:border-surface-700">
+          <div className="mt-5 pt-4 border-t border-border-muted">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-surface-500 dark:text-surface-400">Phase 1 Progress</span>
+              <span className="text-xs font-semibold text-text-muted">Phase 1 Progress</span>
               <span className="text-xs font-bold text-primary-500">60%</span>
             </div>
-            <div className="h-2 bg-surface-100 dark:bg-surface-700 rounded-full overflow-hidden">
+            <div className="h-2 bg-hover rounded-full overflow-hidden">
               <div className="h-full w-3/5 bg-gradient-to-r from-primary-500 to-primary-400 rounded-full animate-progress" />
             </div>
           </div>

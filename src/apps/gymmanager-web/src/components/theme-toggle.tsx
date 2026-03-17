@@ -38,8 +38,7 @@ export function ThemeToggle() {
       onClick={cycleTheme}
       className={cn(
         "relative p-2 rounded-xl transition-all duration-200",
-        "text-surface-500 hover:text-surface-700 hover:bg-surface-100",
-        "dark:text-surface-400 dark:hover:text-surface-200 dark:hover:bg-surface-800",
+        "text-text-muted hover:text-text-secondary hover:bg-hover",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
       )}
       aria-label={`Toggle theme. Current: ${label}`}

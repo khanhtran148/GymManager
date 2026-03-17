@@ -52,14 +52,14 @@ export function TopBar() {
   const initials = displayName.slice(0, 2).toUpperCase();
 
   return (
-    <header className="h-16 bg-white/80 dark:bg-surface-900/80 backdrop-blur-xl border-b border-surface-100 dark:border-surface-700 flex items-center justify-between px-6 sticky top-0 z-30">
+    <header className="h-16 bg-topbar backdrop-blur-xl border-b border-topbar-border flex items-center justify-between px-6 sticky top-0 z-30">
       <div className="flex items-center gap-4">
         {/* Spacer for sidebar on mobile */}
         <div className="lg:hidden w-8" aria-hidden="true" />
         <div>
-          <h1 className="text-lg font-bold text-surface-900 dark:text-white tracking-tight">{title}</h1>
+          <h1 className="text-lg font-bold text-text-primary tracking-tight">{title}</h1>
           {description && (
-            <p className="text-xs text-surface-400 dark:text-surface-500 hidden sm:block">{description}</p>
+            <p className="text-xs text-text-muted hidden sm:block">{description}</p>
           )}
         </div>
       </div>
@@ -68,7 +68,7 @@ export function TopBar() {
         {/* Search */}
         <button
           type="button"
-          className="p-2 rounded-xl text-surface-400 hover:text-surface-600 hover:bg-surface-100 dark:hover:text-surface-300 dark:hover:bg-surface-800 transition-all hidden sm:flex"
+          className="p-2 rounded-xl text-text-muted hover:text-text-secondary hover:bg-hover transition-all hidden sm:flex"
           aria-label="Search"
         >
           <Search className="w-[18px] h-[18px]" aria-hidden="true" />
@@ -77,17 +77,17 @@ export function TopBar() {
         {/* Notifications */}
         <button
           type="button"
-          className="relative p-2 rounded-xl text-surface-400 hover:text-surface-600 hover:bg-surface-100 dark:hover:text-surface-300 dark:hover:bg-surface-800 transition-all"
+          className="relative p-2 rounded-xl text-text-muted hover:text-text-secondary hover:bg-hover transition-all"
           aria-label="Notifications"
         >
           <Bell className="w-[18px] h-[18px]" aria-hidden="true" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary-500 rounded-full border-2 border-white dark:border-surface-900" aria-hidden="true" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary-500 rounded-full border-2 border-dot-border" aria-hidden="true" />
         </button>
 
         <ThemeToggle />
 
         {/* Divider */}
-        <div className="w-px h-6 bg-surface-200 dark:bg-surface-700 mx-1" aria-hidden="true" />
+        <div className="w-px h-6 bg-border-muted mx-1" aria-hidden="true" />
 
         {/* User menu */}
         <div className="relative" ref={dropdownRef}>
@@ -96,7 +96,7 @@ export function TopBar() {
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className={cn(
               "flex items-center gap-2.5 px-2 py-1.5 rounded-xl transition-all duration-200",
-              "hover:bg-surface-50 dark:hover:bg-surface-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              "hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             )}
             aria-label="User menu"
             aria-expanded={dropdownOpen}
@@ -107,12 +107,12 @@ export function TopBar() {
                 {initials}
               </span>
             </div>
-            <span className="text-sm font-medium text-surface-700 dark:text-surface-300 hidden sm:block max-w-[120px] truncate">
+            <span className="text-sm font-medium text-text-secondary hidden sm:block max-w-[120px] truncate">
               {displayName}
             </span>
             <ChevronDown
               className={cn(
-                "w-3.5 h-3.5 text-surface-400 transition-transform hidden sm:block",
+                "w-3.5 h-3.5 text-text-muted transition-transform hidden sm:block",
                 dropdownOpen && "rotate-180"
               )}
               aria-hidden="true"
@@ -124,14 +124,14 @@ export function TopBar() {
               role="menu"
               className={cn(
                 "absolute right-0 top-full mt-2 w-56 rounded-xl shadow-xl",
-                "bg-card border border-surface-100 dark:border-transparent py-1 z-50"
+                "bg-card border border-border py-1 z-50"
               )}
             >
-              <div className="px-4 py-3 border-b border-surface-100 dark:border-surface-700">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
+              <div className="px-4 py-3 border-b border-border-muted">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
                   Signed in as
                 </p>
-                <p className="text-sm font-medium text-surface-800 dark:text-surface-200 truncate mt-0.5">
+                <p className="text-sm font-medium text-text-primary truncate mt-0.5">
                   {displayName}
                 </p>
               </div>

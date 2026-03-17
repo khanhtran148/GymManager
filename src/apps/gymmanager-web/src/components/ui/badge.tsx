@@ -11,31 +11,31 @@ interface BadgeProps {
 
 const statusStyles: Record<string, { bg: string; text: string; dot: string }> = {
   Active: {
-    bg: "bg-accent-50 dark:bg-accent-900/20",
-    text: "text-accent-700 dark:text-accent-400",
-    dot: "bg-accent-500",
+    bg: "bg-badge-active-bg",
+    text: "text-badge-active-text",
+    dot: "bg-badge-active-dot",
   },
   Frozen: {
-    bg: "bg-blue-50 dark:bg-blue-900/20",
-    text: "text-blue-700 dark:text-blue-400",
-    dot: "bg-blue-500",
+    bg: "bg-badge-frozen-bg",
+    text: "text-badge-frozen-text",
+    dot: "bg-badge-frozen-dot",
   },
   Expired: {
-    bg: "bg-surface-100 dark:bg-surface-700/50",
-    text: "text-surface-600 dark:text-surface-400",
-    dot: "bg-surface-400",
+    bg: "bg-badge-expired-bg",
+    text: "text-badge-expired-text",
+    dot: "bg-badge-expired-dot",
   },
   Cancelled: {
-    bg: "bg-red-50 dark:bg-red-900/20",
-    text: "text-red-700 dark:text-red-400",
-    dot: "bg-red-500",
+    bg: "bg-badge-cancelled-bg",
+    text: "text-badge-cancelled-text",
+    dot: "bg-badge-cancelled-dot",
   },
 };
 
 const defaultStyle = {
-  bg: "bg-surface-100 dark:bg-surface-700/50",
-  text: "text-surface-600 dark:text-surface-400",
-  dot: "bg-surface-400",
+  bg: "bg-badge-expired-bg",
+  text: "text-badge-expired-text",
+  dot: "bg-badge-expired-dot",
 };
 
 export function Badge({ status, className }: BadgeProps) {

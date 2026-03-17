@@ -7,6 +7,7 @@ import { useGymHouses, useDeleteGymHouse } from "@/hooks/use-gym-houses";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Alert } from "@/components/ui/alert";
 import type { GymHouseDto } from "@/types/gym-house";
 
 export default function GymHousesPage() {
@@ -31,28 +32,28 @@ export default function GymHousesPage() {
       key: "address",
       header: "Address",
       render: (gym: GymHouseDto) => (
-        <span className="text-surface-600 dark:text-surface-300">{gym.address}</span>
+        <span className="text-text-secondary">{gym.address}</span>
       ),
     },
     {
       key: "phone",
       header: "Phone",
       render: (gym: GymHouseDto) => (
-        <span className="text-surface-500 dark:text-surface-400">{gym.phone ?? "—"}</span>
+        <span className="text-text-muted">{gym.phone ?? "—"}</span>
       ),
     },
     {
       key: "capacity",
       header: "Capacity / hr",
       render: (gym: GymHouseDto) => (
-        <span className="font-semibold text-surface-800 dark:text-surface-200 tabular-nums">{gym.hourlyCapacity}</span>
+        <span className="font-semibold text-text-primary tabular-nums">{gym.hourlyCapacity}</span>
       ),
     },
     {
       key: "hours",
       header: "Operating Hours",
       render: (gym: GymHouseDto) => (
-        <span className="text-surface-500 dark:text-surface-400">{gym.operatingHours ?? "—"}</span>
+        <span className="text-text-muted">{gym.operatingHours ?? "—"}</span>
       ),
     },
     {
@@ -66,7 +67,7 @@ export default function GymHousesPage() {
               variant="ghost"
               size="sm"
               aria-label={`Edit ${gym.name}`}
-              className="text-surface-400 hover:text-primary-500"
+              className="text-text-muted hover:text-primary-500"
             >
               <Pencil className="w-4 h-4" aria-hidden="true" />
             </Button>
@@ -76,7 +77,7 @@ export default function GymHousesPage() {
             size="sm"
             onClick={() => setDeleteTarget(gym)}
             aria-label={`Delete ${gym.name}`}
-            className="text-surface-400 hover:text-red-500"
+            className="text-text-muted hover:text-red-500"
           >
             <Trash2 className="w-4 h-4" aria-hidden="true" />
           </Button>
@@ -87,12 +88,7 @@ export default function GymHousesPage() {
 
   if (error) {
     return (
-      <div
-        role="alert"
-        className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-xl text-red-600 dark:text-red-400 text-sm"
-      >
-        Failed to load gym houses. Please refresh the page.
-      </div>
+      <Alert variant="error">Failed to load gym houses. Please refresh the page.</Alert>
     );
   }
 
@@ -100,7 +96,7 @@ export default function GymHousesPage() {
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-surface-500 dark:text-surface-400 text-sm">
+          <p className="text-text-muted text-sm">
             {isLoading ? "Loading..." : `${gymHouses?.length ?? 0} locations registered`}
           </p>
         </div>

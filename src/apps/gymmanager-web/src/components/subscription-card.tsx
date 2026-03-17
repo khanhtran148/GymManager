@@ -86,34 +86,34 @@ export function SubscriptionCard({ subscription, memberId }: SubscriptionCardPro
   }
 
   return (
-    <div className="bg-card rounded-2xl border border-surface-100 dark:border-transparent shadow-sm p-5 space-y-4">
+    <div className="bg-card rounded-2xl border border-border shadow-sm p-5 space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-semibold text-surface-900 dark:text-white">{subscription.type}</span>
+            <span className="font-semibold text-text-primary">{subscription.type}</span>
             <Badge status={subscription.status} />
           </div>
-          <p className="text-xs text-surface-400 dark:text-surface-500 font-mono">{subscription.id.slice(0, 8)}...</p>
+          <p className="text-xs text-text-muted font-mono">{subscription.id.slice(0, 8)}...</p>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-lg font-bold text-surface-900 dark:text-white tabular-nums">
+          <p className="text-lg font-bold text-text-primary tabular-nums">
             ${subscription.price.toFixed(2)}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-sm">
-        <div className="flex items-center gap-1.5 text-surface-500 dark:text-surface-400">
+        <div className="flex items-center gap-1.5 text-text-muted">
           <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
           <span>Start:</span>
-          <span className="text-surface-700 dark:text-surface-300 font-medium tabular-nums">
+          <span className="text-text-secondary font-medium tabular-nums">
             {new Date(subscription.startDate).toLocaleDateString()}
           </span>
         </div>
-        <div className="flex items-center gap-1.5 text-surface-500 dark:text-surface-400">
+        <div className="flex items-center gap-1.5 text-text-muted">
           <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
           <span>End:</span>
-          <span className="text-surface-700 dark:text-surface-300 font-medium tabular-nums">
+          <span className="text-text-secondary font-medium tabular-nums">
             {new Date(subscription.endDate).toLocaleDateString()}
           </span>
         </div>
@@ -130,8 +130,8 @@ export function SubscriptionCard({ subscription, memberId }: SubscriptionCardPro
 
       {/* Renew form */}
       {showRenewForm && (
-        <div className="bg-surface-50 dark:bg-surface-700/30 rounded-xl p-4 space-y-3 border border-surface-100 dark:border-surface-700">
-          <h4 className="text-sm font-semibold text-surface-800 dark:text-surface-200">Renew Subscription</h4>
+        <div className="bg-card-inset rounded-xl p-4 space-y-3 border border-border-muted">
+          <h4 className="text-sm font-semibold text-text-primary">Renew Subscription</h4>
           {formError && (
             <p className="text-xs text-red-500 font-medium" role="alert">{formError}</p>
           )}

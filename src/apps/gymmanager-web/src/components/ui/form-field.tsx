@@ -24,7 +24,7 @@ export function FormField({
       {label && (
         <label
           htmlFor={htmlFor}
-          className="block text-sm font-medium text-surface-700 dark:text-surface-300"
+          className="block text-sm font-medium text-text-secondary"
         >
           {label}
           {required && (
@@ -36,7 +36,7 @@ export function FormField({
       )}
       {children}
       {hint && !error && (
-        <p className="text-xs text-surface-400 dark:text-surface-500">{hint}</p>
+        <p className="text-xs text-text-muted">{hint}</p>
       )}
       {error && (
         <p className="text-xs text-red-500 font-medium" role="alert" aria-live="polite">

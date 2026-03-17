@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
+import { Spinner } from "./spinner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Column<T> {
@@ -46,16 +47,16 @@ export function DataTable<T>({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <div className="overflow-x-auto rounded-2xl border border-surface-100 dark:border-transparent shadow-sm bg-card">
-        <table className="min-w-full divide-y divide-surface-100 dark:divide-surface-700">
+      <div className="overflow-x-auto rounded-2xl border border-border shadow-sm bg-card">
+        <table className="min-w-full divide-y divide-border-muted">
           <thead>
-            <tr className="bg-surface-50/80 dark:bg-surface-800/40">
+            <tr className="bg-table-header">
               {columns.map((col) => (
                 <th
                   key={col.key}
                   scope="col"
                   className={cn(
-                    "px-4 py-3.5 text-left text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider",
+                    "px-4 py-3.5 text-left text-xs font-semibold text-text-muted uppercase tracking-wider",
                     col.className
                   )}
                 >
@@ -64,21 +65,18 @@ export function DataTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-surface-50 dark:divide-surface-700">
+          <tbody className="divide-y divide-table-divider">
             {isLoading ? (
               <tr>
                 <td colSpan={columns.length} className="py-16 text-center">
-                  <div className="flex flex-col items-center gap-3 text-surface-400 dark:text-surface-500">
-                    <div className="w-8 h-8 border-2 border-primary-500/30 border-t-primary-500 rounded-full animate-spin" />
-                    <span className="text-sm">Loading...</span>
-                  </div>
+                  <Spinner label="Loading..." />
                 </td>
               </tr>
             ) : data.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="py-16 text-center text-sm text-surface-400 dark:text-surface-500"
+                  className="py-16 text-center text-sm text-text-muted"
                 >
                   {emptyMessage}
                 </td>
@@ -87,13 +85,13 @@ export function DataTable<T>({
               data.map((item, rowIndex) => (
                 <tr
                   key={rowIndex}
-                  className="hover:bg-primary-50/30 dark:hover:bg-surface-700/30 transition-colors"
+                  className="hover:bg-table-row-hover transition-colors"
                 >
                   {columns.map((col) => (
                     <td
                       key={col.key}
                       className={cn(
-                        "px-4 py-3.5 text-sm text-surface-700 dark:text-surface-300 whitespace-nowrap",
+                        "px-4 py-3.5 text-sm text-text-secondary whitespace-nowrap",
                         col.className
                       )}
                     >
@@ -109,12 +107,12 @@ export function DataTable<T>({
 
       {pagination && pagination.totalCount > 0 && (
         <div className="flex items-center justify-between px-1">
-          <p className="text-sm text-surface-500 dark:text-surface-400">
+          <p className="text-sm text-text-secondary">
             Showing{" "}
-            <span className="font-semibold text-surface-700 dark:text-surface-300">{startItem}</span>
+            <span className="font-semibold text-text-secondary">{startItem}</span>
             {" - "}
-            <span className="font-semibold text-surface-700 dark:text-surface-300">{endItem}</span> of{" "}
-            <span className="font-semibold text-surface-700 dark:text-surface-300">
+            <span className="font-semibold text-text-secondary">{endItem}</span> of{" "}
+            <span className="font-semibold text-text-secondary">
               {pagination.totalCount}
             </span>
           </p>
@@ -129,7 +127,7 @@ export function DataTable<T>({
               <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               Prev
             </Button>
-            <span className="text-sm text-surface-600 dark:text-surface-400 px-2 tabular-nums">
+            <span className="text-sm text-text-secondary px-2 tabular-nums">
               {pagination.page} / {totalPages}
             </span>
             <Button

@@ -52,6 +52,78 @@
   --color-sidebar-hover: #1c2233;
   --color-sidebar-active: #1e2a3a;
   --color-sidebar-border: #1f2738;
+
+  /* Page backgrounds */
+  --color-page: #f8fafc;
+  --color-page-inset: #f1f5f9;
+
+  /* Text hierarchy */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+  --color-text-inverted: #ffffff;
+
+  /* Borders */
+  --color-border: #e2e8f0;
+  --color-border-muted: #f1f5f9;
+
+  /* Interactive */
+  --color-hover: #f1f5f9;
+  --color-table-header: rgba(248, 250, 252, 0.8);
+  --color-table-row-hover: rgba(255, 247, 237, 0.3);
+  --color-table-divider: #f8fafc;
+
+  /* TopBar */
+  --color-topbar: rgba(255, 255, 255, 0.8);
+  --color-topbar-border: #f1f5f9;
+
+  /* Feedback */
+  --color-error-bg: #fef2f2;
+  --color-error-border: #fecaca;
+  --color-error-text: #dc2626;
+  --color-success-bg: #ecfdf5;
+  --color-success-border: #a7f3d0;
+  --color-success-text: #047857;
+
+  /* Notification */
+  --color-dot-border: #ffffff;
+
+  /* Badge tokens */
+  --color-badge-active-bg: #ecfdf5;
+  --color-badge-active-text: #047857;
+  --color-badge-active-dot: #10b981;
+  --color-badge-frozen-bg: #eff6ff;
+  --color-badge-frozen-text: #1d4ed8;
+  --color-badge-frozen-dot: #3b82f6;
+  --color-badge-expired-bg: #f1f5f9;
+  --color-badge-expired-text: #475569;
+  --color-badge-expired-dot: #94a3b8;
+  --color-badge-cancelled-bg: #fef2f2;
+  --color-badge-cancelled-text: #dc2626;
+  --color-badge-cancelled-dot: #ef4444;
+
+  /* Sidebar nav tokens */
+  --color-nav-active-bg: #fff7ed;
+  --color-nav-active-text: #ea580c;
+  --color-nav-active-icon-bg: #ffedd5;
+  --color-nav-hover-bg: #f1f5f9;
+  --color-nav-icon-bg: #f1f5f9;
+  --color-nav-icon-hover-bg: #e2e8f0;
+
+  /* Auth tokens (always dark bg, no light/dark toggle needed) */
+  --color-auth-card-bg: rgba(255, 255, 255, 0.04);
+  --color-auth-card-border: rgba(255, 255, 255, 0.06);
+  --color-auth-input-bg: rgba(255, 255, 255, 0.06);
+  --color-auth-input-border: rgba(255, 255, 255, 0.1);
+  --color-auth-error-bg: rgba(239, 68, 68, 0.1);
+  --color-auth-error-border: rgba(239, 68, 68, 0.2);
+
+  /* Danger feedback */
+  --color-danger-bg: #fef2f2;
+
+  /* Upgrade card */
+  --color-upgrade-bg: #fff7ed;
+  --color-upgrade-border: #ffedd5;
 }
 
 /* Dark mode overrides for semantic tokens */
@@ -60,6 +132,66 @@
   --color-card-inset: #1f2535;
   --color-sidebar-bg: #141821;
   --color-sidebar-border-color: #1f2738;
+
+  /* Page backgrounds */
+  --color-page: #141821;
+  --color-page-inset: #1a1f2e;
+
+  /* Text hierarchy */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #64748b;
+  --color-text-inverted: #0f172a;
+
+  /* Borders */
+  --color-border: transparent;
+  --color-border-muted: #2d3548;
+
+  /* Interactive */
+  --color-hover: #2d3548;
+  --color-table-header: rgba(36, 43, 61, 0.4);
+  --color-table-row-hover: rgba(45, 53, 72, 0.3);
+  --color-table-divider: #2d3548;
+
+  /* TopBar */
+  --color-topbar: rgba(26, 31, 46, 0.8);
+  --color-topbar-border: #2d3548;
+
+  /* Feedback */
+  --color-error-bg: rgba(153, 27, 27, 0.2);
+  --color-error-border: rgba(153, 27, 27, 0.5);
+  --color-error-text: #f87171;
+  --color-success-bg: rgba(6, 78, 59, 0.2);
+  --color-success-border: rgba(6, 78, 59, 0.5);
+  --color-success-text: #34d399;
+
+  /* Notification */
+  --color-dot-border: #1a1f2e;
+
+  /* Badge tokens */
+  --color-badge-active-bg: rgba(6, 78, 59, 0.2);
+  --color-badge-active-text: #34d399;
+  --color-badge-frozen-bg: rgba(30, 58, 138, 0.2);
+  --color-badge-frozen-text: #60a5fa;
+  --color-badge-expired-bg: rgba(45, 53, 72, 0.5);
+  --color-badge-expired-text: #94a3b8;
+  --color-badge-cancelled-bg: rgba(153, 27, 27, 0.2);
+  --color-badge-cancelled-text: #f87171;
+
+  /* Sidebar nav tokens */
+  --color-nav-active-bg: rgba(249, 115, 22, 0.15);
+  --color-nav-active-text: #fb923c;
+  --color-nav-active-icon-bg: rgba(249, 115, 22, 0.2);
+  --color-nav-hover-bg: rgba(255, 255, 255, 0.05);
+  --color-nav-icon-bg: rgba(255, 255, 255, 0.05);
+  --color-nav-icon-hover-bg: rgba(255, 255, 255, 0.1);
+
+  /* Danger feedback */
+  --color-danger-bg: rgba(153, 27, 27, 0.2);
+
+  /* Upgrade card */
+  --color-upgrade-bg: rgba(249, 115, 22, 0.1);
+  --color-upgrade-border: rgba(249, 115, 22, 0.2);
 }
 
 /* Smooth page transitions */
@@ -154,6 +286,19 @@ body {
 .dark .glass {
   background: rgba(255, 255, 255, 0.03);
   border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Auth input utility */
+.input-auth {
+  background-color: var(--color-auth-input-bg);
+  border-color: var(--color-auth-input-border);
+  color: white;
+}
+.input-auth::placeholder {
+  color: var(--color-surface-500);
+}
+.input-auth:focus {
+  border-color: var(--color-primary-500);
 }
 
 /* Skeleton loading animation */

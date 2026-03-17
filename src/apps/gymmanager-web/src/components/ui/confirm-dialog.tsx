@@ -60,7 +60,7 @@ export function ConfirmDialog({
       className={cn(
         "fixed inset-0 z-50 m-auto w-full max-w-md rounded-2xl p-6 shadow-2xl",
         "bg-card",
-        "border border-surface-100 dark:border-transparent",
+        "border border-border",
         "backdrop:bg-black/60 backdrop:backdrop-blur-sm",
         "open:flex open:flex-col open:gap-4"
       )}
@@ -73,20 +73,20 @@ export function ConfirmDialog({
     >
       <div className="flex items-start gap-4">
         {variant === "danger" && (
-          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-danger-bg flex items-center justify-center">
             <AlertTriangle className="w-5 h-5 text-red-500" aria-hidden="true" />
           </div>
         )}
         <div className="flex-1 min-w-0">
           <h2
             id="dialog-title"
-            className="text-base font-semibold text-surface-900 dark:text-surface-100"
+            className="text-base font-semibold text-text-primary"
           >
             {title}
           </h2>
           <p
             id="dialog-description"
-            className="mt-1.5 text-sm text-surface-500 dark:text-surface-400 leading-relaxed"
+            className="mt-1.5 text-sm text-text-muted leading-relaxed"
           >
             {description}
           </p>
@@ -94,7 +94,7 @@ export function ConfirmDialog({
         <button
           type="button"
           onClick={onCancel}
-          className="flex-shrink-0 p-1 rounded-lg text-surface-400 hover:text-surface-600 hover:bg-surface-100 dark:hover:text-surface-200 dark:hover:bg-surface-700 transition-all"
+          className="flex-shrink-0 p-1 rounded-lg text-text-muted hover:text-text-secondary hover:bg-hover transition-all"
           aria-label="Close dialog"
         >
           <X className="w-4 h-4" aria-hidden="true" />
