@@ -24,6 +24,11 @@ dependencies:
   # Secure storage
   flutter_secure_storage: ^9.2.2
 
+  # Offline / local storage
+  sqflite: ^2.4.1
+  path: ^1.9.0
+  connectivity_plus: ^6.1.1
+
   # Utils
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0

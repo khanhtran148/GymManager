@@ -5,7 +5,7 @@ using GymManager.Infrastructure;
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddBackgroundServices();
 
 var host = builder.Build();
