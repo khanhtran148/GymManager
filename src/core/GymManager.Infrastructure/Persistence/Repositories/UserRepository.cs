@@ -1,5 +1,6 @@
 using GymManager.Application.Common.Interfaces;
 using GymManager.Domain.Entities;
+using GymManager.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymManager.Infrastructure.Persistence.Repositories;
@@ -34,5 +35,25 @@ public sealed class UserRepository(GymManagerDbContext db) : IUserRepository
             db.Users.Update(user);
         }
         await db.SaveChangesAsync(ct);
+    }
+
+    public async Task<List<User>> GetByRoleAndHouseAsync(Role role, Guid? gymHouseId, CancellationToken ct = default)
+    {
+        if (gymHouseId.HasValue)
+        {
+            // Return users with the given role that are associated with the gym house via Members or Staff tables
+            return await db.Users
+                .AsNoTracking()
+                .Where(u => u.Role == role && u.DeletedAt == null &&
+                    (db.Members.Any(m => m.UserId == u.Id && m.GymHouseId == gymHouseId && m.DeletedAt == null) ||
+                     db.Staff.Any(s => s.UserId == u.Id && s.GymHouseId == gymHouseId && s.DeletedAt == null)))
+                .ToListAsync(ct);
+        }
+
+        // Chain-wide: all users with the given role
+        return await db.Users
+            .AsNoTracking()
+            .Where(u => u.Role == role && u.DeletedAt == null)
+            .ToListAsync(ct);
     }
 }

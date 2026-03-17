@@ -12,6 +12,11 @@ public sealed class NotificationHub : Hub
         if (tenantId is not null)
             await Groups.AddToGroupAsync(Context.ConnectionId, $"tenant:{tenantId}");
 
+        var userId = Context.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? Context.User?.FindFirst("sub")?.Value;
+        if (userId is not null)
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"user:{userId}");
+
         await base.OnConnectedAsync();
     }
 }
