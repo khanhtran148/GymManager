@@ -56,26 +56,26 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/10">
+    <div className="bg-white/[0.04] backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/[0.06]">
       <div className="flex items-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
           <Dumbbell className="w-5 h-5 text-white" aria-hidden="true" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-white">GymManager</h1>
-          <p className="text-slate-400 text-xs">Management Platform</p>
+          <h1 className="text-xl font-bold text-white tracking-tight">GymManager</h1>
+          <p className="text-surface-500 text-[10px] font-medium uppercase tracking-wider">Pro Dashboard</p>
         </div>
       </div>
 
-      <h2 className="text-2xl font-bold text-white mb-2">Welcome back</h2>
-      <p className="text-slate-400 text-sm mb-6">
+      <h2 className="text-2xl font-bold text-white mb-1.5 tracking-tight">Welcome back</h2>
+      <p className="text-surface-400 text-sm mb-6">
         Sign in to your account to continue
       </p>
 
       {serverError && (
         <div
           role="alert"
-          className="mb-4 px-4 py-3 bg-red-500/20 border border-red-500/40 rounded-lg text-red-300 text-sm"
+          className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm"
         >
           {serverError}
         </div>
@@ -94,7 +94,7 @@ export default function LoginPage() {
             autoComplete="email"
             placeholder="you@example.com"
             error={!!errors.email}
-            className="bg-white/10 border-white/20 text-white placeholder-slate-400 focus:border-indigo-400"
+            className="bg-white/[0.06] border-white/10 text-white placeholder-surface-500 focus:border-primary-500 focus:ring-primary-500/30"
             {...register("email")}
           />
         </FormField>
@@ -109,9 +109,9 @@ export default function LoginPage() {
             id="password"
             type="password"
             autoComplete="current-password"
-            placeholder="••••••••"
+            placeholder="Enter your password"
             error={!!errors.password}
-            className="bg-white/10 border-white/20 text-white placeholder-slate-400 focus:border-indigo-400"
+            className="bg-white/[0.06] border-white/10 text-white placeholder-surface-500 focus:border-primary-500 focus:ring-primary-500/30"
             {...register("password")}
           />
         </FormField>
@@ -127,11 +127,11 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-400">
+      <p className="mt-6 text-center text-sm text-surface-500">
         Don&apos;t have an account?{" "}
         <Link
           href="/register"
-          className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+          className="text-primary-400 hover:text-primary-300 font-semibold transition-colors"
         >
           Create one
         </Link>

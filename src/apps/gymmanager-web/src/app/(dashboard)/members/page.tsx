@@ -47,7 +47,7 @@ export default function MembersPage() {
       key: "memberCode",
       header: "Code",
       render: (m: MemberDto) => (
-        <span className="font-mono text-xs text-gray-500">{m.memberCode}</span>
+        <span className="font-mono text-xs text-surface-400 dark:text-surface-500">{m.memberCode}</span>
       ),
     },
     {
@@ -56,7 +56,7 @@ export default function MembersPage() {
       render: (m: MemberDto) => (
         <Link
           href={`/members/${m.id}`}
-          className="font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+          className="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
         >
           {m.fullName}
         </Link>
@@ -66,14 +66,14 @@ export default function MembersPage() {
       key: "email",
       header: "Email",
       render: (m: MemberDto) => (
-        <span className="text-gray-600">{m.email}</span>
+        <span className="text-surface-600 dark:text-surface-300">{m.email}</span>
       ),
     },
     {
       key: "phone",
       header: "Phone",
       render: (m: MemberDto) => (
-        <span className="text-gray-600">{m.phone ?? "—"}</span>
+        <span className="text-surface-500 dark:text-surface-400">{m.phone ?? "—"}</span>
       ),
     },
     {
@@ -85,7 +85,7 @@ export default function MembersPage() {
       key: "joinedAt",
       header: "Joined",
       render: (m: MemberDto) => (
-        <span className="text-gray-500 text-xs">
+        <span className="text-surface-400 dark:text-surface-500 text-xs tabular-nums">
           {new Date(m.joinedAt).toLocaleDateString()}
         </span>
       ),
@@ -96,7 +96,7 @@ export default function MembersPage() {
     return (
       <div
         role="alert"
-        className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+        className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-xl text-red-600 dark:text-red-400 text-sm"
       >
         Failed to load members. Please refresh the page.
       </div>
@@ -113,7 +113,7 @@ export default function MembersPage() {
         >
           <div className="relative">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400 dark:text-surface-500"
               aria-hidden="true"
             />
             <Input
@@ -121,7 +121,7 @@ export default function MembersPage() {
               placeholder="Search members..."
               value={searchInput}
               onChange={handleSearchChange}
-              className="pl-9 w-64"
+              className="pl-10 w-64"
               aria-label="Search members"
             />
           </div>

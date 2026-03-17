@@ -46,16 +46,16 @@ export function DataTable<T>({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <div className="overflow-x-auto rounded-xl border border-gray-100 shadow-sm">
-        <table className="min-w-full divide-y divide-gray-100">
-          <thead className="bg-gray-50">
-            <tr>
+      <div className="overflow-x-auto rounded-2xl border border-surface-100 dark:border-transparent shadow-sm bg-card">
+        <table className="min-w-full divide-y divide-surface-100 dark:divide-surface-700">
+          <thead>
+            <tr className="bg-surface-50/80 dark:bg-surface-800/40">
               {columns.map((col) => (
                 <th
                   key={col.key}
                   scope="col"
                   className={cn(
-                    "px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider",
+                    "px-4 py-3.5 text-left text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider",
                     col.className
                   )}
                 >
@@ -64,32 +64,12 @@ export function DataTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-50">
+          <tbody className="divide-y divide-surface-50 dark:divide-surface-700">
             {isLoading ? (
               <tr>
-                <td colSpan={columns.length} className="py-12 text-center">
-                  <div className="flex items-center justify-center gap-2 text-gray-400">
-                    <svg
-                      className="h-5 w-5 animate-spin"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      />
-                    </svg>
+                <td colSpan={columns.length} className="py-16 text-center">
+                  <div className="flex flex-col items-center gap-3 text-surface-400 dark:text-surface-500">
+                    <div className="w-8 h-8 border-2 border-primary-500/30 border-t-primary-500 rounded-full animate-spin" />
                     <span className="text-sm">Loading...</span>
                   </div>
                 </td>
@@ -98,7 +78,7 @@ export function DataTable<T>({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="py-12 text-center text-sm text-gray-400"
+                  className="py-16 text-center text-sm text-surface-400 dark:text-surface-500"
                 >
                   {emptyMessage}
                 </td>
@@ -107,13 +87,13 @@ export function DataTable<T>({
               data.map((item, rowIndex) => (
                 <tr
                   key={rowIndex}
-                  className="hover:bg-gray-50/50 transition-colors"
+                  className="hover:bg-primary-50/30 dark:hover:bg-surface-700/30 transition-colors"
                 >
                   {columns.map((col) => (
                     <td
                       key={col.key}
                       className={cn(
-                        "px-4 py-3 text-sm text-gray-700 whitespace-nowrap",
+                        "px-4 py-3.5 text-sm text-surface-700 dark:text-surface-300 whitespace-nowrap",
                         col.className
                       )}
                     >
@@ -129,15 +109,14 @@ export function DataTable<T>({
 
       {pagination && pagination.totalCount > 0 && (
         <div className="flex items-center justify-between px-1">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-surface-500 dark:text-surface-400">
             Showing{" "}
-            <span className="font-medium text-gray-700">{startItem}</span>
-            {" – "}
-            <span className="font-medium text-gray-700">{endItem}</span> of{" "}
-            <span className="font-medium text-gray-700">
+            <span className="font-semibold text-surface-700 dark:text-surface-300">{startItem}</span>
+            {" - "}
+            <span className="font-semibold text-surface-700 dark:text-surface-300">{endItem}</span> of{" "}
+            <span className="font-semibold text-surface-700 dark:text-surface-300">
               {pagination.totalCount}
-            </span>{" "}
-            results
+            </span>
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -150,8 +129,8 @@ export function DataTable<T>({
               <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               Prev
             </Button>
-            <span className="text-sm text-gray-600 px-2">
-              Page {pagination.page} of {totalPages}
+            <span className="text-sm text-surface-600 dark:text-surface-400 px-2 tabular-nums">
+              {pagination.page} / {totalPages}
             </span>
             <Button
               variant="secondary"

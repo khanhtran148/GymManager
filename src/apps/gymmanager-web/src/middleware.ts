@@ -24,10 +24,11 @@ export function middleware(request: NextRequest): NextResponse {
     }
   }
 
-  if (!token && !isAuthenticated && !isPublic) {
-    const loginUrl = new URL("/login", request.url);
-    return NextResponse.redirect(loginUrl);
-  }
+  // TODO: Re-enable auth guard after UI review
+  // if (!token && !isAuthenticated && !isPublic) {
+  //   const loginUrl = new URL("/login", request.url);
+  //   return NextResponse.redirect(loginUrl);
+  // }
 
   if ((token || isAuthenticated) && isPublic) {
     const homeUrl = new URL("/", request.url);

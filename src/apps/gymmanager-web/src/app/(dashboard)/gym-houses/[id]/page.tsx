@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, CheckCircle } from "lucide-react";
 import { useGymHouse, useUpdateGymHouse } from "@/hooks/use-gym-houses";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -101,29 +101,9 @@ export default function GymHouseDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12 text-gray-400">
-        <svg
-          className="h-6 w-6 animate-spin mr-2"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-          />
-        </svg>
-        <span>Loading gym house...</span>
+      <div className="flex items-center justify-center py-16 text-surface-400 dark:text-surface-500">
+        <div className="w-6 h-6 border-2 border-primary-500/30 border-t-primary-500 rounded-full animate-spin mr-3" />
+        <span className="text-sm">Loading gym house...</span>
       </div>
     );
   }
@@ -132,10 +112,10 @@ export default function GymHouseDetailPage() {
     return (
       <div
         role="alert"
-        className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+        className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-xl text-red-600 dark:text-red-400 text-sm"
       >
         Gym house not found or failed to load.{" "}
-        <Link href="/gym-houses" className="underline">
+        <Link href="/gym-houses" className="underline font-medium">
           Back to gym houses
         </Link>
       </div>
@@ -147,14 +127,14 @@ export default function GymHouseDetailPage() {
       <div className="flex items-center gap-3">
         <Link
           href="/gym-houses"
-          className="text-gray-400 hover:text-gray-600 transition-colors"
+          className="p-1.5 rounded-lg text-surface-400 hover:text-surface-600 hover:bg-surface-100 dark:hover:text-surface-300 dark:hover:bg-surface-800 transition-all"
           aria-label="Back to gym houses"
         >
           <ChevronLeft className="w-5 h-5" aria-hidden="true" />
         </Link>
         <div>
-          <p className="text-sm text-gray-500">Gym Houses</p>
-          <h2 className="text-xl font-bold text-gray-900">{gymHouse.name}</h2>
+          <p className="text-xs font-medium text-surface-400 dark:text-surface-500 uppercase tracking-wider">Gym Houses</p>
+          <h2 className="text-xl font-bold text-surface-900 dark:text-white tracking-tight">{gymHouse.name}</h2>
         </div>
       </div>
 
@@ -162,7 +142,7 @@ export default function GymHouseDetailPage() {
         {serverError && (
           <div
             role="alert"
-            className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+            className="mb-5 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-xl text-red-600 dark:text-red-400 text-sm"
           >
             {serverError}
           </div>
@@ -170,8 +150,9 @@ export default function GymHouseDetailPage() {
         {saved && (
           <div
             role="status"
-            className="mb-5 px-4 py-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm"
+            className="mb-5 px-4 py-3 bg-accent-50 dark:bg-accent-900/20 border border-accent-200 dark:border-accent-800/50 rounded-xl text-accent-700 dark:text-accent-400 text-sm flex items-center gap-2"
           >
+            <CheckCircle className="w-4 h-4" aria-hidden="true" />
             Gym house updated successfully.
           </div>
         )}
@@ -245,12 +226,12 @@ export default function GymHouseDetailPage() {
             label="Operating Hours"
             htmlFor="operatingHours"
             error={errors.operatingHours?.message}
-            hint="Optional — e.g. Mon–Fri 6am–10pm"
+            hint="Optional — e.g. Mon-Fri 6am-10pm"
           >
             <Input
               id="operatingHours"
               type="text"
-              placeholder="Mon–Fri 6:00am–10:00pm, Sat–Sun 8:00am–8:00pm"
+              placeholder="Mon-Fri 6:00am-10:00pm, Sat-Sun 8:00am-8:00pm"
               error={!!errors.operatingHours}
               {...register("operatingHours")}
             />

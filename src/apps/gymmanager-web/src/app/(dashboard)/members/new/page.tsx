@@ -85,14 +85,14 @@ export default function NewMemberPage() {
       <div className="flex items-center gap-3">
         <Link
           href="/members"
-          className="text-gray-400 hover:text-gray-600 transition-colors"
+          className="p-1.5 rounded-lg text-surface-400 hover:text-surface-600 hover:bg-surface-100 dark:hover:text-surface-300 dark:hover:bg-surface-800 transition-all"
           aria-label="Back to members"
         >
           <ChevronLeft className="w-5 h-5" aria-hidden="true" />
         </Link>
         <div>
-          <p className="text-sm text-gray-500">Members</p>
-          <h2 className="text-xl font-bold text-gray-900">Add New Member</h2>
+          <p className="text-xs font-medium text-surface-400 dark:text-surface-500 uppercase tracking-wider">Members</p>
+          <h2 className="text-xl font-bold text-surface-900 dark:text-white tracking-tight">Add New Member</h2>
         </div>
       </div>
 
@@ -100,7 +100,7 @@ export default function NewMemberPage() {
         {serverError && (
           <div
             role="alert"
-            className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+            className="mb-5 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-xl text-red-600 dark:text-red-400 text-sm"
           >
             {serverError}
           </div>

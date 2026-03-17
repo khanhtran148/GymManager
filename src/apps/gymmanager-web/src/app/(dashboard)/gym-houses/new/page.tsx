@@ -84,14 +84,14 @@ export default function NewGymHousePage() {
       <div className="flex items-center gap-3">
         <Link
           href="/gym-houses"
-          className="text-gray-400 hover:text-gray-600 transition-colors"
+          className="p-1.5 rounded-lg text-surface-400 hover:text-surface-600 hover:bg-surface-100 dark:hover:text-surface-300 dark:hover:bg-surface-800 transition-all"
           aria-label="Back to gym houses"
         >
           <ChevronLeft className="w-5 h-5" aria-hidden="true" />
         </Link>
         <div>
-          <p className="text-sm text-gray-500">Gym Houses</p>
-          <h2 className="text-xl font-bold text-gray-900">Add New Gym House</h2>
+          <p className="text-xs font-medium text-surface-400 dark:text-surface-500 uppercase tracking-wider">Gym Houses</p>
+          <h2 className="text-xl font-bold text-surface-900 dark:text-white tracking-tight">Add New Gym House</h2>
         </div>
       </div>
 
@@ -99,7 +99,7 @@ export default function NewGymHousePage() {
         {serverError && (
           <div
             role="alert"
-            className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+            className="mb-5 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-xl text-red-600 dark:text-red-400 text-sm"
           >
             {serverError}
           </div>
@@ -174,12 +174,12 @@ export default function NewGymHousePage() {
             label="Operating Hours"
             htmlFor="operatingHours"
             error={errors.operatingHours?.message}
-            hint="Optional — e.g. Mon–Fri 6am–10pm"
+            hint="Optional — e.g. Mon-Fri 6am-10pm"
           >
             <Input
               id="operatingHours"
               type="text"
-              placeholder="Mon–Fri 6:00am–10:00pm, Sat–Sun 8:00am–8:00pm"
+              placeholder="Mon-Fri 6:00am-10:00pm, Sat-Sun 8:00am-8:00pm"
               error={!!errors.operatingHours}
               {...register("operatingHours")}
             />

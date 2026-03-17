@@ -1,13 +1,24 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Building2, CreditCard } from "lucide-react";
+import {
+  Users,
+  Building2,
+  CreditCard,
+  TrendingUp,
+  ArrowRight,
+  Activity,
+  Target,
+  Flame,
+} from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
 import { get } from "@/lib/api-client";
 import type { GymHouseDto } from "@/types/gym-house";
 import type { PaginatedResponse } from "@/types/member";
 import type { MemberDto } from "@/types/member";
 import { useAuthStore } from "@/stores/auth-store";
+import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -28,89 +39,184 @@ export default function DashboardPage() {
   const activeCount =
     members?.items.filter((m) => m.status === "Active").length ?? 0;
 
+  const greeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">
-          Welcome back{user?.email ? `, ${user.email.split("@")[0]}` : ""}
-        </h2>
-        <p className="text-gray-500 mt-1">
-          Here&apos;s what&apos;s happening with your gyms today.
-        </p>
+    <div className="space-y-6 max-w-7xl">
+      {/* Welcome section */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 p-6 sm:p-8 text-white">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" aria-hidden="true" />
+        <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-white/5 rounded-full translate-y-1/2" aria-hidden="true" />
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-1">
+            <Flame className="w-5 h-5 text-primary-200" aria-hidden="true" />
+            <span className="text-xs font-semibold text-primary-200 uppercase tracking-wider">Dashboard</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            {greeting()}
+            {user?.email ? `, ${user.email.split("@")[0]}` : ""}
+          </h2>
+          <p className="text-primary-100 mt-1 text-sm sm:text-base max-w-lg">
+            Here&apos;s what&apos;s happening with your gyms today. Stay on track and keep growing.
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Stats grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total Members"
-          value={membersLoading ? "—" : (members?.totalCount ?? 0)}
+          value={membersLoading ? "..." : (members?.totalCount ?? 0)}
           icon={Users}
-          iconColor="text-indigo-600"
-          iconBg="bg-indigo-50"
+          iconColor="text-primary-500"
+          iconBg="bg-primary-50 dark:bg-primary-900/20"
+          trend={{ value: 12, label: "vs last month" }}
         />
         <StatCard
           label="Active Subscriptions"
-          value={membersLoading ? "—" : activeCount}
+          value={membersLoading ? "..." : activeCount}
           icon={CreditCard}
-          iconColor="text-green-600"
-          iconBg="bg-green-50"
+          iconColor="text-accent-500"
+          iconBg="bg-accent-50 dark:bg-accent-900/20"
+          trend={{ value: 8, label: "vs last month" }}
         />
         <StatCard
           label="Gym Houses"
-          value={gymLoading ? "—" : (gymHouses?.length ?? 0)}
+          value={gymLoading ? "..." : (gymHouses?.length ?? 0)}
           icon={Building2}
-          iconColor="text-amber-600"
-          iconBg="bg-amber-50"
+          iconColor="text-blue-500"
+          iconBg="bg-blue-50 dark:bg-blue-900/20"
+        />
+        <StatCard
+          label="Revenue"
+          value="$0"
+          icon={TrendingUp}
+          iconColor="text-violet-500"
+          iconBg="bg-violet-50 dark:bg-violet-900/20"
+          trend={{ value: 0, label: "Phase 2" }}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-base font-semibold text-gray-900 mb-4">Quick Actions</h3>
-          <div className="space-y-2">
-            <a
-              href="/gym-houses/new"
-              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
-            >
-              <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center group-hover:bg-amber-100 transition-colors">
-                <Building2 className="w-4 h-4 text-amber-600" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-800">Add Gym House</p>
-                <p className="text-xs text-gray-500">Register a new gym location</p>
-              </div>
-            </a>
-            <a
-              href="/members/new"
-              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
-            >
-              <div className="w-9 h-9 rounded-lg bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
-                <Users className="w-4 h-4 text-indigo-600" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-800">Add Member</p>
-                <p className="text-xs text-gray-500">Enroll a new gym member</p>
-              </div>
-            </a>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Quick Actions */}
+        <div className="lg:col-span-2 bg-card rounded-2xl border border-surface-100 dark:border-transparent shadow-sm p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-base font-semibold text-surface-900 dark:text-white">Quick Actions</h3>
+            <Activity className="w-4 h-4 text-surface-400" aria-hidden="true" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              {
+                href: "/gym-houses/new",
+                icon: Building2,
+                title: "Add Gym House",
+                desc: "Register a new gym location",
+                color: "text-blue-500",
+                bg: "bg-blue-50 dark:bg-blue-900/20",
+                hoverBg: "hover:bg-blue-50/50 dark:hover:bg-blue-900/10",
+              },
+              {
+                href: "/members/new",
+                icon: Users,
+                title: "Add Member",
+                desc: "Enroll a new gym member",
+                color: "text-primary-500",
+                bg: "bg-primary-50 dark:bg-primary-900/20",
+                hoverBg: "hover:bg-primary-50/50 dark:hover:bg-primary-900/10",
+              },
+              {
+                href: "/members",
+                icon: Target,
+                title: "View Members",
+                desc: "Browse and manage all members",
+                color: "text-accent-500",
+                bg: "bg-accent-50 dark:bg-accent-900/20",
+                hoverBg: "hover:bg-accent-50/50 dark:hover:bg-accent-900/10",
+              },
+              {
+                href: "/gym-houses",
+                icon: TrendingUp,
+                title: "View Gym Houses",
+                desc: "Manage all gym locations",
+                color: "text-violet-500",
+                bg: "bg-violet-50 dark:bg-violet-900/20",
+                hoverBg: "hover:bg-violet-50/50 dark:hover:bg-violet-900/10",
+              },
+            ].map((action) => (
+              <Link
+                key={action.href}
+                href={action.href}
+                className={cn(
+                  "flex items-center gap-3.5 p-3.5 rounded-xl transition-all duration-200 group border border-transparent",
+                  action.hoverBg,
+                  "hover:border-surface-100 dark:hover:border-surface-700/50"
+                )}
+              >
+                <div
+                  className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all",
+                    action.bg
+                  )}
+                >
+                  <action.icon className={cn("w-4.5 h-4.5", action.color)} aria-hidden="true" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-surface-800 dark:text-surface-200">
+                    {action.title}
+                  </p>
+                  <p className="text-xs text-surface-400 dark:text-surface-500">{action.desc}</p>
+                </div>
+                <ArrowRight
+                  className="w-4 h-4 text-surface-300 dark:text-surface-600 group-hover:text-surface-500 dark:group-hover:text-surface-400 group-hover:translate-x-0.5 transition-all"
+                  aria-hidden="true"
+                />
+              </Link>
+            ))}
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-base font-semibold text-gray-900 mb-4">System Overview</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center py-2 border-b border-gray-50">
-              <span className="text-sm text-gray-500">Platform Status</span>
-              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-600">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" aria-hidden="true" />
+        {/* System Overview */}
+        <div className="bg-card rounded-2xl border border-surface-100 dark:border-transparent shadow-sm p-6">
+          <h3 className="text-base font-semibold text-surface-900 dark:text-white mb-5">System Overview</h3>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center py-2.5 border-b border-surface-50 dark:border-surface-700">
+              <span className="text-sm text-surface-500 dark:text-surface-400">Status</span>
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-600 dark:text-accent-400">
+                <span className="relative w-2 h-2 rounded-full bg-accent-500">
+                  <span className="absolute inset-0 rounded-full bg-accent-500 animate-ping opacity-75" aria-hidden="true" />
+                </span>
                 Operational
               </span>
             </div>
-            <div className="flex justify-between items-center py-2 border-b border-gray-50">
-              <span className="text-sm text-gray-500">Phase</span>
-              <span className="text-sm font-medium text-gray-800">1 — Foundation</span>
+            <div className="flex justify-between items-center py-2.5 border-b border-surface-50 dark:border-surface-700">
+              <span className="text-sm text-surface-500 dark:text-surface-400">Phase</span>
+              <span className="text-sm font-semibold text-surface-800 dark:text-surface-200">
+                1 — Foundation
+              </span>
             </div>
-            <div className="flex justify-between items-center py-2">
-              <span className="text-sm text-gray-500">API Version</span>
-              <span className="text-sm font-medium text-gray-800">v1</span>
+            <div className="flex justify-between items-center py-2.5 border-b border-surface-50 dark:border-surface-700">
+              <span className="text-sm text-surface-500 dark:text-surface-400">API Version</span>
+              <span className="text-sm font-semibold text-surface-800 dark:text-surface-200">v1</span>
+            </div>
+            <div className="flex justify-between items-center py-2.5">
+              <span className="text-sm text-surface-500 dark:text-surface-400">Uptime</span>
+              <span className="text-sm font-semibold text-surface-800 dark:text-surface-200">99.9%</span>
+            </div>
+          </div>
+
+          {/* Phase progress */}
+          <div className="mt-5 pt-4 border-t border-surface-100 dark:border-surface-700">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-surface-500 dark:text-surface-400">Phase 1 Progress</span>
+              <span className="text-xs font-bold text-primary-500">60%</span>
+            </div>
+            <div className="h-2 bg-surface-100 dark:bg-surface-700 rounded-full overflow-hidden">
+              <div className="h-full w-3/5 bg-gradient-to-r from-primary-500 to-primary-400 rounded-full animate-progress" />
             </div>
           </div>
         </div>

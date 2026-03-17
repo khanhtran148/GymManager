@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { HTMLAttributes, LabelHTMLAttributes } from "react";
+import type { HTMLAttributes } from "react";
 
 interface FormFieldProps extends HTMLAttributes<HTMLDivElement> {
   label?: string;
@@ -24,11 +24,11 @@ export function FormField({
       {label && (
         <label
           htmlFor={htmlFor}
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-surface-700 dark:text-surface-300"
         >
           {label}
           {required && (
-            <span className="ml-0.5 text-red-500" aria-hidden="true">
+            <span className="ml-0.5 text-primary-500" aria-hidden="true">
               *
             </span>
           )}
@@ -36,10 +36,10 @@ export function FormField({
       )}
       {children}
       {hint && !error && (
-        <p className="text-xs text-gray-500">{hint}</p>
+        <p className="text-xs text-surface-400 dark:text-surface-500">{hint}</p>
       )}
       {error && (
-        <p className="text-xs text-red-600" role="alert" aria-live="polite">
+        <p className="text-xs text-red-500 font-medium" role="alert" aria-live="polite">
           {error}
         </p>
       )}

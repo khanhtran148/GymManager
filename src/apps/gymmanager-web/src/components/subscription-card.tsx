@@ -86,34 +86,34 @@ export function SubscriptionCard({ subscription, memberId }: SubscriptionCardPro
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+    <div className="bg-card rounded-2xl border border-surface-100 dark:border-transparent shadow-sm p-5 space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-semibold text-gray-900">{subscription.type}</span>
+            <span className="font-semibold text-surface-900 dark:text-white">{subscription.type}</span>
             <Badge status={subscription.status} />
           </div>
-          <p className="text-xs text-gray-400 font-mono">{subscription.id.slice(0, 8)}…</p>
+          <p className="text-xs text-surface-400 dark:text-surface-500 font-mono">{subscription.id.slice(0, 8)}...</p>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-lg font-bold text-gray-900">
+          <p className="text-lg font-bold text-surface-900 dark:text-white tabular-nums">
             ${subscription.price.toFixed(2)}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-sm">
-        <div className="flex items-center gap-1.5 text-gray-500">
+        <div className="flex items-center gap-1.5 text-surface-500 dark:text-surface-400">
           <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
           <span>Start:</span>
-          <span className="text-gray-700">
+          <span className="text-surface-700 dark:text-surface-300 font-medium tabular-nums">
             {new Date(subscription.startDate).toLocaleDateString()}
           </span>
         </div>
-        <div className="flex items-center gap-1.5 text-gray-500">
+        <div className="flex items-center gap-1.5 text-surface-500 dark:text-surface-400">
           <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
           <span>End:</span>
-          <span className="text-gray-700">
+          <span className="text-surface-700 dark:text-surface-300 font-medium tabular-nums">
             {new Date(subscription.endDate).toLocaleDateString()}
           </span>
         </div>
@@ -121,7 +121,7 @@ export function SubscriptionCard({ subscription, memberId }: SubscriptionCardPro
           <div className="flex items-center gap-1.5 text-blue-500 col-span-2">
             <Snowflake className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Frozen until:</span>
-            <span className="font-medium">
+            <span className="font-semibold tabular-nums">
               {new Date(subscription.frozenUntil).toLocaleDateString()}
             </span>
           </div>
@@ -130,10 +130,10 @@ export function SubscriptionCard({ subscription, memberId }: SubscriptionCardPro
 
       {/* Renew form */}
       {showRenewForm && (
-        <div className="bg-gray-50 rounded-lg p-4 space-y-3 border border-gray-100">
-          <h4 className="text-sm font-semibold text-gray-800">Renew Subscription</h4>
+        <div className="bg-surface-50 dark:bg-surface-700/30 rounded-xl p-4 space-y-3 border border-surface-100 dark:border-surface-700">
+          <h4 className="text-sm font-semibold text-surface-800 dark:text-surface-200">Renew Subscription</h4>
           {formError && (
-            <p className="text-xs text-red-600" role="alert">{formError}</p>
+            <p className="text-xs text-red-500 font-medium" role="alert">{formError}</p>
           )}
           <div className="grid grid-cols-2 gap-3">
             <FormField label="New Start Date" htmlFor="renew-start" required>
@@ -213,7 +213,7 @@ export function SubscriptionCard({ subscription, memberId }: SubscriptionCardPro
               variant="ghost"
               size="sm"
               onClick={() => setShowCancelDialog(true)}
-              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
             >
               <XCircle className="w-3.5 h-3.5" aria-hidden="true" />
               Cancel
@@ -238,11 +238,11 @@ export function SubscriptionCard({ subscription, memberId }: SubscriptionCardPro
         }}
       />
 
-      {/* Freeze date input shown outside dialog for accessibility */}
+      {/* Freeze date input */}
       {showFreezeDialog && (
-        <div className="bg-blue-50 rounded-lg p-4 space-y-2 border border-blue-100">
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 space-y-2 border border-blue-100 dark:border-blue-800">
           {formError && (
-            <p className="text-xs text-red-600" role="alert">{formError}</p>
+            <p className="text-xs text-red-500 font-medium" role="alert">{formError}</p>
           )}
           <FormField label="Freeze Until" htmlFor="freeze-until" required>
             <Input
