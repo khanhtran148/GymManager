@@ -11,6 +11,10 @@ function getPageTitle(pathname: string): string {
   if (pathname === "/") return "Dashboard";
   if (pathname.startsWith("/gym-houses")) return "Gym Houses";
   if (pathname.startsWith("/members")) return "Members";
+  if (pathname.startsWith("/bookings")) return "Bookings";
+  if (pathname.startsWith("/class-schedules")) return "Class Schedules";
+  if (pathname.startsWith("/time-slots")) return "Time Slots";
+  if (pathname.startsWith("/check-in")) return "Check-in";
   return "GymManager";
 }
 
@@ -18,6 +22,10 @@ function getPageDescription(pathname: string): string {
   if (pathname === "/") return "Welcome back! Here's your overview.";
   if (pathname.startsWith("/gym-houses")) return "Manage your gym locations";
   if (pathname.startsWith("/members")) return "Manage gym members";
+  if (pathname.startsWith("/bookings")) return "Manage member bookings";
+  if (pathname.startsWith("/class-schedules")) return "Manage class schedules";
+  if (pathname.startsWith("/time-slots")) return "Manage time slots";
+  if (pathname.startsWith("/check-in")) return "Check in members";
   return "";
 }
 

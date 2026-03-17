@@ -24,6 +24,10 @@ public static class DependencyInjection
         services.AddScoped<IGymHouseRepository, GymHouseRepository>();
         services.AddScoped<IMemberRepository, MemberRepository>();
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+        services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();
+        services.AddScoped<IClassScheduleRepository, ClassScheduleRepository>();
+        services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddScoped<IWaitlistRepository, WaitlistRepository>();
 
         // Auth Services
         services.AddScoped<ITokenService, JwtTokenService>();

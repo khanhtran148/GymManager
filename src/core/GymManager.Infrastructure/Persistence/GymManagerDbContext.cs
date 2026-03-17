@@ -10,6 +10,10 @@ public sealed class GymManagerDbContext(DbContextOptions<GymManagerDbContext> op
     public DbSet<GymHouse> GymHouses => Set<GymHouse>();
     public DbSet<Member> Members => Set<Member>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
+    public DbSet<TimeSlot> TimeSlots => Set<TimeSlot>();
+    public DbSet<ClassSchedule> ClassSchedules => Set<ClassSchedule>();
+    public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<Waitlist> Waitlists => Set<Waitlist>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
