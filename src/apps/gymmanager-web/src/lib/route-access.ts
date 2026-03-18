@@ -1,57 +1,29 @@
-import { Role, type RoleType } from "@/lib/roles";
-
-interface RouteAccess {
-  path: string;
-  allowedRoles: RoleType[];
-}
-
-const VALID_ROLES = new Set<string>(Object.values(Role));
-
-/**
- * Route-to-role access map. Single source of truth for frontend route guards.
- *
- * Routes are matched from most-specific to least-specific.
- * Unknown routes default to allowed (fail-open for UX; backend enforces security).
- */
-const routeAccessMap: RouteAccess[] = [
-  { path: "/settings/roles/users", allowedRoles: ["Owner"] },
-  { path: "/settings/roles", allowedRoles: ["Owner"] },
-  { path: "/settings", allowedRoles: ["Owner"] },
-  { path: "/finance/pnl", allowedRoles: ["Owner", "HouseManager"] },
-  { path: "/finance/transactions", allowedRoles: ["Owner", "HouseManager", "Staff"] },
-  { path: "/finance", allowedRoles: ["Owner", "HouseManager", "Staff"] },
-  { path: "/staff", allowedRoles: ["Owner", "HouseManager"] },
-  { path: "/shifts", allowedRoles: ["Owner", "HouseManager"] },
-  { path: "/payroll", allowedRoles: ["Owner", "HouseManager"] },
-  { path: "/check-in", allowedRoles: ["Owner", "HouseManager", "Trainer", "Staff"] },
-  { path: "/gym-houses", allowedRoles: ["Owner", "HouseManager", "Trainer", "Staff"] },
-  { path: "/members", allowedRoles: ["Owner", "HouseManager", "Trainer", "Staff", "Member"] },
-  { path: "/bookings", allowedRoles: ["Owner", "HouseManager", "Trainer", "Staff", "Member"] },
-  { path: "/class-schedules", allowedRoles: ["Owner", "HouseManager", "Trainer", "Staff", "Member"] },
-  { path: "/time-slots", allowedRoles: ["Owner", "HouseManager", "Trainer", "Staff", "Member"] },
-  { path: "/announcements", allowedRoles: ["Owner", "HouseManager", "Trainer", "Staff", "Member"] },
-  { path: "/", allowedRoles: ["Owner", "HouseManager", "Trainer", "Staff", "Member"] },
-];
+import type { RoleType } from "@/lib/roles";
+import type { RouteAccessRule } from "@/types/rbac";
 
 /**
  * Check if a given pathname is accessible by the specified role.
  * Matches from most-specific to least-specific route prefix.
- * Returns true for unknown routes (fail-open for UX).
+ * Returns true for unknown routes (fail-open for UX; backend enforces security).
+ *
+ * The routeMap parameter must be provided by the caller — typically sourced from
+ * `useRbacStore().routeAccess` which is loaded from the RBAC metadata API.
  */
-export function canAccessRoute(pathname: string, role: string): boolean {
-  // Reject unknown roles (fail-closed for invalid cookie values)
-  if (!VALID_ROLES.has(role)) return false;
-
-  for (const route of routeAccessMap) {
+export function canAccessRoute(
+  pathname: string,
+  role: string,
+  routeMap: RouteAccessRule[]
+): boolean {
+  for (const route of routeMap) {
     if (route.path === "/") {
       if (pathname === "/") {
-        return route.allowedRoles.includes(role as RoleType);
+        return route.allowedRoles.includes(role);
       }
       continue;
     }
 
     if (pathname === route.path || pathname.startsWith(route.path + "/")) {
-      return route.allowedRoles.includes(role as RoleType);
+      return route.allowedRoles.includes(role);
     }
   }
 
@@ -62,11 +34,16 @@ export function canAccessRoute(pathname: string, role: string): boolean {
 /**
  * Get allowed roles for a specific route path.
  * Returns undefined for unknown routes (all roles allowed).
+ *
+ * The routeMap parameter must be provided by the caller — typically sourced from
+ * `useRbacStore().routeAccess` which is loaded from the RBAC metadata API.
  */
-export function getAllowedRolesForRoute(path: string): RoleType[] | undefined {
-  const route = routeAccessMap.find((r) => r.path === path);
+export function getAllowedRolesForRoute(
+  path: string,
+  routeMap: RouteAccessRule[]
+): RoleType[] | undefined {
+  const route = routeMap.find((r) => r.path === path);
   return route?.allowedRoles;
 }
 
-export { routeAccessMap };
-export type { RouteAccess };
+export type { RouteAccessRule };

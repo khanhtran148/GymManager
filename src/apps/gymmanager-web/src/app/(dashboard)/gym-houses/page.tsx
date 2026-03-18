@@ -9,10 +9,11 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Alert } from "@/components/ui/alert";
 import { PermissionGate } from "@/components/permission-gate";
-import { Permission } from "@/lib/permissions";
+import { useRbacStore } from "@/stores/rbac-store";
 import type { GymHouseDto } from "@/types/gym-house";
 
 export default function GymHousesPage() {
+  const { permissionMap } = useRbacStore();
   const { data: gymHouses, isLoading, error } = useGymHouses();
   const deleteGymHouse = useDeleteGymHouse();
   const [deleteTarget, setDeleteTarget] = useState<GymHouseDto | null>(null);
@@ -63,7 +64,7 @@ export default function GymHousesPage() {
       header: "",
       className: "w-24",
       render: (gym: GymHouseDto) => (
-        <PermissionGate permission={Permission.ManageTenant}>
+        <PermissionGate permission={permissionMap["ManageTenant"] ?? 0n}>
           <div className="flex items-center gap-1">
             <Link href={`/gym-houses/${gym.id}`}>
               <Button
@@ -104,7 +105,7 @@ export default function GymHousesPage() {
             {isLoading ? "Loading..." : `${gymHouses?.length ?? 0} locations registered`}
           </p>
         </div>
-        <PermissionGate permission={Permission.ManageTenant}>
+        <PermissionGate permission={permissionMap["ManageTenant"] ?? 0n}>
           <Link href="/gym-houses/new">
             <Button variant="primary" size="md">
               <Plus className="w-4 h-4" aria-hidden="true" />

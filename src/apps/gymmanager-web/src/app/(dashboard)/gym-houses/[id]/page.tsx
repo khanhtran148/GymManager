@@ -16,7 +16,7 @@ import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PermissionGate } from "@/components/permission-gate";
-import { Permission } from "@/lib/permissions";
+import { useRbacStore } from "@/stores/rbac-store";
 
 const gymHouseSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -39,6 +39,7 @@ const gymHouseSchema = z.object({
 type GymHouseFormData = z.infer<typeof gymHouseSchema>;
 
 export default function GymHouseDetailPage() {
+  const { permissionMap } = useRbacStore();
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { data: gymHouse, isLoading, error } = useGymHouse(params.id);
@@ -134,7 +135,7 @@ export default function GymHouseDetailPage() {
     <div className="max-w-2xl space-y-5">
       <div className="flex items-center justify-between gap-4">
         <PageHeader backHref="/gym-houses" breadcrumb="Gym Houses" title={gymHouse.name} />
-        <PermissionGate permission={Permission.ManageTenant}>
+        <PermissionGate permission={permissionMap["ManageTenant"] ?? 0n}>
           <div className="flex items-center gap-2 shrink-0">
             <Button
               type="button"

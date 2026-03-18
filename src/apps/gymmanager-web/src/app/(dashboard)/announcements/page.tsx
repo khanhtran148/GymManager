@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { PermissionGate } from "@/components/permission-gate";
-import { Permission } from "@/lib/permissions";
+import { useRbacStore } from "@/stores/rbac-store";
 import type { AnnouncementDto } from "@/types/announcement";
 
 const AUDIENCE_LABELS: Record<string, string> = {
@@ -39,6 +39,7 @@ function PublishStatusBadge({ announcement }: { announcement: AnnouncementDto })
 }
 
 export default function AnnouncementsPage() {
+  const { permissionMap } = useRbacStore();
   const [page, setPage] = useState(1);
   const { data: gymHouses } = useGymHouses();
   const [gymHouseId, setGymHouseId] = useState("");
@@ -139,7 +140,7 @@ export default function AnnouncementsPage() {
             </div>
           )}
 
-          <PermissionGate permission={Permission.ManageAnnouncements}>
+          <PermissionGate permission={permissionMap["ManageAnnouncements"] ?? 0n}>
             <Link href="/announcements/new">
               <Button variant="primary" size="md">
                 <Plus className="w-4 h-4" aria-hidden="true" />

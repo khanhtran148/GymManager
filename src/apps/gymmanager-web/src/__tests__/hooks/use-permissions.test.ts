@@ -2,7 +2,13 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useAuthStore } from "@/stores/auth-store";
 import { usePermissions, useCanDo, useRole, useHasRole } from "@/hooks/use-permissions";
-import { Permission } from "@/lib/permissions";
+import { buildPermissionFlag } from "@/lib/permissions";
+
+// Replicate commonly-used permission flags via buildPermissionFlag
+const ViewMembers = buildPermissionFlag(0);
+const ManageMembers = buildPermissionFlag(1);
+const ViewClasses = buildPermissionFlag(4);
+const ManageStaff = buildPermissionFlag(18);
 
 describe("usePermissions hooks", () => {
   beforeEach(() => {
@@ -12,25 +18,25 @@ describe("usePermissions hooks", () => {
       token: "fake-token",
       isAuthenticated: true,
       role: "Owner",
-      permissions: Permission.ViewMembers | Permission.ManageMembers | Permission.ViewClasses,
+      permissions: ViewMembers | ManageMembers | ViewClasses,
     });
   });
 
   describe("usePermissions", () => {
     it("returns the current permissions bigint", () => {
       const { result } = renderHook(() => usePermissions());
-      expect(result.current).toBe(Permission.ViewMembers | Permission.ManageMembers | Permission.ViewClasses);
+      expect(result.current).toBe(ViewMembers | ManageMembers | ViewClasses);
     });
   });
 
   describe("useCanDo", () => {
     it("returns true when user has the permission", () => {
-      const { result } = renderHook(() => useCanDo(Permission.ViewMembers));
+      const { result } = renderHook(() => useCanDo(ViewMembers));
       expect(result.current).toBe(true);
     });
 
     it("returns false when user lacks the permission", () => {
-      const { result } = renderHook(() => useCanDo(Permission.ManageStaff));
+      const { result } = renderHook(() => useCanDo(ManageStaff));
       expect(result.current).toBe(false);
     });
   });

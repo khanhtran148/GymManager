@@ -18,14 +18,14 @@ import type { GymHouseDto } from "@/types/gym-house";
 import type { PaginatedResponse } from "@/types/member";
 import type { MemberDto } from "@/types/member";
 import { useAuthStore } from "@/stores/auth-store";
+import { useRbacStore } from "@/stores/rbac-store";
 import { cn } from "@/lib/utils";
 import { RoleGate } from "@/components/role-gate";
 import { PermissionGate } from "@/components/permission-gate";
-import { Permission } from "@/lib/permissions";
-import { Role } from "@/lib/roles";
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
+  const { permissionMap } = useRbacStore();
 
   const { data: gymHouses, isLoading: gymLoading } = useQuery({
     queryKey: ["gym-houses"],
@@ -72,7 +72,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats grid - visible to Owner, HouseManager, Staff */}
-      <RoleGate roles={[Role.Owner, Role.HouseManager, Role.Staff]}>
+      <RoleGate roles={["Owner", "HouseManager", "Staff"]}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             label="Total Members"
@@ -116,7 +116,7 @@ export default function DashboardPage() {
             <Activity className="w-4 h-4 text-surface-400" aria-hidden="true" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <PermissionGate permission={Permission.ManageTenant}>
+            <PermissionGate permission={permissionMap["ManageTenant"] ?? 0n}>
               <Link
                 href="/gym-houses/new"
                 className={cn(
@@ -136,7 +136,7 @@ export default function DashboardPage() {
               </Link>
             </PermissionGate>
 
-            <PermissionGate permission={Permission.ManageMembers}>
+            <PermissionGate permission={permissionMap["ManageMembers"] ?? 0n}>
               <Link
                 href="/members/new"
                 className={cn(
@@ -195,7 +195,7 @@ export default function DashboardPage() {
         </div>
 
         {/* System Overview - visible to Owner and HouseManager only */}
-        <RoleGate roles={[Role.Owner, Role.HouseManager]}>
+        <RoleGate roles={["Owner", "HouseManager"]}>
           <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
             <h3 className="text-base font-semibold text-text-primary mb-5">System Overview</h3>
             <div className="space-y-4">

@@ -1,8 +1,14 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { useAuthStore } from "@/stores/auth-store";
-import { Permission } from "@/lib/permissions";
+import { buildPermissionFlag } from "@/lib/permissions";
 import { PermissionGate } from "@/components/permission-gate";
+
+// Replicate commonly-used permission flags via buildPermissionFlag
+const ViewMembers = buildPermissionFlag(0);
+const ManageMembers = buildPermissionFlag(1);
+const ManageStaff = buildPermissionFlag(18);
+const Admin = ~0n;
 
 describe("PermissionGate", () => {
   beforeEach(() => {
@@ -11,12 +17,12 @@ describe("PermissionGate", () => {
 
   it("shows children when user has the required permission", () => {
     useAuthStore.setState({
-      permissions: Permission.ManageMembers,
+      permissions: ManageMembers,
       role: "Owner",
     });
 
     render(
-      <PermissionGate permission={Permission.ManageMembers}>
+      <PermissionGate permission={ManageMembers}>
         <button>Add Member</button>
       </PermissionGate>
     );
@@ -26,12 +32,12 @@ describe("PermissionGate", () => {
 
   it("hides children when user lacks the required permission", () => {
     useAuthStore.setState({
-      permissions: Permission.ViewMembers,
+      permissions: ViewMembers,
       role: "Member",
     });
 
     render(
-      <PermissionGate permission={Permission.ManageMembers}>
+      <PermissionGate permission={ManageMembers}>
         <button>Add Member</button>
       </PermissionGate>
     );
@@ -41,13 +47,13 @@ describe("PermissionGate", () => {
 
   it("shows fallback when provided and permission is absent", () => {
     useAuthStore.setState({
-      permissions: Permission.ViewMembers,
+      permissions: ViewMembers,
       role: "Member",
     });
 
     render(
       <PermissionGate
-        permission={Permission.ManageMembers}
+        permission={ManageMembers}
         fallback={<span>No access</span>}
       >
         <button>Add Member</button>
@@ -60,12 +66,12 @@ describe("PermissionGate", () => {
 
   it("shows children when user has Admin permission", () => {
     useAuthStore.setState({
-      permissions: Permission.Admin,
+      permissions: Admin,
       role: "Owner",
     });
 
     render(
-      <PermissionGate permission={Permission.ManageStaff}>
+      <PermissionGate permission={ManageStaff}>
         <button>Add Staff</button>
       </PermissionGate>
     );

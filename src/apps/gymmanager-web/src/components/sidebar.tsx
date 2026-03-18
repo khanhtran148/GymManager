@@ -6,6 +6,7 @@ import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/hooks/use-permissions";
 import type { RoleType } from "@/lib/roles";
+import { useRbacStore } from "@/stores/rbac-store";
 import { getAllowedRolesForRoute } from "@/lib/route-access";
 import {
   LayoutDashboard,
@@ -53,55 +54,56 @@ function isNavGroup(entry: NavEntry): entry is NavGroup {
   return "children" in entry;
 }
 
-// Derive allowed roles from route-access.ts (single source of truth)
-const navEntries: NavEntry[] = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard, allowedRoles: getAllowedRolesForRoute("/") },
-  { label: "Gym Houses", href: "/gym-houses", icon: Building2, allowedRoles: getAllowedRolesForRoute("/gym-houses") },
-  { label: "Members", href: "/members", icon: Users, allowedRoles: getAllowedRolesForRoute("/members") },
-  { label: "Bookings", href: "/bookings", icon: CalendarCheck, allowedRoles: getAllowedRolesForRoute("/bookings") },
-  { label: "Class Schedules", href: "/class-schedules", icon: GraduationCap, allowedRoles: getAllowedRolesForRoute("/class-schedules") },
-  { label: "Time Slots", href: "/time-slots", icon: Clock, allowedRoles: getAllowedRolesForRoute("/time-slots") },
-  { label: "Check-in", href: "/check-in", icon: ScanLine, allowedRoles: getAllowedRolesForRoute("/check-in") },
-  {
-    label: "Finance",
-    icon: Wallet,
-    prefix: "/finance",
-    allowedRoles: getAllowedRolesForRoute("/finance"),
-    children: [
-      { label: "Dashboard", href: "/finance", icon: Wallet, allowedRoles: getAllowedRolesForRoute("/finance") },
-      { label: "Transactions", href: "/finance/transactions", icon: Receipt, allowedRoles: getAllowedRolesForRoute("/finance/transactions") },
-      { label: "P&L Report", href: "/finance/pnl", icon: FileText, allowedRoles: getAllowedRolesForRoute("/finance/pnl") },
-    ],
-  },
-  {
-    label: "Staff & HR",
-    icon: UserCog,
-    prefix: "/staff-hr",
-    allowedRoles: getAllowedRolesForRoute("/staff"),
-    children: [
-      { label: "Staff", href: "/staff", icon: Users, allowedRoles: getAllowedRolesForRoute("/staff") },
-      { label: "Shifts", href: "/shifts", icon: CalendarDays, allowedRoles: getAllowedRolesForRoute("/shifts") },
-      { label: "Payroll", href: "/payroll", icon: Banknote, allowedRoles: getAllowedRolesForRoute("/payroll") },
-    ],
-  },
-  { label: "Announcements", href: "/announcements", icon: Megaphone, allowedRoles: getAllowedRolesForRoute("/announcements") },
-  {
-    label: "Settings",
-    icon: Settings,
-    prefix: "/settings",
-    allowedRoles: getAllowedRolesForRoute("/settings"),
-    children: [
-      { label: "Role Permissions", href: "/settings/roles", icon: Shield, allowedRoles: getAllowedRolesForRoute("/settings/roles") },
-      { label: "User Roles", href: "/settings/roles/users", icon: UserCog, allowedRoles: getAllowedRolesForRoute("/settings/roles/users") },
-    ],
-  },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
   const role = useRole();
+  const { routeAccess } = useRbacStore();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ "/finance": true, "/staff-hr": true, "/settings": true });
+
+  // Build nav entries dynamically from routeAccess (falls back to no restrictions when not yet loaded)
+  const navEntries: NavEntry[] = useMemo(() => [
+    { label: "Dashboard", href: "/", icon: LayoutDashboard, allowedRoles: getAllowedRolesForRoute("/", routeAccess) },
+    { label: "Gym Houses", href: "/gym-houses", icon: Building2, allowedRoles: getAllowedRolesForRoute("/gym-houses", routeAccess) },
+    { label: "Members", href: "/members", icon: Users, allowedRoles: getAllowedRolesForRoute("/members", routeAccess) },
+    { label: "Bookings", href: "/bookings", icon: CalendarCheck, allowedRoles: getAllowedRolesForRoute("/bookings", routeAccess) },
+    { label: "Class Schedules", href: "/class-schedules", icon: GraduationCap, allowedRoles: getAllowedRolesForRoute("/class-schedules", routeAccess) },
+    { label: "Time Slots", href: "/time-slots", icon: Clock, allowedRoles: getAllowedRolesForRoute("/time-slots", routeAccess) },
+    { label: "Check-in", href: "/check-in", icon: ScanLine, allowedRoles: getAllowedRolesForRoute("/check-in", routeAccess) },
+    {
+      label: "Finance",
+      icon: Wallet,
+      prefix: "/finance",
+      allowedRoles: getAllowedRolesForRoute("/finance", routeAccess),
+      children: [
+        { label: "Dashboard", href: "/finance", icon: Wallet, allowedRoles: getAllowedRolesForRoute("/finance", routeAccess) },
+        { label: "Transactions", href: "/finance/transactions", icon: Receipt, allowedRoles: getAllowedRolesForRoute("/finance/transactions", routeAccess) },
+        { label: "P&L Report", href: "/finance/pnl", icon: FileText, allowedRoles: getAllowedRolesForRoute("/finance/pnl", routeAccess) },
+      ],
+    },
+    {
+      label: "Staff & HR",
+      icon: UserCog,
+      prefix: "/staff-hr",
+      allowedRoles: getAllowedRolesForRoute("/staff", routeAccess),
+      children: [
+        { label: "Staff", href: "/staff", icon: Users, allowedRoles: getAllowedRolesForRoute("/staff", routeAccess) },
+        { label: "Shifts", href: "/shifts", icon: CalendarDays, allowedRoles: getAllowedRolesForRoute("/shifts", routeAccess) },
+        { label: "Payroll", href: "/payroll", icon: Banknote, allowedRoles: getAllowedRolesForRoute("/payroll", routeAccess) },
+      ],
+    },
+    { label: "Announcements", href: "/announcements", icon: Megaphone, allowedRoles: getAllowedRolesForRoute("/announcements", routeAccess) },
+    {
+      label: "Settings",
+      icon: Settings,
+      prefix: "/settings",
+      allowedRoles: getAllowedRolesForRoute("/settings", routeAccess),
+      children: [
+        { label: "Role Permissions", href: "/settings/roles", icon: Shield, allowedRoles: getAllowedRolesForRoute("/settings/roles", routeAccess) },
+        { label: "User Roles", href: "/settings/roles/users", icon: UserCog, allowedRoles: getAllowedRolesForRoute("/settings/roles/users", routeAccess) },
+      ],
+    },
+  ], [routeAccess]);
 
   const filteredEntries = useMemo(() => {
     if (!role) return navEntries;
@@ -120,7 +122,7 @@ export function Sidebar() {
         return entry;
       })
       .filter((entry): entry is NavEntry => entry !== null);
-  }, [role]);
+  }, [role, navEntries]);
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";

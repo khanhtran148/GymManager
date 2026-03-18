@@ -1,8 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { useAuthStore } from "@/stores/auth-store";
-import { Permission } from "@/lib/permissions";
+import { buildPermissionFlag } from "@/lib/permissions";
 import { PermissionSkeleton } from "@/components/permission-skeleton";
+
+// Replicate commonly-used permission flags via buildPermissionFlag
+const ViewMembers = buildPermissionFlag(0);
+const ManageMembers = buildPermissionFlag(1);
 
 // Mock useMounted to control mount state
 let mockMounted = false;
@@ -19,13 +23,13 @@ describe("PermissionSkeleton", () => {
   it("shows skeleton before mount", () => {
     mockMounted = false;
     useAuthStore.setState({
-      permissions: Permission.ManageMembers,
+      permissions: ManageMembers,
       role: "Owner",
     });
 
     render(
       <PermissionSkeleton
-        permission={Permission.ManageMembers}
+        permission={ManageMembers}
         skeleton={<div data-testid="skeleton">Loading...</div>}
       >
         <button>Add Member</button>
@@ -39,13 +43,13 @@ describe("PermissionSkeleton", () => {
   it("shows gated content after mount when permission is present", () => {
     mockMounted = true;
     useAuthStore.setState({
-      permissions: Permission.ManageMembers,
+      permissions: ManageMembers,
       role: "Owner",
     });
 
     render(
       <PermissionSkeleton
-        permission={Permission.ManageMembers}
+        permission={ManageMembers}
         skeleton={<div data-testid="skeleton">Loading...</div>}
       >
         <button>Add Member</button>
@@ -59,13 +63,13 @@ describe("PermissionSkeleton", () => {
   it("hides content after mount when permission is absent", () => {
     mockMounted = true;
     useAuthStore.setState({
-      permissions: Permission.ViewMembers,
+      permissions: ViewMembers,
       role: "Member",
     });
 
     render(
       <PermissionSkeleton
-        permission={Permission.ManageMembers}
+        permission={ManageMembers}
         skeleton={<div data-testid="skeleton">Loading...</div>}
       >
         <button>Add Member</button>
@@ -79,12 +83,12 @@ describe("PermissionSkeleton", () => {
   it("shows default empty skeleton when no skeleton prop provided", () => {
     mockMounted = false;
     useAuthStore.setState({
-      permissions: Permission.ManageMembers,
+      permissions: ManageMembers,
       role: "Owner",
     });
 
-    const { container } = render(
-      <PermissionSkeleton permission={Permission.ManageMembers}>
+    render(
+      <PermissionSkeleton permission={ManageMembers}>
         <button>Add Member</button>
       </PermissionSkeleton>
     );

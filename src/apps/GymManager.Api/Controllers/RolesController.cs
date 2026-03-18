@@ -3,6 +3,7 @@ using GymManager.Api.Common;
 using GymManager.Application.Roles.ChangeUserRole;
 using GymManager.Application.Roles.GetRolePermissions;
 using GymManager.Application.Roles.GetRoleUsers;
+using GymManager.Application.Roles.GetRolesMetadata;
 using GymManager.Application.Roles.ResetDefaultPermissions;
 using GymManager.Application.Roles.Shared;
 using GymManager.Application.Roles.UpdateRolePermissions;
@@ -54,6 +55,16 @@ public sealed class RolesController(ISender sender) : ApiControllerBase(sender)
     public async Task<IActionResult> ResetDefaults(CancellationToken ct)
     {
         var result = await Sender.Send(new ResetDefaultPermissionsCommand(), ct);
+        return HandleResult(result);
+    }
+
+    /// <summary>Returns static RBAC metadata: role definitions, permission catalogue, and route access rules.</summary>
+    [HttpGet("metadata")]
+    [ProducesResponseType(typeof(RolesMetadataDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetMetadata(CancellationToken ct)
+    {
+        var result = await Sender.Send(new GetRolesMetadataQuery(), ct);
         return HandleResult(result);
     }
 

@@ -14,7 +14,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormField } from "@/components/ui/form-field";
 import { Spinner } from "@/components/ui/spinner";
 import { PermissionGate } from "@/components/permission-gate";
-import { Permission } from "@/lib/permissions";
+import { useRbacStore } from "@/stores/rbac-store";
 import {
   bookingTypeLabel,
   bookingStatusLabel,
@@ -30,6 +30,7 @@ const statusBadgeMap: Record<string, string> = {
 };
 
 export default function BookingsPage() {
+  const { permissionMap } = useRbacStore();
   const { gymHouseId, isLoading: gymHouseLoading } = useActiveGymHouse();
   const [page, setPage] = useState(1);
   const [from, setFrom] = useState("");
@@ -210,7 +211,7 @@ export default function BookingsPage() {
           </div>
         </form>
 
-        <PermissionGate permission={Permission.ManageBookings}>
+        <PermissionGate permission={permissionMap["ManageBookings"] ?? 0n}>
           <Link href="/bookings/new">
             <Button variant="primary" size="md">
               <Plus className="w-4 h-4" aria-hidden="true" />

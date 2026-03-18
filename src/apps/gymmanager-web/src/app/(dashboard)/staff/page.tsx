@@ -12,7 +12,7 @@ import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { PermissionGate } from "@/components/permission-gate";
-import { Permission } from "@/lib/permissions";
+import { useRbacStore } from "@/stores/rbac-store";
 import type { StaffDto, StaffType } from "@/types/staff";
 
 function formatCurrency(value: number): string {
@@ -44,6 +44,7 @@ const STAFF_TYPE_COLORS: Record<StaffType, string> = {
 };
 
 export default function StaffPage() {
+  const { permissionMap } = useRbacStore();
   const { data: gymHouses, isLoading: gymLoading } = useGymHouses();
   const [selectedHouseId, setSelectedHouseId] = useState<string>("");
   const [page, setPage] = useState(1);
@@ -134,7 +135,7 @@ export default function StaffPage() {
           <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Staff & HR</p>
           <h2 className="text-2xl font-bold text-text-primary tracking-tight">Staff</h2>
         </div>
-        <PermissionGate permission={Permission.ManageStaff}>
+        <PermissionGate permission={permissionMap["ManageStaff"] ?? 0n}>
           <Link href="/staff/new">
             <Button variant="primary" size="md">
               <Plus className="w-4 h-4" aria-hidden="true" />

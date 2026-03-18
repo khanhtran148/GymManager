@@ -1,6 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { useAuthStore } from "@/stores/auth-store";
+import { useRbacStore } from "@/stores/rbac-store";
+import { testRolesMetadata } from "@/__tests__/fixtures/rbac-metadata";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -22,6 +24,11 @@ function setRole(role: string | null) {
 describe("Sidebar permissions filtering", () => {
   beforeEach(() => {
     localStorage.clear();
+    useRbacStore.getState().setMetadata(testRolesMetadata);
+  });
+
+  afterEach(() => {
+    useRbacStore.getState().reset();
   });
 
   it("Owner sees all nav entries including Finance and Staff & HR groups", () => {

@@ -1,36 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { RoleUserTable } from "@/components/role-user-table";
 import { useHasRole } from "@/hooks/use-permissions";
-import { Role } from "@/lib/roles";
 
 interface Toast {
-  id: number;
+  id: string;
   message: string;
   variant: "success" | "error";
 }
 
-let toastIdCounter = 0;
-
 export default function UserRolesPage() {
   const router = useRouter();
-  const isOwner = useHasRole(Role.Owner);
+  const isOwner = useHasRole("Owner");
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const toastTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  // Redirect non-owners to 403
-  if (!isOwner) {
-    router.replace("/403");
-    return null;
-  }
+  // Redirect non-owners to 403 — must be in useEffect, not render phase
+  useEffect(() => {
+    if (!isOwner) {
+      router.replace("/403");
+    }
+  }, [isOwner, router]);
 
   function addToast(message: string, variant: "success" | "error") {
-    const id = ++toastIdCounter;
+    const id = crypto.randomUUID();
     setToasts((prev) => [...prev, { id, message, variant }]);
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
+      toastTimers.current.delete(id);
     }, 4000);
+    toastTimers.current.set(id, timer);
+  }
+
+  if (!isOwner) {
+    return null;
   }
 
   return (

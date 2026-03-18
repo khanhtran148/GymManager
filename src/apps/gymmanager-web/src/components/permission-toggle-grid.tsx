@@ -1,127 +1,17 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { Permission } from "@/lib/permissions";
-import { Role } from "@/lib/roles";
+import { useRbacStore } from "@/stores/rbac-store";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
 import {
   useRolePermissions,
   useUpdateRolePermissions,
-  type RolePermissionDto,
 } from "@/hooks/use-role-permissions";
 
-// Permission categories with their flag names, mirroring Permission.cs groupings
-interface PermissionCategory {
-  label: string;
-  permissions: Array<{ name: string; flag: bigint }>;
-}
-
-const PERMISSION_CATEGORIES: PermissionCategory[] = [
-  {
-    label: "Members",
-    permissions: [
-      { name: "ViewMembers", flag: Permission.ViewMembers },
-      { name: "ManageMembers", flag: Permission.ManageMembers },
-    ],
-  },
-  {
-    label: "Subscriptions",
-    permissions: [
-      { name: "ViewSubscriptions", flag: Permission.ViewSubscriptions },
-      { name: "ManageSubscriptions", flag: Permission.ManageSubscriptions },
-    ],
-  },
-  {
-    label: "Classes",
-    permissions: [
-      { name: "ViewClasses", flag: Permission.ViewClasses },
-      { name: "ManageClasses", flag: Permission.ManageClasses },
-    ],
-  },
-  {
-    label: "Trainers",
-    permissions: [
-      { name: "ViewTrainers", flag: Permission.ViewTrainers },
-      { name: "ManageTrainers", flag: Permission.ManageTrainers },
-    ],
-  },
-  {
-    label: "Payments",
-    permissions: [
-      { name: "ViewPayments", flag: Permission.ViewPayments },
-      { name: "ProcessPayments", flag: Permission.ProcessPayments },
-    ],
-  },
-  {
-    label: "Settings",
-    permissions: [{ name: "ManageTenant", flag: Permission.ManageTenant }],
-  },
-  {
-    label: "Reports",
-    permissions: [{ name: "ViewReports", flag: Permission.ViewReports }],
-  },
-  {
-    label: "Bookings",
-    permissions: [
-      { name: "ManageBookings", flag: Permission.ManageBookings },
-      { name: "ViewBookings", flag: Permission.ViewBookings },
-    ],
-  },
-  {
-    label: "Schedule",
-    permissions: [
-      { name: "ManageSchedule", flag: Permission.ManageSchedule },
-      { name: "ViewSchedule", flag: Permission.ViewSchedule },
-    ],
-  },
-  {
-    label: "Finance",
-    permissions: [
-      { name: "ManageFinance", flag: Permission.ManageFinance },
-      { name: "ViewFinance", flag: Permission.ViewFinance },
-    ],
-  },
-  {
-    label: "Staff",
-    permissions: [
-      { name: "ManageStaff", flag: Permission.ManageStaff },
-      { name: "ViewStaff", flag: Permission.ViewStaff },
-    ],
-  },
-  {
-    label: "Announcements",
-    permissions: [
-      { name: "ManageAnnouncements", flag: Permission.ManageAnnouncements },
-      { name: "ViewAnnouncements", flag: Permission.ViewAnnouncements },
-    ],
-  },
-  {
-    label: "Payroll",
-    permissions: [{ name: "ApprovePayroll", flag: Permission.ApprovePayroll }],
-  },
-  {
-    label: "Shifts",
-    permissions: [
-      { name: "ManageShifts", flag: Permission.ManageShifts },
-      { name: "ViewShifts", flag: Permission.ViewShifts },
-    ],
-  },
-  {
-    label: "Waitlist",
-    permissions: [{ name: "ManageWaitlist", flag: Permission.ManageWaitlist }],
-  },
-];
-
-// Roles shown in columns (Owner always has all, shown as disabled)
-const DISPLAY_ROLES = [
-  Role.Owner,
-  Role.HouseManager,
-  Role.Trainer,
-  Role.Staff,
-  Role.Member,
-] as const;
+// Roles shown in the column header — Owner always has all and is shown as disabled
+const OWNER_ROLE = "Owner";
 
 interface PermissionToggleProps {
   checked: boolean;
@@ -179,22 +69,33 @@ interface PermissionToggleGridProps {
 export function PermissionToggleGrid({ onError, onSuccess }: PermissionToggleGridProps) {
   const { data, isLoading, error } = useRolePermissions();
   const updateMutation = useUpdateRolePermissions();
+  const { permissionCategories, permissionMap, roles: rbacRoles, isLoaded } = useRbacStore();
 
   // Track which (role, permissionName) cells are currently saving
   const [pendingCells, setPendingCells] = useState<Set<string>>(new Set());
 
-  const getRoleBitmask = useCallback(
-    (roleName: string, roleData: RolePermissionDto[]): bigint => {
-      const entry = roleData.find((r) => r.role === roleName);
-      if (!entry) return 0n;
+  // Derive display roles from store (all roles, Owner first)
+  const displayRoles = useMemo(() => {
+    if (!isLoaded || rbacRoles.length === 0) return [];
+    const owner = rbacRoles.find((r) => r.name === OWNER_ROLE);
+    const others = rbacRoles.filter((r) => r.name !== OWNER_ROLE);
+    return owner ? [owner, ...others] : others;
+  }, [rbacRoles, isLoaded]);
+
+  const roleItems = data?.items ?? [];
+
+  // Pre-index roleItems by role name → bigint bitmask so every render cell
+  // is O(1) instead of O(n) Array.find
+  const roleBitmaskIndex = useMemo<Record<string, bigint>>(() => {
+    return roleItems.reduce<Record<string, bigint>>((acc, entry) => {
       try {
-        return BigInt(entry.permissions);
+        acc[entry.role] = BigInt(entry.permissions);
       } catch {
-        return 0n;
+        acc[entry.role] = 0n;
       }
-    },
-    []
-  );
+      return acc;
+    }, {});
+  }, [roleItems]);
 
   const hasFlag = useCallback((bitmask: bigint, flag: bigint): boolean => {
     return (bitmask & flag) === flag;
@@ -231,7 +132,7 @@ export function PermissionToggleGrid({ onError, onSuccess }: PermissionToggleGri
     [updateMutation, onSuccess, onError]
   );
 
-  if (isLoading) {
+  if (isLoading || !isLoaded) {
     return (
       <div className="flex items-center justify-center py-16">
         <Spinner label="Loading permissions..." />
@@ -247,8 +148,6 @@ export function PermissionToggleGrid({ onError, onSuccess }: PermissionToggleGri
     );
   }
 
-  const roleData = data?.items ?? [];
-
   return (
     <div className="overflow-x-auto rounded-2xl border border-border shadow-sm bg-card">
       <table className="min-w-full" aria-label="Role permissions matrix">
@@ -260,16 +159,16 @@ export function PermissionToggleGrid({ onError, onSuccess }: PermissionToggleGri
             >
               Permission
             </th>
-            {DISPLAY_ROLES.map((role) => (
+            {displayRoles.map((roleObj) => (
               <th
-                key={role}
+                key={roleObj.name}
                 scope="col"
                 className="px-4 py-3.5 text-center text-xs font-semibold text-text-muted uppercase tracking-wider"
               >
-                <span className={cn(role === Role.Owner && "text-primary-600 dark:text-primary-400")}>
-                  {role}
+                <span className={cn(roleObj.name === OWNER_ROLE && "text-primary-600 dark:text-primary-400")}>
+                  {roleObj.name}
                 </span>
-                {role === Role.Owner && (
+                {roleObj.name === OWNER_ROLE && (
                   <span className="block text-[10px] font-normal text-text-muted normal-case tracking-normal">
                     (always on)
                   </span>
@@ -278,57 +177,62 @@ export function PermissionToggleGrid({ onError, onSuccess }: PermissionToggleGri
             ))}
           </tr>
         </thead>
-        {PERMISSION_CATEGORIES.map((category) => (
-          <tbody key={category.label}>
+        {permissionCategories.map((category) => (
+          <tbody key={category.category}>
             {/* Category header row */}
             <tr className="bg-surface-50 dark:bg-surface-800/50 border-t border-border-muted">
               <td
-                colSpan={DISPLAY_ROLES.length + 1}
+                colSpan={displayRoles.length + 1}
                 className="px-4 py-2 text-[11px] font-semibold text-text-muted uppercase tracking-wider"
               >
-                {category.label}
+                {category.category}
               </td>
             </tr>
             {/* Permission rows */}
-            {category.permissions.map((perm) => (
-              <tr
-                key={perm.name}
-                className="border-t border-table-divider hover:bg-table-row-hover transition-colors"
-              >
-                <td className="px-4 py-3 text-sm text-text-secondary">
-                  {formatPermissionLabel(perm.name)}
-                </td>
-                {DISPLAY_ROLES.map((role) => {
-                  const isOwner = role === Role.Owner;
-                  const bitmask = getRoleBitmask(role, roleData);
-                  const checked = isOwner || hasFlag(bitmask, perm.flag);
-                  const cellKey = `${role}:${perm.name}`;
-                  const isPending = pendingCells.has(cellKey);
+            {category.permissions.map((perm) => {
+              // Use the store's pre-computed permissionMap for O(1) flag lookup
+              const permFlag = permissionMap[perm.name] ?? (1n << BigInt(perm.bitPosition));
+              return (
+                <tr
+                  key={perm.name}
+                  className="border-t border-table-divider hover:bg-table-row-hover transition-colors"
+                >
+                  <td className="px-4 py-3 text-sm text-text-secondary">
+                    {formatPermissionLabel(perm.name)}
+                  </td>
+                  {displayRoles.map((roleObj) => {
+                    const isOwner = roleObj.name === OWNER_ROLE;
+                    // O(1) lookup via pre-indexed map
+                    const bitmask = roleBitmaskIndex[roleObj.name] ?? 0n;
+                    const checked = isOwner || hasFlag(bitmask, permFlag);
+                    const cellKey = `${roleObj.name}:${perm.name}`;
+                    const isPending = pendingCells.has(cellKey);
 
-                  return (
-                    <td key={role} className="px-4 py-3 text-center">
-                      {isPending ? (
-                        <div className="flex items-center justify-center">
-                          <Spinner size="sm" />
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center">
-                          <PermissionToggle
-                            checked={checked}
-                            disabled={isOwner}
-                            label={`${role}: ${formatPermissionLabel(perm.name)}`}
-                            onChange={(newValue) =>
-                              handleToggle(role, perm.name, perm.flag, bitmask, newValue)
-                            }
-                            isPending={isPending}
-                          />
-                        </div>
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+                    return (
+                      <td key={roleObj.name} className="px-4 py-3 text-center">
+                        {isPending ? (
+                          <div className="flex items-center justify-center">
+                            <Spinner size="sm" />
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center">
+                            <PermissionToggle
+                              checked={checked}
+                              disabled={isOwner}
+                              label={`${roleObj.name}: ${formatPermissionLabel(perm.name)}`}
+                              onChange={(newValue) =>
+                                handleToggle(roleObj.name, perm.name, permFlag, bitmask, newValue)
+                              }
+                              isPending={isPending}
+                            />
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         ))}
       </table>

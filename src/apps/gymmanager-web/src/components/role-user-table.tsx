@@ -1,22 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Alert } from "@/components/ui/alert";
 import { ChangeRoleDialog } from "@/components/change-role-dialog";
-import { Role } from "@/lib/roles";
+import { useRbacStore } from "@/stores/rbac-store";
 import { useRoleUsers, type RoleUserDto } from "@/hooks/use-role-users";
-
-const ROLE_TABS = [
-  Role.HouseManager,
-  Role.Trainer,
-  Role.Staff,
-  Role.Member,
-] as const;
-
-type RoleTab = (typeof ROLE_TABS)[number];
+import type { RoleType } from "@/lib/roles";
 
 const PAGE_SIZE = 20;
 
@@ -30,13 +22,24 @@ interface RoleUserTableProps {
 }
 
 export function RoleUserTable({ onToast }: RoleUserTableProps) {
-  const [activeRole, setActiveRole] = useState<RoleTab>(Role.HouseManager);
+  const { assignableRoles, isLoaded } = useRbacStore();
+
+  // Derive role tabs from assignable roles (excludes Owner which is not assignable)
+  const roleTabs: RoleType[] = useMemo(
+    () => assignableRoles.map((r) => r.name),
+    [assignableRoles]
+  );
+
+  const [activeRole, setActiveRole] = useState<RoleType>("");
   const [page, setPage] = useState(1);
   const [dialogUser, setDialogUser] = useState<RoleUserDto | null>(null);
 
-  const { data, isLoading, error } = useRoleUsers(activeRole, page, PAGE_SIZE);
+  // Set default active role once store is loaded
+  const effectiveRole = activeRole || roleTabs[0] || "";
 
-  function handleRoleTabChange(role: RoleTab) {
+  const { data, isLoading, error } = useRoleUsers(effectiveRole, page, PAGE_SIZE);
+
+  function handleRoleTabChange(role: RoleType) {
     setActiveRole(role);
     setPage(1);
   }
@@ -99,6 +102,15 @@ export function RoleUserTable({ onToast }: RoleUserTableProps) {
     },
   ];
 
+  if (!isLoaded || roleTabs.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="h-10 bg-card rounded-xl animate-pulse w-64" aria-hidden="true" />
+        <div className="h-32 bg-card rounded-xl animate-pulse" aria-hidden="true" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Role tabs */}
@@ -107,18 +119,18 @@ export function RoleUserTable({ onToast }: RoleUserTableProps) {
         role="tablist"
         aria-label="Filter by role"
       >
-        {ROLE_TABS.map((role) => (
+        {roleTabs.map((role) => (
           <button
             key={role}
             type="button"
             role="tab"
-            aria-selected={activeRole === role}
+            aria-selected={effectiveRole === role}
             aria-controls={`role-tab-panel-${role}`}
             id={`role-tab-${role}`}
             onClick={() => handleRoleTabChange(role)}
             className={cn(
               "px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200",
-              activeRole === role
+              effectiveRole === role
                 ? "bg-primary-500 text-white shadow-sm"
                 : "text-text-muted hover:text-text-secondary hover:bg-hover"
             )}
@@ -135,15 +147,15 @@ export function RoleUserTable({ onToast }: RoleUserTableProps) {
       )}
 
       <div
-        id={`role-tab-panel-${activeRole}`}
+        id={`role-tab-panel-${effectiveRole}`}
         role="tabpanel"
-        aria-labelledby={`role-tab-${activeRole}`}
+        aria-labelledby={`role-tab-${effectiveRole}`}
       >
         <DataTable
           columns={columns}
           data={data?.items ?? []}
           isLoading={isLoading}
-          emptyMessage={`No users with the ${activeRole} role found.`}
+          emptyMessage={`No users with the ${effectiveRole} role found.`}
           pagination={
             data
               ? {

@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createElement } from "react";
 import { useAuthStore } from "@/stores/auth-store";
+import { useRbacStore } from "@/stores/rbac-store";
+import { testRolesMetadata } from "@/__tests__/fixtures/rbac-metadata";
 
 // Mock next/navigation
 const mockReplace = vi.fn();
@@ -74,6 +76,11 @@ describe("UserRolesPage", () => {
     localStorage.clear();
     vi.clearAllMocks();
     mockReplace.mockClear();
+    useRbacStore.getState().setMetadata(testRolesMetadata);
+  });
+
+  afterEach(() => {
+    useRbacStore.getState().reset();
   });
 
   it("redirects non-Owner users to /403", () => {

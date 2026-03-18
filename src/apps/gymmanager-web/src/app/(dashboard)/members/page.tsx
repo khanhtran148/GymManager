@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { PermissionGate } from "@/components/permission-gate";
-import { Permission } from "@/lib/permissions";
+import { useRbacStore } from "@/stores/rbac-store";
 import type { MemberDto } from "@/types/member";
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -29,6 +29,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export default function MembersPage() {
+  const { permissionMap } = useRbacStore();
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -128,7 +129,7 @@ export default function MembersPage() {
           </Button>
         </form>
 
-        <PermissionGate permission={Permission.ManageMembers}>
+        <PermissionGate permission={permissionMap["ManageMembers"] ?? 0n}>
           <Link href="/members/new">
             <Button variant="primary" size="md">
               <Plus className="w-4 h-4" aria-hidden="true" />

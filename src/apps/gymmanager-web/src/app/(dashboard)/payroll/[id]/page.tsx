@@ -12,7 +12,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 import { PermissionGate } from "@/components/permission-gate";
-import { Permission } from "@/lib/permissions";
+import { useRbacStore } from "@/stores/rbac-store";
 import type { PayrollEntryDto, PayrollStatus, StaffType } from "@/types/staff";
 
 function formatCurrency(value: number): string {
@@ -41,6 +41,7 @@ const STAFF_TYPE_LABELS: Record<StaffType, string> = {
 };
 
 export default function PayrollDetailPage() {
+  const { permissionMap } = useRbacStore();
   const params = useParams();
   const id = typeof params.id === "string" ? params.id : (params.id?.[0] ?? "");
   const { data: period, isLoading, error } = usePayrollPeriodById(id);
@@ -154,7 +155,7 @@ export default function PayrollDetailPage() {
           </h2>
         </div>
         {(period.status === "Draft" || period.status === "PendingApproval") && (
-          <PermissionGate permission={Permission.ApprovePayroll}>
+          <PermissionGate permission={permissionMap["ApprovePayroll"] ?? 0n}>
             <Button
               variant="primary"
               size="md"

@@ -1,82 +1,81 @@
 import { describe, it, expect } from "vitest";
 import {
-  Permission,
+  buildPermissionFlag,
   hasPermission,
   hasAnyPermission,
 } from "@/lib/permissions";
 
-describe("Permission constants", () => {
-  it("defines ViewMembers at bit 0", () => {
-    expect(Permission.ViewMembers).toBe(1n);
+// Re-create the previously-hardcoded constants locally using buildPermissionFlag
+// so that these tests exercise the helper function directly.
+const ViewMembers = buildPermissionFlag(0);
+const ManageMembers = buildPermissionFlag(1);
+const ViewClasses = buildPermissionFlag(4);
+const ManageStaff = buildPermissionFlag(18);
+const ApprovePayroll = buildPermissionFlag(22);
+const ManageWaitlist = buildPermissionFlag(25);
+const None = 0n;
+const Admin = ~0n;
+
+describe("buildPermissionFlag", () => {
+  it("returns 1n for bit position 0", () => {
+    expect(buildPermissionFlag(0)).toBe(1n);
   });
 
-  it("defines ManageMembers at bit 1", () => {
-    expect(Permission.ManageMembers).toBe(2n);
+  it("returns 2n for bit position 1", () => {
+    expect(buildPermissionFlag(1)).toBe(2n);
   });
 
-  it("defines ManageWaitlist at bit 25", () => {
-    expect(Permission.ManageWaitlist).toBe(1n << 25n);
-  });
-
-  it("defines Admin as all bits set (masked to 64-bit signed)", () => {
-    expect(Permission.Admin).toBe(-1n);
-  });
-
-  it("has exactly 28 permission entries (None + 26 flags + Admin)", () => {
-    expect(Object.keys(Permission)).toHaveLength(28);
+  it("returns correct value for bit position 25", () => {
+    expect(buildPermissionFlag(25)).toBe(1n << 25n);
   });
 });
 
 describe("hasPermission", () => {
   it("returns true when the required bit is set", () => {
-    const userPermissions = Permission.ViewMembers | Permission.ManageMembers;
-    expect(hasPermission(userPermissions, Permission.ViewMembers)).toBe(true);
+    const userPermissions = ViewMembers | ManageMembers;
+    expect(hasPermission(userPermissions, ViewMembers)).toBe(true);
   });
 
   it("returns false when the required bit is missing", () => {
-    const userPermissions = Permission.ViewMembers;
-    expect(hasPermission(userPermissions, Permission.ManageMembers)).toBe(false);
+    const userPermissions = ViewMembers;
+    expect(hasPermission(userPermissions, ManageMembers)).toBe(false);
   });
 
   it("returns true for compound permission check when all bits present", () => {
-    const userPermissions = Permission.ViewMembers | Permission.ManageMembers | Permission.ViewClasses;
-    const required = Permission.ViewMembers | Permission.ManageMembers;
+    const userPermissions = ViewMembers | ManageMembers | ViewClasses;
+    const required = ViewMembers | ManageMembers;
     expect(hasPermission(userPermissions, required)).toBe(true);
   });
 
   it("returns false for compound permission check when only partial bits present", () => {
-    const userPermissions = Permission.ViewMembers;
-    const required = Permission.ViewMembers | Permission.ManageMembers;
+    const userPermissions = ViewMembers;
+    const required = ViewMembers | ManageMembers;
     expect(hasPermission(userPermissions, required)).toBe(false);
   });
 
   it("Admin permission matches every individual permission", () => {
-    expect(hasPermission(Permission.Admin, Permission.ViewMembers)).toBe(true);
-    expect(hasPermission(Permission.Admin, Permission.ManageStaff)).toBe(true);
-    expect(hasPermission(Permission.Admin, Permission.ApprovePayroll)).toBe(true);
+    expect(hasPermission(Admin, ViewMembers)).toBe(true);
+    expect(hasPermission(Admin, ManageStaff)).toBe(true);
+    expect(hasPermission(Admin, ApprovePayroll)).toBe(true);
   });
 
   it("returns true for None requirement", () => {
-    expect(hasPermission(0n, Permission.None)).toBe(true);
+    expect(hasPermission(0n, None)).toBe(true);
   });
 });
 
 describe("hasAnyPermission", () => {
   it("returns true if any of the required permissions match", () => {
-    const userPermissions = Permission.ViewMembers;
-    expect(
-      hasAnyPermission(userPermissions, Permission.ViewMembers, Permission.ManageMembers)
-    ).toBe(true);
+    const userPermissions = ViewMembers;
+    expect(hasAnyPermission(userPermissions, ViewMembers, ManageMembers)).toBe(true);
   });
 
   it("returns false if none of the required permissions match", () => {
-    const userPermissions = Permission.ViewClasses;
-    expect(
-      hasAnyPermission(userPermissions, Permission.ViewMembers, Permission.ManageMembers)
-    ).toBe(false);
+    const userPermissions = ViewClasses;
+    expect(hasAnyPermission(userPermissions, ViewMembers, ManageMembers)).toBe(false);
   });
 
   it("returns false when called with no required permissions", () => {
-    expect(hasAnyPermission(Permission.Admin)).toBe(false);
+    expect(hasAnyPermission(Admin)).toBe(false);
   });
 });

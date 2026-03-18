@@ -13,11 +13,12 @@ import { Alert } from "@/components/ui/alert";
 import { FormField } from "@/components/ui/form-field";
 import { Spinner } from "@/components/ui/spinner";
 import { PermissionGate } from "@/components/permission-gate";
-import { Permission } from "@/lib/permissions";
+import { useRbacStore } from "@/stores/rbac-store";
 import { dayOfWeekLabel } from "@/lib/booking-utils";
 import type { ClassScheduleDto } from "@/types/booking";
 
 export default function ClassSchedulesPage() {
+  const { permissionMap } = useRbacStore();
   const { gymHouseId, isLoading: gymHouseLoading } = useActiveGymHouse();
   const [dayFilter, setDayFilter] = useState<string>("");
 
@@ -146,7 +147,7 @@ export default function ClassSchedulesPage() {
           </Select>
         </FormField>
 
-        <PermissionGate permission={Permission.ManageSchedule}>
+        <PermissionGate permission={permissionMap["ManageSchedule"] ?? 0n}>
           <Link href="/class-schedules/new">
             <Button variant="primary" size="md">
               <Plus className="w-4 h-4" aria-hidden="true" />

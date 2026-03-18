@@ -1,22 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { X, AlertTriangle } from "lucide-react";
-import { Role } from "@/lib/roles";
 import type { RoleType } from "@/lib/roles";
+import { useRbacStore } from "@/stores/rbac-store";
 import { useChangeUserRole } from "@/hooks/use-role-users";
 import type { RoleUserDto } from "@/hooks/use-role-users";
-
-// Owner cannot be assigned — exclude from selectable roles
-const ASSIGNABLE_ROLES: RoleType[] = [
-  Role.HouseManager,
-  Role.Trainer,
-  Role.Staff,
-  Role.Member,
-];
 
 interface ChangeRoleDialogProps {
   user: RoleUserDto | null;
@@ -36,13 +28,20 @@ export function ChangeRoleDialog({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const changeRoleMutation = useChangeUserRole();
+  const { assignableRoles } = useRbacStore();
+
+  // Derive assignable role names from store (Owner is excluded because isAssignable === false)
+  const assignableRoleNames: RoleType[] = useMemo(
+    () => assignableRoles.map((r) => r.name),
+    [assignableRoles]
+  );
 
   // Default selection: current role if assignable, else first option
-  const defaultRole = (user?.role as RoleType | undefined);
+  const defaultRole = user?.role as RoleType | undefined;
   const initialRole =
-    defaultRole && ASSIGNABLE_ROLES.includes(defaultRole)
+    defaultRole && assignableRoleNames.includes(defaultRole)
       ? defaultRole
-      : ASSIGNABLE_ROLES[0];
+      : (assignableRoleNames[0] ?? "");
 
   const [selectedRole, setSelectedRole] = useState<RoleType>(initialRole);
 
@@ -51,10 +50,10 @@ export function ChangeRoleDialog({
     if (user) {
       const userRole = user.role as RoleType;
       setSelectedRole(
-        ASSIGNABLE_ROLES.includes(userRole) ? userRole : ASSIGNABLE_ROLES[0]
+        assignableRoleNames.includes(userRole) ? userRole : (assignableRoleNames[0] ?? "")
       );
     }
-  }, [user]);
+  }, [user, assignableRoleNames]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -161,7 +160,7 @@ export function ChangeRoleDialog({
           disabled={changeRoleMutation.isPending}
           aria-label="Select new role"
         >
-          {ASSIGNABLE_ROLES.map((role) => (
+          {assignableRoleNames.map((role) => (
             <option key={role} value={role}>
               {role}
             </option>

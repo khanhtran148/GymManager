@@ -13,7 +13,7 @@ import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { PermissionGate } from "@/components/permission-gate";
-import { Permission } from "@/lib/permissions";
+import { useRbacStore } from "@/stores/rbac-store";
 import type { TransactionDto, TransactionType, TransactionDirection } from "@/types/transaction";
 
 function formatCurrency(value: number): string {
@@ -53,6 +53,7 @@ const TYPE_LABELS: Record<TransactionType, string> = {
 };
 
 export default function TransactionsPage() {
+  const { permissionMap } = useRbacStore();
   const { data: gymHouses, isLoading: gymLoading } = useGymHouses();
   const [selectedHouseId, setSelectedHouseId] = useState<string>("");
   const [page, setPage] = useState(1);
@@ -164,7 +165,7 @@ export default function TransactionsPage() {
           <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Finance</p>
           <h2 className="text-2xl font-bold text-text-primary tracking-tight">Transactions</h2>
         </div>
-        <PermissionGate permission={Permission.ProcessPayments}>
+        <PermissionGate permission={permissionMap["ProcessPayments"] ?? 0n}>
           <Link href="/finance/transactions/new">
             <Button variant="primary" size="md">
               <Plus className="w-4 h-4" aria-hidden="true" />

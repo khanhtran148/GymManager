@@ -1,7 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { useAuthStore } from "@/stores/auth-store";
+import { useRbacStore } from "@/stores/rbac-store";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { testRolesMetadata } from "@/__tests__/fixtures/rbac-metadata";
 
 // Mock api-client to prevent real network calls
 vi.mock("@/lib/api-client", () => ({
@@ -32,6 +34,11 @@ function renderWithProviders(ui: React.ReactElement) {
 describe("DashboardPage role-conditional rendering", () => {
   beforeEach(() => {
     localStorage.clear();
+    useRbacStore.getState().setMetadata(testRolesMetadata);
+  });
+
+  afterEach(() => {
+    useRbacStore.getState().reset();
   });
 
   it("shows stats cards and system overview for Owner", () => {

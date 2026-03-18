@@ -14,9 +14,10 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { PermissionGate } from "@/components/permission-gate";
-import { Permission } from "@/lib/permissions";
+import { useRbacStore } from "@/stores/rbac-store";
 
 export default function MemberDetailPage() {
+  const { permissionMap } = useRbacStore();
   const params = useParams<{ id: string }>();
 
   const { data: member, isLoading: memberLoading, error: memberError } = useMember(params.id);
@@ -49,7 +50,7 @@ export default function MemberDetailPage() {
         breadcrumb="Members"
         title={member.fullName}
         actions={
-          <PermissionGate permission={Permission.ManageMembers}>
+          <PermissionGate permission={permissionMap["ManageMembers"] ?? 0n}>
             <Link href={`/members/${member.id}/subscriptions/new`}>
               <Button variant="primary" size="md">
                 <Plus className="w-4 h-4" aria-hidden="true" />
