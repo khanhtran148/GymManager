@@ -55,7 +55,7 @@ export default function PnLReportPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Finance</p>

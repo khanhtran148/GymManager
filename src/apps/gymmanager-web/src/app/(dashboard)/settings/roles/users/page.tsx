@@ -39,7 +39,7 @@ export default function UserRolesPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl">
+    <div className="space-y-6">
       {/* Page header */}
       <div>
         <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">

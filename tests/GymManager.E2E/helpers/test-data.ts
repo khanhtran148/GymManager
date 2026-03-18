@@ -21,6 +21,7 @@ import type {
   TransactionType,
   TransactionDirection,
   TransactionCategory,
+  PaymentMethod,
   StaffType,
   TargetAudience,
   CreateShiftAssignmentRequest,
@@ -224,12 +225,12 @@ export function generateTransaction(
     transactionType: 0 as TransactionType, // MembershipFee
     direction: 0 as TransactionDirection,   // Credit
     amount: 1_000_000,
-    category: "Revenue" as TransactionCategory,
+    category: 0 as TransactionCategory, // Revenue
     description: `Membership payment ${id}`,
     transactionDate: new Date().toISOString(),
     relatedEntityId: null,
     approvedById: null,
-    paymentMethod: "Cash",
+    paymentMethod: 0 as PaymentMethod, // Cash
     externalReference: null,
     ...overrides,
   };
@@ -275,7 +276,7 @@ export function generateAnnouncement(
     gymHouseId: null,
     title: `Announcement ${id}`,
     content: `Test announcement content ${id}. Please read carefully.`,
-    targetAudience: "AllMembers" as TargetAudience,
+    targetAudience: 0 as TargetAudience, // AllMembers
     publishAt,
     ...overrides,
   };

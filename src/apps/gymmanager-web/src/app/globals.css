@@ -301,6 +301,19 @@ body {
   border-color: var(--color-primary-500);
 }
 
+/* Native date/datetime picker dark mode support */
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"] {
+  color-scheme: light;
+}
+
+.dark input[type="date"],
+.dark input[type="datetime-local"],
+.dark input[type="time"] {
+  color-scheme: dark;
+}
+
 /* Skeleton loading animation */
 @keyframes shimmer {
   0% { background-position: -200% 0; }

@@ -15,12 +15,14 @@ import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { PermissionGate } from "@/components/permission-gate";
 import { useRbacStore } from "@/stores/rbac-store";
+import { useActiveGymHouse } from "@/hooks/use-active-gym-house";
 
 export default function MemberDetailPage() {
   const { permissionMap } = useRbacStore();
+  const { gymHouseId } = useActiveGymHouse();
   const params = useParams<{ id: string }>();
 
-  const { data: member, isLoading: memberLoading, error: memberError } = useMember(params.id);
+  const { data: member, isLoading: memberLoading, error: memberError } = useMember(gymHouseId, params.id);
   const { data: subscriptions, isLoading: subsLoading } = useSubscriptions(params.id);
   const { data: gymHouses } = useGymHouses();
 

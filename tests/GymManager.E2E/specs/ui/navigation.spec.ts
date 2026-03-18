@@ -37,12 +37,12 @@ test.describe("App navigation and layout", () => {
 
     // Collapsible group links — "Finance" and "Staff" live inside accordion groups
     // that must be expanded before the child link becomes visible.
-    const groupRoutes: Array<{ group: string; childLabel: string; url: RegExp }> = [
-      { group: "Finance", childLabel: "Dashboard", url: /\/finance$/ },
-      { group: "Staff & HR", childLabel: "Staff", url: /\/staff/ },
+    const groupRoutes: Array<{ group: string; childLabel: string; childHref: string; url: RegExp }> = [
+      { group: "Finance", childLabel: "Dashboard", childHref: "/finance", url: /\/finance$/ },
+      { group: "Staff & HR", childLabel: "Staff", childHref: "/staff", url: /\/staff/ },
     ];
 
-    for (const { group, childLabel, url } of groupRoutes) {
+    for (const { group, childLabel, childHref, url } of groupRoutes) {
       test(`sidebar group "${group}" → "${childLabel}" navigates correctly`, async ({
         authenticatedPage,
       }) => {
@@ -62,11 +62,13 @@ test.describe("App navigation and layout", () => {
           await groupButton.click();
         }
 
-        // Click the child link inside the expanded group
+        // Click the child link inside the expanded group using its href
+        // to avoid ambiguity (e.g., "Dashboard" appears both as top-level
+        // and as a Finance child link)
         const childLink = page
           .getByRole("navigation")
           .first()
-          .getByRole("link", { name: new RegExp(`^${childLabel}$`, "i") });
+          .locator(`a[href="${childHref}"]`);
         await childLink.click();
 
         await page.waitForURL(url, { timeout: 15_000 });

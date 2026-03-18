@@ -52,15 +52,26 @@ const TYPE_LABELS: Record<TransactionType, string> = {
   Other: "Other",
 };
 
+function getDefaultDateRange(): { from: string; to: string } {
+  const to = new Date();
+  const from = new Date();
+  from.setDate(from.getDate() - 30);
+  return {
+    from: from.toISOString().split("T")[0],
+    to: to.toISOString().split("T")[0],
+  };
+}
+
 export default function TransactionsPage() {
   const { permissionMap } = useRbacStore();
   const { data: gymHouses, isLoading: gymLoading } = useGymHouses();
+  const defaultRange = getDefaultDateRange();
   const [selectedHouseId, setSelectedHouseId] = useState<string>("");
   const [page, setPage] = useState(1);
   const [filterType, setFilterType] = useState<TransactionType | "">("");
   const [filterDirection, setFilterDirection] = useState<TransactionDirection | "">("");
-  const [filterFrom, setFilterFrom] = useState<string>("");
-  const [filterTo, setFilterTo] = useState<string>("");
+  const [filterFrom, setFilterFrom] = useState<string>(defaultRange.from);
+  const [filterTo, setFilterTo] = useState<string>(defaultRange.to);
 
   const gymHouseId = selectedHouseId || (gymHouses?.[0]?.id ?? "");
 
@@ -158,7 +169,7 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="space-y-5 max-w-7xl">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>

@@ -7,6 +7,9 @@ namespace GymManager.Infrastructure.Persistence.Repositories;
 
 public sealed class AnnouncementRepository(GymManagerDbContext db) : IAnnouncementRepository
 {
+    private static DateTime ToUtc(DateTime dt) =>
+        dt.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(dt, DateTimeKind.Utc) : dt.ToUniversalTime();
+
     public async Task<Announcement?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         await db.Announcements
             .Include(a => a.Author)
@@ -35,7 +38,7 @@ public sealed class AnnouncementRepository(GymManagerDbContext db) : IAnnounceme
     public async Task<List<Announcement>> GetDueForPublishingAsync(DateTime asOf, CancellationToken ct = default) =>
         await db.Announcements
             .AsNoTracking()
-            .Where(a => !a.IsPublished && a.PublishAt <= asOf)
+            .Where(a => !a.IsPublished && a.PublishAt <= ToUtc(asOf))
             .ToListAsync(ct);
 
     public async Task CreateAsync(Announcement announcement, CancellationToken ct = default)

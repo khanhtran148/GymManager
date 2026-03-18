@@ -139,7 +139,7 @@ export default function PayrollDetailPage() {
   }
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4 flex-wrap">
         <Link href="/payroll" aria-label="Back to payroll list">

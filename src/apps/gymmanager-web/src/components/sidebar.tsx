@@ -126,7 +126,7 @@ export function Sidebar() {
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
-    return pathname === href || (href !== "/" && pathname.startsWith(href + "/"));
+    return pathname === href;
   };
 
   const isGroupActive = (group: NavGroup) => {

@@ -8,6 +8,9 @@ namespace GymManager.Infrastructure.Persistence.Repositories;
 
 public sealed class TransactionRepository(GymManagerDbContext db) : ITransactionRepository
 {
+    private static DateTime ToUtc(DateTime dt) =>
+        dt.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(dt, DateTimeKind.Utc) : dt.ToUniversalTime();
+
     public async Task RecordAsync(Transaction transaction, CancellationToken ct = default)
     {
         db.Transactions.Add(transaction);
@@ -48,10 +51,16 @@ public sealed class TransactionRepository(GymManagerDbContext db) : ITransaction
             .Where(t => t.GymHouseId == gymHouseId);
 
         if (from.HasValue)
-            query = query.Where(t => t.TransactionDate >= from.Value);
+        {
+            var fromUtc = ToUtc(from.Value);
+            query = query.Where(t => t.TransactionDate >= fromUtc);
+        }
 
         if (to.HasValue)
-            query = query.Where(t => t.TransactionDate <= to.Value);
+        {
+            var toUtc = ToUtc(to.Value);
+            query = query.Where(t => t.TransactionDate <= toUtc);
+        }
 
         if (type.HasValue)
             query = query.Where(t => t.TransactionType == type.Value);
@@ -77,24 +86,30 @@ public sealed class TransactionRepository(GymManagerDbContext db) : ITransaction
             .AnyAsync(t => t.RelatedEntityId == relatedEntityId && t.TransactionType == type, ct);
 
     public async Task<decimal> GetRevenueAggregateAsync(
-        Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default) =>
-        await db.Transactions
+        Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default)
+    {
+        var fromUtc = ToUtc(from);
+        var toUtc = ToUtc(to);
+        return await db.Transactions
             .AsNoTracking()
             .Where(t => t.GymHouseId == gymHouseId
                 && t.Direction == TransactionDirection.Credit
-                && t.TransactionDate >= from
-                && t.TransactionDate <= to)
+                && t.TransactionDate >= fromUtc
+                && t.TransactionDate <= toUtc)
             .SumAsync(t => t.Amount, ct);
+    }
 
 
     public async Task<List<(TransactionDirection Direction, TransactionCategory Category, decimal Total)>> GetAggregateByDirectionAndCategoryAsync(
         Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default)
     {
+        var fromUtc = ToUtc(from);
+        var toUtc = ToUtc(to);
         var results = await db.Transactions
             .AsNoTracking()
             .Where(t => t.GymHouseId == gymHouseId
-                && t.TransactionDate >= from
-                && t.TransactionDate <= to)
+                && t.TransactionDate >= fromUtc
+                && t.TransactionDate <= toUtc)
             .GroupBy(t => new { t.Direction, t.Category })
             .Select(g => new { g.Key.Direction, g.Key.Category, Total = g.Sum(t => t.Amount) })
             .ToListAsync(ct);

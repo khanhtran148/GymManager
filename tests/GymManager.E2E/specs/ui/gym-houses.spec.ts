@@ -112,14 +112,24 @@ test.describe("Gym House management", () => {
       ).toBeVisible({ timeout: 10_000 });
 
       // Click the delete button in the matching row
+      // The button has aria-label="Delete {name}" — target by aria-label pattern
       const row = page.getByRole("row").filter({ hasText: gymHouse.name });
-      await row.getByRole("button", { name: /delete|remove/i }).click();
+      const deleteBtn = row.getByRole("button", { name: /delete/i });
+      await deleteBtn.waitFor({ timeout: 10_000 });
+      await deleteBtn.click();
 
-      // Confirm deletion if a dialog appears
-      const confirmButton = page.getByRole("button", { name: /confirm|yes|delete/i });
-      if (await confirmButton.isVisible().catch(() => false)) {
-        await confirmButton.click();
-      }
+      // The ConfirmDialog renders inside a <dialog> element.
+      // Wait for the dialog to appear and click the confirm button ("Delete").
+      const dialog = page.locator("dialog[open]");
+      await dialog.waitFor({ state: "visible", timeout: 5_000 });
+      const confirmButton = dialog.getByRole("button", { name: /^delete$/i });
+      await confirmButton.click();
+
+      // Wait for the dialog to close and the list to refresh
+      await dialog.waitFor({ state: "hidden", timeout: 5_000 }).catch(() => {});
+
+      // Reload the page to ensure the list is fresh
+      await listPage.goto();
 
       await expect(
         page.getByRole("row").filter({ hasText: gymHouse.name })

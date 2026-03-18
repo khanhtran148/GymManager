@@ -109,14 +109,11 @@ export type TransactionType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 /** Credit=0 Debit=1 */
 export type TransactionDirection = 0 | 1;
 
-export type TransactionCategory =
-  | "Revenue"
-  | "OperatingExpense"
-  | "CapitalExpense"
-  | "Payroll"
-  | "Refund";
+/** Revenue=0 OperatingExpense=1 CapitalExpense=2 Payroll=3 Refund=4 */
+export type TransactionCategory = 0 | 1 | 2 | 3 | 4;
 
-export type PaymentMethod = "Cash" | "BankTransfer" | "Card" | "Online";
+/** Cash=0 BankTransfer=1 Card=2 Online=3 */
+export type PaymentMethod = 0 | 1 | 2 | 3;
 
 export interface CreateTransactionRequest {
   transactionType: TransactionType;
@@ -142,12 +139,8 @@ export interface CreateStaffRequest {
   perClassBonus: number;
 }
 
-export type TargetAudience =
-  | "AllMembers"
-  | "ActiveMembers"
-  | "Staff"
-  | "Trainers"
-  | "Everyone";
+/** AllMembers=0 ActiveMembers=1 Staff=2 Trainers=3 Everyone=4 */
+export type TargetAudience = 0 | 1 | 2 | 3 | 4;
 
 export interface CreateAnnouncementRequest {
   gymHouseId: string | null;
@@ -333,17 +326,17 @@ export interface BookingDto {
 export interface TransactionDto {
   id: string;
   gymHouseId: string;
-  transactionType: string;
-  direction: string;
+  transactionType: number;
+  direction: number;
   amount: number;
-  category: string;
+  category: number;
   description: string;
   transactionDate: string;
   relatedEntityId: string | null;
   reversesTransactionId: string | null;
   reversedByTransactionId: string | null;
   approvedById: string | null;
-  paymentMethod: string | null;
+  paymentMethod: number | null;
   externalReference: string | null;
   createdAt: string;
 }
@@ -368,7 +361,7 @@ export interface AnnouncementDto {
   authorName: string;
   title: string;
   content: string;
-  targetAudience: TargetAudience;
+  targetAudience: number;
   publishAt: string;
   isPublished: boolean;
   publishedAt: string | null;

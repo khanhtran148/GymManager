@@ -29,14 +29,25 @@ const statusBadgeMap: Record<string, string> = {
   "Wait Listed": "Frozen",
 };
 
+function getDefaultDateRange(): { from: string; to: string } {
+  const to = new Date();
+  const from = new Date();
+  from.setDate(from.getDate() - 30);
+  return {
+    from: `${from.toISOString().split("T")[0]}T00:00`,
+    to: `${to.toISOString().split("T")[0]}T23:59`,
+  };
+}
+
 export default function BookingsPage() {
   const { permissionMap } = useRbacStore();
   const { gymHouseId, isLoading: gymHouseLoading } = useActiveGymHouse();
+  const defaultRange = getDefaultDateRange();
   const [page, setPage] = useState(1);
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [appliedFrom, setAppliedFrom] = useState("");
-  const [appliedTo, setAppliedTo] = useState("");
+  const [from, setFrom] = useState(defaultRange.from);
+  const [to, setTo] = useState(defaultRange.to);
+  const [appliedFrom, setAppliedFrom] = useState(defaultRange.from);
+  const [appliedTo, setAppliedTo] = useState(defaultRange.to);
   const [cancelId, setCancelId] = useState<string | null>(null);
 
   const { data, isLoading, error } = useBookings(

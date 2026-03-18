@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { canAccessRoute } from "@/lib/route-access";
 import type { RouteAccessRule } from "@/types/rbac";
 
-const PUBLIC_PATHS = ["/login", "/register", "/403"];
+const PUBLIC_PATHS = ["/login", "/register", "/401", "/403", "/500"];
 
 /**
  * Static fallback route map used by the Next.js middleware when the
@@ -103,7 +103,8 @@ export function middleware(request: NextRequest): NextResponse {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isAuthenticated && isPublic && pathname !== "/403") {
+  const isErrorPage = pathname === "/401" || pathname === "/403" || pathname === "/500";
+  if (isAuthenticated && isPublic && !isErrorPage) {
     const homeUrl = new URL("/", request.url);
     return NextResponse.redirect(homeUrl);
   }

@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { PermissionGate } from "@/components/permission-gate";
 import { useRbacStore } from "@/stores/rbac-store";
+import { useActiveGymHouse } from "@/hooks/use-active-gym-house";
 import type { MemberDto } from "@/types/member";
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -30,11 +31,12 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export default function MembersPage() {
   const { permissionMap } = useRbacStore();
+  const { gymHouseId } = useActiveGymHouse();
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
 
-  const { data, isLoading, error } = useMembers(page, search);
+  const { data, isLoading, error } = useMembers(gymHouseId, page, search);
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     setSearchInput(e.target.value);

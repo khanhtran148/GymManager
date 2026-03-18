@@ -5,6 +5,7 @@ import axios, {
 } from "axios";
 import type { AuthResponse } from "@/types/auth";
 import { useAuthStore } from "@/stores/auth-store";
+import { useLoadingStore } from "@/stores/loading-store";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1";
 
@@ -32,6 +33,7 @@ function createApiClient(): AxiosInstance {
   });
 
   instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+    useLoadingStore.getState().increment();
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("access_token");
       if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -40,8 +42,12 @@ function createApiClient(): AxiosInstance {
   });
 
   instance.interceptors.response.use(
-    (res) => res,
+    (res) => {
+      useLoadingStore.getState().decrement();
+      return res;
+    },
     async (error) => {
+      useLoadingStore.getState().decrement();
       const originalRequest = error.config as InternalAxiosRequestConfig & {
         _retry?: boolean;
       };
@@ -103,9 +109,7 @@ function createApiClient(): AxiosInstance {
           return instance(originalRequest);
         } catch (refreshError) {
           processQueue(refreshError, null);
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-          localStorage.removeItem("user");
+          useAuthStore.getState().logout();
           if (typeof window !== "undefined") {
             window.location.href = "/login";
           }
@@ -113,6 +117,20 @@ function createApiClient(): AxiosInstance {
         } finally {
           isRefreshing = false;
         }
+      }
+
+      const status: number | undefined = error.response?.status;
+
+      if (status === 403) {
+        const { useToastStore } = await import("@/stores/toast-store");
+        useToastStore
+          .getState()
+          .addToast({ variant: "error", message: "You don't have permission for this action" });
+      } else if (status !== undefined && status >= 500) {
+        const { useToastStore } = await import("@/stores/toast-store");
+        useToastStore
+          .getState()
+          .addToast({ variant: "error", message: "Something went wrong. Please try again later." });
       }
 
       return Promise.reject(error);

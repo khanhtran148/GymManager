@@ -8,6 +8,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCreateMember } from "@/hooks/use-members";
 import { useGymHouses } from "@/hooks/use-gym-houses";
+import { useActiveGymHouse } from "@/hooks/use-active-gym-house";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -37,7 +38,8 @@ type MemberFormData = z.infer<typeof memberSchema>;
 
 export default function NewMemberPage() {
   const router = useRouter();
-  const createMember = useCreateMember();
+  const { gymHouseId } = useActiveGymHouse();
+  const createMember = useCreateMember(gymHouseId);
   const { data: gymHouses } = useGymHouses();
   const [serverError, setServerError] = useState<string | null>(null);
 

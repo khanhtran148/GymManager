@@ -134,20 +134,22 @@ export class DashboardPage {
    * Logout: opens user-menu if present, then clicks the logout button.
    */
   async logout(): Promise<void> {
+    // Navigate to dashboard first to ensure the top bar is visible
+    await this.page.goto("/");
+    await this.page.waitForLoadState("domcontentloaded");
+
     // The logout action is behind a user menu dropdown in the top bar.
     // The button has aria-label="User menu" and aria-haspopup="menu".
-    const userMenu = this.page
-      .getByRole("button", { name: /user menu/i })
-      .or(this.page.getByRole("button", { name: /user|account|profile|avatar/i }))
-      .or(this.page.getByTestId("user-menu"))
-      .or(this.page.getByTestId("user-avatar"));
+    const userMenu = this.page.getByRole("button", { name: /user menu/i });
+    await userMenu.waitFor({ state: "visible", timeout: 10_000 });
+    await userMenu.click();
 
-    if (await userMenu.isVisible().catch(() => false)) {
-      await userMenu.click();
-      // Wait for the dropdown menu to appear
-      await this.page.waitForTimeout(300);
-    }
+    // Wait for the dropdown menu to appear
+    const menu = this.page.getByRole("menu");
+    await menu.waitFor({ state: "visible", timeout: 5_000 });
 
-    await this.logoutButton.click();
+    // Click the "Sign out" menu item
+    const signOutItem = menu.getByRole("menuitem", { name: /sign out/i });
+    await signOutItem.click();
   }
 }

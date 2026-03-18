@@ -7,6 +7,9 @@ namespace GymManager.Infrastructure.Persistence.Repositories;
 
 public sealed class SubscriptionRepository(GymManagerDbContext db) : ISubscriptionRepository
 {
+    private static DateTime ToUtc(DateTime dt) =>
+        dt.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(dt, DateTimeKind.Utc) : dt.ToUniversalTime();
+
     public async Task<Subscription?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         await db.Subscriptions
             .AsNoTracking()
@@ -55,6 +58,6 @@ public sealed class SubscriptionRepository(GymManagerDbContext db) : ISubscripti
             .AsNoTracking()
             .CountAsync(s => s.GymHouseId == gymHouseId
                 && s.Status == SubscriptionStatus.Cancelled
-                && s.UpdatedAt >= from
-                && s.UpdatedAt <= to, ct);
+                && s.UpdatedAt >= ToUtc(from)
+                && s.UpdatedAt <= ToUtc(to), ct);
 }

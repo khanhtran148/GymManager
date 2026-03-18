@@ -8,6 +8,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useMember } from "@/hooks/use-members";
 import { useCreateSubscription } from "@/hooks/use-subscriptions";
+import { useActiveGymHouse } from "@/hooks/use-active-gym-house";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -38,7 +39,8 @@ type SubscriptionFormData = z.infer<typeof subscriptionSchema>;
 export default function NewSubscriptionPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { data: member } = useMember(params.id);
+  const { gymHouseId } = useActiveGymHouse();
+  const { data: member } = useMember(gymHouseId, params.id);
   const createSubscription = useCreateSubscription();
   const [serverError, setServerError] = useState<string | null>(null);
 
