@@ -8,36 +8,74 @@ import { DashboardPage } from "../../pages/dashboard.page.js";
 
 test.describe("App navigation and layout", () => {
   test.describe("Sidebar navigation links", () => {
-    const routes: Array<{ label: string; url: RegExp }> = [
-      { label: "gym house", url: /\/gym-houses/ },
-      { label: "member", url: /\/members/ },
-      { label: "booking", url: /\/bookings/ },
-      { label: "class schedule", url: /\/class-schedules/ },
-      { label: "time slot", url: /\/time-slots/ },
-      { label: "finance", url: /\/finance/ },
-      { label: "staff", url: /\/staff/ },
-      { label: "announcement", url: /\/announcements/ },
-      { label: "notification", url: /\/notifications/ },
+    // Direct links — these are top-level nav items, not inside collapsible groups
+    const directRoutes: Array<{ label: string; url: RegExp }> = [
+      { label: "Gym Houses", url: /\/gym-houses/ },
+      { label: "Members", url: /\/members/ },
+      { label: "Bookings", url: /\/bookings/ },
+      { label: "Class Schedules", url: /\/class-schedules/ },
+      { label: "Time Slots", url: /\/time-slots/ },
+      { label: "Announcements", url: /\/announcements/ },
     ];
 
-    for (const { label, url } of routes) {
+    for (const { label, url } of directRoutes) {
       test(`sidebar link "${label}" navigates to the correct page`, async ({
         authenticatedPage,
       }) => {
         const page = authenticatedPage;
         const dashboardPage = new DashboardPage(page);
 
-        // Ensure we start from the dashboard
         await dashboardPage.goto();
         await dashboardPage.waitForLoad();
 
-        // Click the matching nav link
         await dashboardPage.navLink(label).click();
 
         await page.waitForURL(url, { timeout: 15_000 });
         expect(page.url()).toMatch(url);
       });
     }
+
+    // Collapsible group links — "Finance" and "Staff" live inside accordion groups
+    // that must be expanded before the child link becomes visible.
+    const groupRoutes: Array<{ group: string; childLabel: string; url: RegExp }> = [
+      { group: "Finance", childLabel: "Dashboard", url: /\/finance$/ },
+      { group: "Staff & HR", childLabel: "Staff", url: /\/staff/ },
+    ];
+
+    for (const { group, childLabel, url } of groupRoutes) {
+      test(`sidebar group "${group}" → "${childLabel}" navigates correctly`, async ({
+        authenticatedPage,
+      }) => {
+        const page = authenticatedPage;
+        const dashboardPage = new DashboardPage(page);
+
+        await dashboardPage.goto();
+        await dashboardPage.waitForLoad();
+
+        // Expand the collapsible group by clicking its header button
+        const groupButton = page
+          .getByRole("navigation")
+          .first()
+          .getByRole("button", { name: new RegExp(group, "i") });
+        const isExpanded = await groupButton.getAttribute("aria-expanded");
+        if (isExpanded !== "true") {
+          await groupButton.click();
+        }
+
+        // Click the child link inside the expanded group
+        const childLink = page
+          .getByRole("navigation")
+          .first()
+          .getByRole("link", { name: new RegExp(`^${childLabel}$`, "i") });
+        await childLink.click();
+
+        await page.waitForURL(url, { timeout: 15_000 });
+        expect(page.url()).toMatch(url);
+      });
+    }
+
+    // "Notifications" is NOT a sidebar link — it is a bell icon in the top bar.
+    // Skip this as a sidebar navigation test.
   });
 
   test.describe("Dashboard quick action links", () => {
@@ -103,25 +141,28 @@ test.describe("App navigation and layout", () => {
   });
 
   test.describe("Page title / document title", () => {
-    const titleChecks: Array<{ route: string; titlePattern: RegExp }> = [
-      { route: "/", titlePattern: /dashboard|gym manager/i },
-      { route: "/gym-houses", titlePattern: /gym house/i },
-      { route: "/members", titlePattern: /member/i },
-      { route: "/bookings", titlePattern: /booking/i },
-      { route: "/finance", titlePattern: /finance/i },
-      { route: "/staff", titlePattern: /staff/i },
-      { route: "/announcements", titlePattern: /announcement/i },
+    // The root layout sets a static title "GymManager" for all pages.
+    // Individual pages do not override the document title via Next.js metadata.
+    // Verify that each route at least renders the app title without error.
+    const titleChecks: Array<{ route: string }> = [
+      { route: "/" },
+      { route: "/gym-houses" },
+      { route: "/members" },
+      { route: "/bookings" },
+      { route: "/finance" },
+      { route: "/staff" },
+      { route: "/announcements" },
     ];
 
-    for (const { route, titlePattern } of titleChecks) {
-      test(`document title reflects the "${route}" route`, async ({
+    for (const { route } of titleChecks) {
+      test(`document title is set on "${route}" route`, async ({
         authenticatedPage,
       }) => {
         await authenticatedPage.goto(route);
         await authenticatedPage.waitForLoadState("domcontentloaded");
 
         const title = await authenticatedPage.title();
-        expect(title).toMatch(titlePattern);
+        expect(title).toMatch(/gymmanager/i);
       });
     }
   });

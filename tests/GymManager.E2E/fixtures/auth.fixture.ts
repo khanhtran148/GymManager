@@ -164,19 +164,34 @@ export const test = base.extend<AuthFixtures>({
         localStorage.setItem("access_token", auth.accessToken);
         localStorage.setItem("refresh_token", auth.refreshToken);
 
-        // Zustand persist store format
+        // Decode JWT payload to extract role and permissions claims
+        let role = "Owner";
+        let permissions = "0";
+        try {
+          const payloadB64 = auth.accessToken.split(".")[1];
+          const payload = JSON.parse(atob(payloadB64));
+          role = payload.role ?? "Owner";
+          permissions = payload.permissions ?? "0";
+        } catch {
+          // fallback to Owner defaults
+        }
+
+        // Zustand persist store format — must include role + permissions
         const zustandState = JSON.stringify({
           state: {
             user: { userId: auth.userId, email: auth.email, fullName: auth.fullName },
             token: auth.accessToken,
             isAuthenticated: true,
+            role,
+            permissions,
           },
           version: 0,
         });
         localStorage.setItem("auth-storage", zustandState);
 
-        // Cookie for Next.js middleware
+        // Cookies for Next.js middleware (no Secure flag — tests run on HTTP)
         document.cookie = "is_authenticated=1; path=/; max-age=604800; SameSite=Lax";
+        document.cookie = `user_role=${role}; path=/; max-age=604800; SameSite=Lax`;
       },
       { auth: authResponse },
     );

@@ -25,51 +25,39 @@ test.describe("Finance features", () => {
       await page.goto("/finance/transactions/new");
       await page.waitForLoadState("domcontentloaded");
 
-      // Fill transaction type / direction
-      const typeSelect = page
-        .getByLabel(/type/i)
-        .or(page.getByRole("combobox", { name: /type/i }))
-        .first();
-      // Select "MembershipFee" (index 0) or by value "0"
-      await typeSelect.selectOption({ index: 0 }).catch(() => {
-        // ignore if no options rendered yet
-      });
+      // Gym house selector (the form requires selecting a gym house first)
+      const gymHouseSelect = page.getByLabel(/gym house/i);
+      await gymHouseSelect.waitFor({ timeout: 10_000 });
+      await gymHouseSelect.selectOption({ index: 1 }); // first real gym house
 
-      // Direction: Credit (Revenue)
-      const directionSelect = page
-        .getByLabel(/direction/i)
-        .or(page.getByRole("combobox", { name: /direction/i }));
-      if (await directionSelect.count() > 0) {
-        await directionSelect.selectOption({ index: 0 });
-      }
+      // Transaction Type: MembershipFee (first option)
+      const typeSelect = page.getByLabel(/transaction type/i);
+      await typeSelect.selectOption("MembershipFee");
+
+      // Direction: Credit (Income)
+      const directionSelect = page.getByLabel(/direction/i);
+      await directionSelect.selectOption("Credit");
 
       // Amount
-      const amountInput = page.getByLabel(/amount/i).or(page.getByPlaceholder(/amount/i));
+      const amountInput = page.getByLabel(/^amount$/i);
       await amountInput.fill(String(txData.amount));
 
       // Category
-      const categorySelect = page
-        .getByLabel(/category/i)
-        .or(page.getByRole("combobox", { name: /category/i }));
-      if (await categorySelect.count() > 0) {
-        await categorySelect.selectOption("Revenue").catch(async () => {
-          await categorySelect.selectOption({ index: 0 });
-        });
-      }
+      const categorySelect = page.getByLabel(/^category$/i);
+      await categorySelect.selectOption("Revenue");
 
       // Description
-      const descInput = page.getByLabel(/description/i).or(page.getByPlaceholder(/description/i));
+      const descInput = page.getByLabel(/description/i);
       await descInput.fill(txData.description);
 
       // Date
-      const dateInput = page.getByLabel(/date/i).first();
+      const dateInput = page.getByLabel(/transaction date/i);
       await dateInput.fill(new Date().toISOString().split("T")[0]);
 
-      await page.getByRole("button", { name: /save|create|submit/i }).click();
+      await page.getByRole("button", { name: /record transaction/i }).click();
 
-      // Navigate to transaction list
-      await page.goto("/finance/transactions");
-      await page.waitForLoadState("domcontentloaded");
+      // After successful submission, the form redirects to /finance/transactions
+      await page.waitForURL(/\/finance\/transactions$/, { timeout: 15_000 });
 
       await expect(
         page.getByRole("row").filter({ hasText: txData.description })
@@ -92,46 +80,38 @@ test.describe("Finance features", () => {
       await page.goto("/finance/transactions/new");
       await page.waitForLoadState("domcontentloaded");
 
-      const typeSelect = page
-        .getByLabel(/type/i)
-        .or(page.getByRole("combobox", { name: /type/i }))
-        .first();
-      // Select "Rent" (index 2) or by value "2"
-      await typeSelect.selectOption({ value: "2" }).catch(async () => {
-        await typeSelect.selectOption({ index: 2 }).catch(() => {});
-      });
+      // Gym house selector
+      const gymHouseSelect = page.getByLabel(/gym house/i);
+      await gymHouseSelect.waitFor({ timeout: 10_000 });
+      await gymHouseSelect.selectOption({ index: 1 });
 
-      const directionSelect = page
-        .getByLabel(/direction/i)
-        .or(page.getByRole("combobox", { name: /direction/i }));
-      if (await directionSelect.count() > 0) {
-        await directionSelect.selectOption({ value: "1" }).catch(async () => {
-          await directionSelect.selectOption({ index: 1 });
-        });
-      }
+      // Transaction Type: Rent
+      const typeSelect = page.getByLabel(/transaction type/i);
+      await typeSelect.selectOption("Rent");
 
-      const amountInput = page.getByLabel(/amount/i).or(page.getByPlaceholder(/amount/i));
+      // Direction: Debit (Expense)
+      const directionSelect = page.getByLabel(/direction/i);
+      await directionSelect.selectOption("Debit");
+
+      // Amount
+      const amountInput = page.getByLabel(/^amount$/i);
       await amountInput.fill(String(txData.amount));
 
-      const categorySelect = page
-        .getByLabel(/category/i)
-        .or(page.getByRole("combobox", { name: /category/i }));
-      if (await categorySelect.count() > 0) {
-        await categorySelect
-          .selectOption("OperatingExpense")
-          .catch(async () => categorySelect.selectOption({ index: 1 }));
-      }
+      // Category
+      const categorySelect = page.getByLabel(/^category$/i);
+      await categorySelect.selectOption("OperatingExpense");
 
-      const descInput = page.getByLabel(/description/i).or(page.getByPlaceholder(/description/i));
+      // Description
+      const descInput = page.getByLabel(/description/i);
       await descInput.fill(txData.description);
 
-      const dateInput = page.getByLabel(/date/i).first();
+      // Date
+      const dateInput = page.getByLabel(/transaction date/i);
       await dateInput.fill(new Date().toISOString().split("T")[0]);
 
-      await page.getByRole("button", { name: /save|create|submit/i }).click();
+      await page.getByRole("button", { name: /record transaction/i }).click();
 
-      await page.goto("/finance/transactions");
-      await page.waitForLoadState("domcontentloaded");
+      await page.waitForURL(/\/finance\/transactions$/, { timeout: 15_000 });
 
       await expect(
         page.getByRole("row").filter({ hasText: txData.description })
@@ -164,13 +144,15 @@ test.describe("Finance features", () => {
       await page.goto("/finance/transactions");
       await page.waitForLoadState("domcontentloaded");
 
-      // Apply the "Revenue" category filter
-      const categoryFilter = page
-        .getByLabel(/category/i)
-        .or(page.getByRole("combobox", { name: /category/i }))
+      // The transaction list page uses "Filter by type" and "Filter by direction"
+      // as aria-labels. There's no direct category filter on the list page.
+      // Use the type filter to narrow results instead.
+      const typeFilter = page
+        .getByLabel(/filter by type/i)
+        .or(page.getByLabel(/type/i))
         .first();
-      if (await categoryFilter.count() > 0) {
-        await categoryFilter.selectOption("Revenue");
+      if (await typeFilter.isVisible().catch(() => false)) {
+        await typeFilter.selectOption("MembershipFee");
         await page.waitForLoadState("domcontentloaded");
 
         // The revenue transaction should be visible

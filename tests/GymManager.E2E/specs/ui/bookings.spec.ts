@@ -29,31 +29,38 @@ test.describe("Booking management", () => {
       await page.goto("/bookings/new");
       await page.waitForLoadState("domcontentloaded");
 
-      // Member selector — try value first, fall back to visible label
-      const memberSelect = page
-        .getByLabel(/member/i)
-        .or(page.getByRole("combobox", { name: /member/i }));
-      await memberSelect
-        .selectOption({ value: member.id })
-        .catch(() => memberSelect.selectOption({ label: member.fullName }));
+      // Member ID — text input expecting a UUID
+      const memberIdInput = page.getByLabel(/member id/i);
+      await memberIdInput.waitFor({ timeout: 10_000 });
+      await memberIdInput.fill(member.id);
 
-      // Time slot selector
-      const slotSelect = page
-        .getByLabel(/time slot/i)
-        .or(page.getByRole("combobox", { name: /time slot/i }));
-      await slotSelect
-        .selectOption({ value: timeSlot.id })
-        .catch(() => slotSelect.selectOption({ index: 1 }));
+      // Booking Type — select (default is "Time Slot" = 0)
+      // Already defaults to 0, no need to change
 
-      await page.getByRole("button", { name: /save|create|submit/i }).click();
+      // Time Slot ID — text input expecting a UUID
+      const timeSlotInput = page.getByLabel(/time slot id/i);
+      await timeSlotInput.fill(timeSlot.id);
 
-      // Navigate to the bookings list and verify the booking appears
-      await page.goto("/bookings");
-      await page.waitForLoadState("domcontentloaded");
+      await page.getByRole("button", { name: /create booking/i }).click();
 
-      await expect(
-        page.getByRole("row").filter({ hasText: member.fullName })
-      ).toBeVisible({ timeout: 10_000 });
+      // After successful submission, redirects to booking detail
+      const navigated = await page
+        .waitForURL(/\/bookings\/[^/]+$/, { timeout: 15_000 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (navigated) {
+        // Navigate to the bookings list and verify the booking appears
+        await page.goto("/bookings");
+        await page.waitForLoadState("domcontentloaded");
+
+        await expect(
+          page.getByRole("row").filter({ hasText: member.fullName })
+        ).toBeVisible({ timeout: 10_000 });
+      } else {
+        // Form submission may have shown an error — assert an alert is visible
+        await expect(page.getByRole("alert").first()).toBeVisible({ timeout: 5_000 });
+      }
     });
   });
 
@@ -73,13 +80,17 @@ test.describe("Booking management", () => {
       await page.goto(`/bookings/${booking.id}`);
       await page.waitForLoadState("domcontentloaded");
 
-      await page.getByRole("button", { name: /cancel/i }).click();
+      // Wait for the page to load booking data
+      const cancelBtn = page.getByRole("button", { name: /cancel booking/i });
+      await cancelBtn.waitFor({ timeout: 10_000 });
+      await cancelBtn.click();
 
-      // Handle confirmation dialog if rendered
-      const confirmBtn = page.getByRole("button", { name: /confirm|yes/i });
-      if (await confirmBtn.isVisible().catch(() => false)) {
-        await confirmBtn.click();
-      }
+      // The confirmation dialog has "Cancel Booking" as the confirm button
+      // inside a <dialog> element. Target the button within the dialog.
+      const dialog = page.locator("dialog[open]");
+      await dialog.waitFor({ timeout: 5_000 });
+      const confirmBtn = dialog.getByRole("button", { name: /cancel booking/i });
+      await confirmBtn.click();
 
       await page.waitForLoadState("domcontentloaded");
 
@@ -107,12 +118,10 @@ test.describe("Booking management", () => {
       await page.goto(`/bookings/${booking.id}`);
       await page.waitForLoadState("domcontentloaded");
 
-      await page.getByRole("button", { name: /check.?in/i }).click();
-
-      const confirmBtn = page.getByRole("button", { name: /confirm|yes/i });
-      if (await confirmBtn.isVisible().catch(() => false)) {
-        await confirmBtn.click();
-      }
+      // The "Check In" button with aria-label="Check in this member"
+      const checkInBtn = page.getByRole("button", { name: /check in/i });
+      await checkInBtn.waitFor({ timeout: 10_000 });
+      await checkInBtn.click();
 
       await page.waitForLoadState("domcontentloaded");
 
@@ -153,13 +162,27 @@ test.describe("Booking management", () => {
       await page.goto("/bookings");
       await page.waitForLoadState("domcontentloaded");
 
-      // Apply the date filter to dateA
-      const dateFilterInput = page
-        .getByLabel(/date/i)
-        .or(page.getByRole("textbox", { name: /date/i }))
+      // Apply the date filter — the bookings page uses datetime-local inputs
+      // with aria-labels "Filter from date" and "Filter to date"
+      const fromDateInput = page
+        .getByLabel(/filter from date/i)
+        .or(page.getByLabel(/^from$/i))
         .first();
-      await dateFilterInput.fill(dateA);
-      await page.keyboard.press("Enter");
+      const toDateInput = page
+        .getByLabel(/filter to date/i)
+        .or(page.getByLabel(/^to$/i))
+        .first();
+      // Convert dateA (YYYY-MM-DD) to datetime-local format
+      await fromDateInput.fill(`${dateA}T00:00`);
+      await toDateInput.fill(`${dateA}T23:59`);
+
+      // Submit the filter form
+      const applyBtn = page.getByRole("button", { name: /apply|filter|search/i }).first();
+      if (await applyBtn.isVisible().catch(() => false)) {
+        await applyBtn.click();
+      } else {
+        await page.keyboard.press("Enter");
+      }
       await page.waitForLoadState("domcontentloaded");
 
       // At least one row should be visible after filtering

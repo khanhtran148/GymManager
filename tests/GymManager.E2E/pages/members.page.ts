@@ -22,6 +22,10 @@ export interface MemberFormData {
   fullName: string;
   email: string;
   phone?: string;
+  /** UUID of an existing user — required by the current form */
+  userId?: string;
+  /** UUID of a gym house — required by the current form */
+  gymHouseId?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -61,8 +65,7 @@ export class MembersPage {
     this.createButton = page
       .getByRole("link", { name: /new member|add member|create member/i })
       .or(page.getByRole("button", { name: /new member|add member|create member/i }))
-      .or(page.getByRole("link", { name: /^(new|create|add)$/i }))
-      .or(page.getByRole("button", { name: /^(new|create|add)$/i }));
+      .first();
 
     this.tableRows = page
       .getByRole("row")
@@ -169,6 +172,12 @@ export class MembersPage {
 export class MemberFormPage {
   // -- Locators -------------------------------------------------------------
 
+  /** Gym house select dropdown */
+  readonly gymHouseSelect: Locator;
+
+  /** User ID text input */
+  readonly userIdInput: Locator;
+
   /** Full name text input */
   readonly fullNameInput: Locator;
 
@@ -188,13 +197,22 @@ export class MemberFormPage {
   readonly invalidFields: Locator;
 
   constructor(private readonly page: Page) {
+    this.gymHouseSelect = page
+      .getByLabel(/gym house/i)
+      .or(page.locator("select#gymHouseId"));
+
+    this.userIdInput = page
+      .getByLabel(/user id/i)
+      .or(page.locator("input#userId"));
+
     this.fullNameInput = page
       .getByLabel(/full name/i)
       .or(page.getByPlaceholder(/full name/i));
 
     this.emailInput = page
-      .getByLabel(/^email/i)
-      .or(page.getByPlaceholder(/^email/i));
+      .getByLabel(/email address/i)
+      .or(page.getByLabel(/^email/i))
+      .or(page.getByPlaceholder(/email/i));
 
     this.phoneInput = page
       .getByLabel(/phone/i)
@@ -236,6 +254,15 @@ export class MemberFormPage {
    * `phone` is optional and skipped when undefined.
    */
   async fillForm(data: MemberFormData): Promise<void> {
+    // The current form requires gymHouseId and userId fields
+    if (data.gymHouseId !== undefined) {
+      await this.gymHouseSelect.selectOption({ value: data.gymHouseId }).catch(async () => {
+        await this.gymHouseSelect.selectOption({ index: 1 });
+      });
+    }
+    if (data.userId !== undefined) {
+      await this.userIdInput.fill(data.userId);
+    }
     await this.fullNameInput.fill(data.fullName);
     await this.emailInput.fill(data.email);
     if (data.phone !== undefined) {

@@ -17,10 +17,12 @@ interface AuthState {
   updateFromToken: (token: string) => void;
 }
 
+const SECURE_FLAG = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
+
 function setAuthCookie(isAuthenticated: boolean): void {
   if (typeof document === "undefined") return;
   if (isAuthenticated) {
-    document.cookie = "is_authenticated=1; path=/; max-age=604800; SameSite=Lax; Secure";
+    document.cookie = `is_authenticated=1; path=/; max-age=604800; SameSite=Lax${SECURE_FLAG}`;
   } else {
     document.cookie = "is_authenticated=; path=/; max-age=0; SameSite=Lax";
   }
@@ -29,7 +31,7 @@ function setAuthCookie(isAuthenticated: boolean): void {
 function setRoleCookie(role: string | null): void {
   if (typeof document === "undefined") return;
   if (role) {
-    document.cookie = `user_role=${role}; path=/; max-age=604800; SameSite=Lax; Secure`;
+    document.cookie = `user_role=${role}; path=/; max-age=604800; SameSite=Lax${SECURE_FLAG}`;
   } else {
     document.cookie = "user_role=; path=/; max-age=0; SameSite=Lax";
   }

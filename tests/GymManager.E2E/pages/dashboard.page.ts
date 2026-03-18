@@ -52,8 +52,8 @@ export class DashboardPage {
       .first();
 
     this.logoutButton = page
-      .getByRole("button", { name: /^(logout|sign out|log out)$/i })
-      .or(page.getByRole("menuitem", { name: /logout|sign out/i }));
+      .getByRole("menuitem", { name: /sign out|logout|log out/i })
+      .or(page.getByRole("button", { name: /^(logout|sign out|log out)$/i }));
   }
 
   // -- Navigation -----------------------------------------------------------
@@ -134,14 +134,18 @@ export class DashboardPage {
    * Logout: opens user-menu if present, then clicks the logout button.
    */
   async logout(): Promise<void> {
-    // Some designs hide logout behind a user avatar or dropdown
+    // The logout action is behind a user menu dropdown in the top bar.
+    // The button has aria-label="User menu" and aria-haspopup="menu".
     const userMenu = this.page
-      .getByRole("button", { name: /user|account|profile|avatar/i })
+      .getByRole("button", { name: /user menu/i })
+      .or(this.page.getByRole("button", { name: /user|account|profile|avatar/i }))
       .or(this.page.getByTestId("user-menu"))
       .or(this.page.getByTestId("user-avatar"));
 
     if (await userMenu.isVisible().catch(() => false)) {
       await userMenu.click();
+      // Wait for the dropdown menu to appear
+      await this.page.waitForTimeout(300);
     }
 
     await this.logoutButton.click();

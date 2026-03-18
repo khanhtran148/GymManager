@@ -113,6 +113,12 @@ Desktop.ini
 .docker/
 
 # ========================
+# Playwright
+# ========================
+playwright-report/
+test-results/
+
+# ========================
 # Logs
 # ========================
 logs/

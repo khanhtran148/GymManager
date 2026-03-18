@@ -20,49 +20,34 @@ test.describe("Announcements", () => {
       await page.goto("/announcements/new");
       await page.waitForLoadState("domcontentloaded");
 
-      // Title
-      const titleInput = page
-        .getByLabel(/title/i)
-        .or(page.getByPlaceholder(/title/i));
+      // Title (label htmlFor="title")
+      const titleInput = page.getByLabel(/^title$/i);
       await titleInput.fill(announcementData.title);
 
-      // Content / body
-      const contentInput = page
-        .getByLabel(/content|body/i)
-        .or(page.getByPlaceholder(/content/i))
-        .or(page.getByRole("textbox", { name: /content|message/i }));
+      // Content (label htmlFor="content", textarea element)
+      const contentInput = page.getByLabel(/^content$/i);
       await contentInput.fill(announcementData.content);
 
-      // Gym house selector (null = chain-wide, or select specific)
-      const gymHouseSelect = page
-        .getByLabel(/gym house/i)
-        .or(page.getByRole("combobox", { name: /gym house/i }));
-      if (await gymHouseSelect.count() > 0) {
-        await gymHouseSelect
-          .selectOption({ value: gymHouse.id })
-          .catch(() => gymHouseSelect.selectOption({ index: 1 }));
+      // Gym House selector (only visible when "Chain-wide" checkbox is unchecked)
+      // The select has id="gymHouseId" with label "Gym House"
+      const gymHouseSelect = page.locator("select#gymHouseId");
+      if (await gymHouseSelect.isVisible().catch(() => false)) {
+        await gymHouseSelect.selectOption({ value: gymHouse.id }).catch(async () => {
+          await gymHouseSelect.selectOption({ index: 1 });
+        });
       }
 
-      // Target audience
-      const audienceSelect = page
-        .getByLabel(/audience|target/i)
-        .or(page.getByRole("combobox", { name: /audience/i }));
-      if (await audienceSelect.count() > 0) {
-        await audienceSelect
-          .selectOption("AllMembers")
-          .catch(() => audienceSelect.selectOption({ index: 0 }));
-      }
+      // Target Audience (label htmlFor="targetAudience")
+      const audienceSelect = page.getByLabel(/target audience/i);
+      await audienceSelect.selectOption("AllMembers");
 
-      // Publish date/time
-      const publishAtInput = page
-        .getByLabel(/publish|schedule/i)
-        .or(page.getByRole("textbox", { name: /publish/i }));
-      if (await publishAtInput.count() > 0) {
-        const publishIso = new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16);
-        await publishAtInput.fill(publishIso).catch(() => {});
-      }
+      // Publish At (label htmlFor="publishAt", datetime-local input)
+      const publishAtInput = page.getByLabel(/publish at/i);
+      const publishIso = new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16);
+      await publishAtInput.fill(publishIso);
 
-      await page.getByRole("button", { name: /save|create|submit/i }).click();
+      // Submit button text is "Create Announcement"
+      await page.getByRole("button", { name: /create announcement/i }).click();
 
       // Navigate to the announcements list
       await page.goto("/announcements");
@@ -74,8 +59,10 @@ test.describe("Announcements", () => {
     });
   });
 
-  test.describe("View announcement detail", () => {
-    test("navigates to announcement detail and displays the title and content", async ({
+  test.describe("View announcement", () => {
+    // Note: there is no /announcements/[id] detail page in the current frontend.
+    // The announcement detail view test is skipped until the page is implemented.
+    test.skip("navigates to announcement detail and displays the title and content", async ({
       authenticatedPage,
       apiContext,
     }) => {
