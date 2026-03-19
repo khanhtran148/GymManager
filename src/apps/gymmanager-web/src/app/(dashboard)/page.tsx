@@ -118,7 +118,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <PermissionGate permission={permissionMap["ManageTenant"] ?? 0n}>
               <Link
-                href="/gym-houses/new"
+                href="/gym-houses?create=true"
                 className={cn(
                   "flex items-center gap-3.5 p-3.5 rounded-xl transition-all duration-200 group border border-transparent",
                   "hover:bg-blue-50/50 dark:hover:bg-blue-900/10",
@@ -138,7 +138,7 @@ export default function DashboardPage() {
 
             <PermissionGate permission={permissionMap["ManageMembers"] ?? 0n}>
               <Link
-                href="/members/new"
+                href="/members?create=true"
                 className={cn(
                   "flex items-center gap-3.5 p-3.5 rounded-xl transition-all duration-200 group border border-transparent",
                   "hover:bg-primary-50/50 dark:hover:bg-primary-900/10",

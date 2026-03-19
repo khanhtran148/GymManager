@@ -14,8 +14,15 @@ export interface SubscriptionDto {
   frozenUntil: string | null;
 }
 
+export const SUBSCRIPTION_TYPE_VALUES: Record<SubscriptionType, number> = {
+  Monthly: 0,
+  Quarterly: 1,
+  Annual: 2,
+  DayPass: 3,
+};
+
 export interface CreateSubscriptionRequest {
-  type: SubscriptionType;
+  type: number;
   price: number;
   startDate: string;
   endDate: string;

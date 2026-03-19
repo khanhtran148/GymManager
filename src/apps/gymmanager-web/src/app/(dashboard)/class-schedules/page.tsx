@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useClassSchedules } from "@/hooks/use-class-schedules";
@@ -11,9 +10,13 @@ import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { FormField } from "@/components/ui/form-field";
+import { FormModal } from "@/components/ui/form-modal";
 import { Spinner } from "@/components/ui/spinner";
 import { PermissionGate } from "@/components/permission-gate";
 import { useRbacStore } from "@/stores/rbac-store";
+import { useCreateModal } from "@/hooks/use-create-modal";
+import { useToastStore } from "@/stores/toast-store";
+import { ClassScheduleForm } from "@/components/forms/class-schedule-form";
 import { dayOfWeekLabel } from "@/lib/booking-utils";
 import type { ClassScheduleDto } from "@/types/booking";
 
@@ -21,6 +24,8 @@ export default function ClassSchedulesPage() {
   const { permissionMap } = useRbacStore();
   const { gymHouseId, isLoading: gymHouseLoading } = useActiveGymHouse();
   const [dayFilter, setDayFilter] = useState<string>("");
+  const createModal = useCreateModal();
+  const { addToast } = useToastStore();
 
   const { data, isLoading, error } = useClassSchedules(
     gymHouseId ?? "",
@@ -148,12 +153,10 @@ export default function ClassSchedulesPage() {
         </FormField>
 
         <PermissionGate permission={permissionMap["ManageSchedule"] ?? 0n}>
-          <Link href="/class-schedules/new">
-            <Button variant="primary" size="md">
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              New Class
-            </Button>
-          </Link>
+          <Button variant="primary" size="md" onClick={createModal.open}>
+            <Plus className="w-4 h-4" aria-hidden="true" />
+            New Class
+          </Button>
         </PermissionGate>
       </div>
 
@@ -163,6 +166,16 @@ export default function ClassSchedulesPage() {
         isLoading={isLoading}
         emptyMessage="No class schedules found. Add a new class to get started."
       />
+
+      <FormModal isOpen={createModal.isOpen} onClose={createModal.close} title="New Class Schedule">
+        <ClassScheduleForm
+          onSuccess={() => {
+            createModal.close();
+            addToast({ message: "Class schedule created successfully", variant: "success" });
+          }}
+          onCancel={createModal.close}
+        />
+      </FormModal>
     </div>
   );
 }

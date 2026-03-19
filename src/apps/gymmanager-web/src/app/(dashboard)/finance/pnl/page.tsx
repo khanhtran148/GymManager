@@ -71,7 +71,7 @@ export default function PnLReportPage() {
       {!gymHouseId && (
         <Alert variant="error">
           No gym house found. Please{" "}
-          <Link href="/gym-houses/new" className="underline font-medium">
+          <Link href="/gym-houses?create=true" className="underline font-medium">
             create a gym house
           </Link>{" "}
           first.

@@ -44,6 +44,7 @@
   /* Semantic colors — overridden in .dark below */
   --color-card: #ffffff;
   --color-card-inset: #f8fafc;
+  --color-input: #ffffff;
   --color-sidebar-bg: #ffffff;
   --color-sidebar-border-color: #e2e8f0;
 
@@ -130,6 +131,7 @@
 .dark {
   --color-card: #242b3d;
   --color-card-inset: #1f2535;
+  --color-input: #1c2333;
   --color-sidebar-bg: #141821;
   --color-sidebar-border-color: #1f2738;
 
@@ -301,17 +303,29 @@ body {
   border-color: var(--color-primary-500);
 }
 
-/* Native date/datetime picker dark mode support */
-input[type="date"],
-input[type="datetime-local"],
-input[type="time"] {
+/* Native form control dark mode support */
+input,
+select,
+textarea {
   color-scheme: light;
 }
 
-.dark input[type="date"],
-.dark input[type="datetime-local"],
-.dark input[type="time"] {
+.dark input,
+.dark select,
+.dark textarea {
   color-scheme: dark;
+}
+
+/* Ensure select option backgrounds match input background in dark mode */
+.dark select option {
+  background-color: var(--color-input);
+  color: var(--color-text-primary);
+}
+
+/* Number input spinner consistency */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
 }
 
 /* Skeleton loading animation */

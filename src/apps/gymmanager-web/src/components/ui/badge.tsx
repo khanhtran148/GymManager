@@ -2,12 +2,19 @@ import { cn } from "@/lib/utils";
 import type { MemberStatus } from "@/types/member";
 import type { SubscriptionStatus } from "@/types/subscription";
 
-type BadgeStatus = MemberStatus | SubscriptionStatus | string;
+type BadgeStatus = MemberStatus | SubscriptionStatus | string | number;
 
 interface BadgeProps {
   status: BadgeStatus;
   className?: string;
 }
+
+const numericStatusMap: Record<number, string> = {
+  0: "Active",
+  1: "Frozen",
+  2: "Expired",
+  3: "Cancelled",
+};
 
 const statusStyles: Record<string, { bg: string; text: string; dot: string }> = {
   Active: {
@@ -39,7 +46,8 @@ const defaultStyle = {
 };
 
 export function Badge({ status, className }: BadgeProps) {
-  const styles = statusStyles[status] ?? defaultStyle;
+  const label = typeof status === "number" ? (numericStatusMap[status] ?? String(status)) : status;
+  const styles = statusStyles[label] ?? defaultStyle;
 
   return (
     <span
@@ -51,7 +59,7 @@ export function Badge({ status, className }: BadgeProps) {
       )}
     >
       <span className={cn("w-1.5 h-1.5 rounded-full", styles.dot)} aria-hidden="true" />
-      {status}
+      {label}
     </span>
   );
 }

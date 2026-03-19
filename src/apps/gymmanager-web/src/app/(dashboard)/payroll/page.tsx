@@ -9,10 +9,16 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
+import { FormModal } from "@/components/ui/form-modal";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { PermissionGate } from "@/components/permission-gate";
 import { useRbacStore } from "@/stores/rbac-store";
+import { useCreateModal } from "@/hooks/use-create-modal";
+import { useViewModal } from "@/hooks/use-view-modal";
+import { useToastStore } from "@/stores/toast-store";
+import { PayrollForm } from "@/components/forms/payroll-form";
+import { PayrollDetail } from "@/components/details/payroll-detail";
 import type { PayrollPeriodDto, PayrollStatus } from "@/types/staff";
 
 function formatCurrency(value: number): string {
@@ -35,6 +41,9 @@ const PAYROLL_STATUS_LABELS: Record<PayrollStatus, string> = {
 
 export default function PayrollPage() {
   const { permissionMap } = useRbacStore();
+  const createModal = useCreateModal();
+  const viewModal = useViewModal();
+  const { addToast } = useToastStore();
   const { data: gymHouses, isLoading: gymLoading } = useGymHouses();
   const [selectedHouseId, setSelectedHouseId] = useState<string>("");
   const [page, setPage] = useState(1);
@@ -48,12 +57,13 @@ export default function PayrollPage() {
       key: "period",
       header: "Period",
       render: (p: PayrollPeriodDto) => (
-        <Link
-          href={`/payroll/${p.id}`}
-          className="font-medium text-text-primary hover:text-primary-500 transition-colors tabular-nums"
+        <button
+          type="button"
+          onClick={() => viewModal.open(p.id)}
+          className="bg-transparent border-none p-0 cursor-pointer font-medium text-text-primary hover:text-primary-500 transition-colors tabular-nums"
         >
           {p.periodStart} – {p.periodEnd}
-        </Link>
+        </button>
       ),
     },
     {
@@ -103,11 +113,9 @@ export default function PayrollPage() {
       key: "actions",
       header: "",
       render: (p: PayrollPeriodDto) => (
-        <Link href={`/payroll/${p.id}`}>
-          <Button variant="ghost" size="sm">
-            View
-          </Button>
-        </Link>
+        <Button variant="ghost" size="sm" onClick={() => viewModal.open(p.id)}>
+          View
+        </Button>
       ),
     },
   ];
@@ -129,12 +137,10 @@ export default function PayrollPage() {
           <h2 className="text-2xl font-bold text-text-primary tracking-tight">Payroll</h2>
         </div>
         <PermissionGate permission={permissionMap["ManageStaff"] ?? 0n}>
-          <Link href="/payroll/new">
-            <Button variant="primary" size="md">
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              Generate Payroll
-            </Button>
-          </Link>
+          <Button variant="primary" size="md" onClick={createModal.open}>
+            <Plus className="w-4 h-4" aria-hidden="true" />
+            Generate Payroll
+          </Button>
         </PermissionGate>
       </div>
 
@@ -145,7 +151,7 @@ export default function PayrollPage() {
       {!gymHouseId && (
         <Alert variant="error">
           No gym house found. Please{" "}
-          <Link href="/gym-houses/new" className="underline font-medium">
+          <Link href="/gym-houses?create=true" className="underline font-medium">
             create a gym house
           </Link>{" "}
           first.
@@ -191,6 +197,25 @@ export default function PayrollPage() {
             : undefined
         }
       />
+
+      <FormModal isOpen={createModal.isOpen} onClose={createModal.close} title="Generate Payroll">
+        <PayrollForm
+          onSuccess={() => {
+            createModal.close();
+            addToast({ message: "Payroll generated successfully", variant: "success" });
+          }}
+          onCancel={createModal.close}
+        />
+      </FormModal>
+
+      <FormModal isOpen={viewModal.isOpen} onClose={viewModal.close} title="Payroll Details" maxWidth="xl">
+        {viewModal.viewId && (
+          <PayrollDetail
+            payrollId={viewModal.viewId}
+            onClose={viewModal.close}
+          />
+        )}
+      </FormModal>
     </div>
   );
 }

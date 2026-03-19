@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { Plus, Megaphone } from "lucide-react";
 import { useAnnouncements } from "@/hooks/use-announcements";
@@ -9,8 +8,12 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
+import { FormModal } from "@/components/ui/form-modal";
 import { PermissionGate } from "@/components/permission-gate";
 import { useRbacStore } from "@/stores/rbac-store";
+import { useCreateModal } from "@/hooks/use-create-modal";
+import { useToastStore } from "@/stores/toast-store";
+import { AnnouncementForm } from "@/components/forms/announcement-form";
 import type { AnnouncementDto } from "@/types/announcement";
 
 const AUDIENCE_LABELS: Record<string, string> = {
@@ -43,6 +46,8 @@ export default function AnnouncementsPage() {
   const [page, setPage] = useState(1);
   const { data: gymHouses } = useGymHouses();
   const [gymHouseId, setGymHouseId] = useState("");
+  const createModal = useCreateModal();
+  const { addToast } = useToastStore();
 
   const selectedGymHouseId = gymHouseId || gymHouses?.[0]?.id || "";
 
@@ -141,12 +146,10 @@ export default function AnnouncementsPage() {
           )}
 
           <PermissionGate permission={permissionMap["ManageAnnouncements"] ?? 0n}>
-            <Link href="/announcements/new">
-              <Button variant="primary" size="md">
-                <Plus className="w-4 h-4" aria-hidden="true" />
-                New Announcement
-              </Button>
-            </Link>
+            <Button variant="primary" size="md" onClick={createModal.open}>
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              New Announcement
+            </Button>
           </PermissionGate>
         </div>
       </div>
@@ -167,6 +170,16 @@ export default function AnnouncementsPage() {
             : undefined
         }
       />
+
+      <FormModal isOpen={createModal.isOpen} onClose={createModal.close} title="New Announcement" maxWidth="xl">
+        <AnnouncementForm
+          onSuccess={() => {
+            createModal.close();
+            addToast({ message: "Announcement created successfully", variant: "success" });
+          }}
+          onCancel={createModal.close}
+        />
+      </FormModal>
     </div>
   );
 }
