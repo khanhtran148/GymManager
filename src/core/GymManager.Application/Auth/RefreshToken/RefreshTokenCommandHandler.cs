@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using GymManager.Application.Auth.Shared;
+using GymManager.Application.Common.Constants;
 using GymManager.Application.Common.Interfaces;
 using MediatR;
 using System.Security.Claims;
@@ -13,17 +14,14 @@ public sealed class RefreshTokenCommandHandler(
 {
     public async Task<Result<AuthResponse>> Handle(RefreshTokenCommand request, CancellationToken ct)
     {
-        // We validate that the refresh token belongs to some user by looking it up
-        // The principal from expired token is used to identify the user
         ClaimsPrincipal? principal = null;
         try
         {
-            // Try to get principal — may be null if token is completely invalid
-            principal = tokenService.GetPrincipalFromExpiredToken(request.Token);
+            principal = tokenService.GetPrincipalFromExpiredToken(request.AccessToken);
         }
-        catch
+        catch (Exception)
         {
-            // swallow — will return failure below
+            // Invalid token format — principal remains null, will return failure below
         }
 
         Guid userId = Guid.Empty;
@@ -38,19 +36,21 @@ public sealed class RefreshTokenCommandHandler(
             return Result.Failure<AuthResponse>("Invalid refresh token.");
 
         var user = await userRepository.GetByIdAsync(userId, ct);
-        if (user is null || !user.IsRefreshTokenValid(request.Token))
+        if (user is null || !user.IsRefreshTokenValid(request.RefreshToken))
             return Result.Failure<AuthResponse>("Invalid or expired refresh token.");
 
-        var newAccessToken = tokenService.GenerateAccessToken(user);
+        var newAccessToken = await tokenService.GenerateAccessTokenAsync(user, ct);
         var newRefreshToken = tokenService.GenerateRefreshToken();
-        user.SetRefreshToken(newRefreshToken, DateTime.UtcNow.AddDays(7));
+        user.SetRefreshToken(newRefreshToken, DateTime.UtcNow.AddDays(TokenDefaults.RefreshTokenExpiryDays));
 
         await userRepository.UpdateAsync(user, ct);
 
         return Result.Success(new AuthResponse(
             user.Id,
+            user.Email,
+            user.FullName,
             newAccessToken,
             newRefreshToken,
-            DateTime.UtcNow.AddMinutes(15)));
+            DateTime.UtcNow.AddMinutes(TokenDefaults.AccessTokenExpiryMinutes)));
     }
 }

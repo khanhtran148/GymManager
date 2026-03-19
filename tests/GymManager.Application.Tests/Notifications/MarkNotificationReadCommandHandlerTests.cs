@@ -58,7 +58,7 @@ public sealed class MarkNotificationReadCommandHandlerTests : ApplicationTestBas
         var (userId, gymHouseId) = await SetupUserAndHouseAsync();
         var deliveryId = await CreateNotificationDeliveryAsync(userId, gymHouseId);
 
-        var command = new MarkNotificationReadCommand(deliveryId, userId);
+        var command = new MarkNotificationReadCommand(deliveryId);
         var result = await Sender.Send(command);
 
         result.IsSuccess.Should().BeTrue();
@@ -77,7 +77,7 @@ public sealed class MarkNotificationReadCommandHandlerTests : ApplicationTestBas
 
         var otherUserId = Guid.NewGuid();
         CurrentUser.UserId = otherUserId;
-        var command = new MarkNotificationReadCommand(deliveryId, otherUserId);
+        var command = new MarkNotificationReadCommand(deliveryId);
         var result = await Sender.Send(command);
 
         result.IsFailure.Should().BeTrue();
@@ -89,7 +89,7 @@ public sealed class MarkNotificationReadCommandHandlerTests : ApplicationTestBas
     {
         var (userId, _) = await SetupUserAndHouseAsync();
 
-        var command = new MarkNotificationReadCommand(Guid.NewGuid(), userId);
+        var command = new MarkNotificationReadCommand(Guid.NewGuid());
         var result = await Sender.Send(command);
 
         result.IsFailure.Should().BeTrue();

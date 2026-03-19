@@ -61,6 +61,9 @@ public enum Permission : long
     // Waitlist
     ManageWaitlist = 1L << 25,
 
+    // Roles
+    ManageRoles = 1L << 26,
+
     // Admin
     Admin = ~0L
 }

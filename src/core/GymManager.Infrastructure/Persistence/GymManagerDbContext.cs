@@ -22,6 +22,7 @@ public sealed class GymManagerDbContext(DbContextOptions<GymManagerDbContext> op
     public DbSet<Announcement> Announcements => Set<Announcement>();
     public DbSet<NotificationDelivery> NotificationDeliveries => Set<NotificationDelivery>();
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -63,8 +63,10 @@ export function TopBar() {
     logout();
   };
 
-  const displayName = user?.email ?? "User";
-  const initials = displayName.slice(0, 2).toUpperCase();
+  const fullName = user?.fullName ?? "";
+  const email = user?.email ?? "";
+  const displayName = fullName || email || "User";
+  const initials = (fullName || email).slice(0, 2).toUpperCase();
 
   return (
     <header className="h-16 bg-topbar backdrop-blur-xl border-b border-topbar-border flex items-center justify-between px-6 sticky top-0 z-30">
@@ -115,8 +117,8 @@ export function TopBar() {
                 {initials}
               </span>
             </div>
-            <span className="text-sm font-medium text-text-secondary hidden sm:block max-w-[120px] truncate">
-              {displayName}
+            <span className="text-sm font-medium text-text-secondary hidden sm:block max-w-[160px] truncate">
+              {fullName || email}
             </span>
             <ChevronDown
               className={cn(
@@ -139,9 +141,16 @@ export function TopBar() {
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
                   Signed in as
                 </p>
-                <p className="text-sm font-medium text-text-primary truncate mt-0.5">
-                  {displayName}
-                </p>
+                {fullName && (
+                  <p className="text-sm font-medium text-text-primary truncate mt-0.5">
+                    {fullName}
+                  </p>
+                )}
+                {email && (
+                  <p className="text-xs text-text-muted truncate mt-0.5">
+                    {email}
+                  </p>
+                )}
               </div>
               <button
                 role="menuitem"

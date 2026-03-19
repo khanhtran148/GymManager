@@ -19,6 +19,7 @@ public sealed class UserBuilder
     public UserBuilder WithRole(Role role) { _role = role; return this; }
     public UserBuilder WithPermissions(Permission permissions) { _permissions = permissions; return this; }
 
+#pragma warning disable CS0618 // Test builder sets Permissions for backward-compat test scenarios
     public User Build() => new()
     {
         Email = _email.ToLowerInvariant(),
@@ -28,4 +29,5 @@ public sealed class UserBuilder
         Role = _role,
         Permissions = _permissions
     };
+#pragma warning restore CS0618
 }

@@ -11,7 +11,7 @@ public sealed class RegisterCommandHandlerTests : ApplicationTestBase
     [Fact]
     public async Task Register_WithValidData_Succeeds()
     {
-        var command = new RegisterCommand("newowner@example.com", "Password123", "New Owner", null);
+        var command = new RegisterCommand("newowner@example.com", "Password123!", "New Owner", null);
 
         var result = await Sender.Send(command);
 
@@ -26,9 +26,9 @@ public sealed class RegisterCommandHandlerTests : ApplicationTestBase
     {
         // Arrange: create first user
         var db = Services.GetRequiredService<GymManagerDbContext>();
-        await Sender.Send(new RegisterCommand("duplicate@example.com", "Password123", "First User", null));
+        await Sender.Send(new RegisterCommand("duplicate@example.com", "Password123!", "First User", null));
 
-        var command = new RegisterCommand("duplicate@example.com", "Password123", "Second User", null);
+        var command = new RegisterCommand("duplicate@example.com", "Password123!", "Second User", null);
 
         var result = await Sender.Send(command);
 
@@ -49,7 +49,7 @@ public sealed class RegisterCommandHandlerTests : ApplicationTestBase
     [Fact]
     public async Task Register_WithInvalidEmail_ThrowsValidationException()
     {
-        var command = new RegisterCommand("not-an-email", "Password123", "Test", null);
+        var command = new RegisterCommand("not-an-email", "Password123!", "Test", null);
 
         var act = async () => await Sender.Send(command);
 

@@ -1,8 +1,8 @@
+using Asp.Versioning;
 using GymManager.Api.Common;
 using GymManager.Application.Announcements.CreateAnnouncement;
 using GymManager.Application.Announcements.GetAnnouncementById;
 using GymManager.Application.Announcements.GetAnnouncements;
-using GymManager.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +10,10 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace GymManager.Api.Controllers;
 
+[ApiVersion("1.0")]
 [Authorize]
 [EnableRateLimiting(RateLimitPolicies.Default)]
-public sealed class AnnouncementsController(ISender sender, ICurrentUser currentUser)
+public sealed class AnnouncementsController(ISender sender)
     : ApiControllerBase(sender)
 {
     [HttpPost]
@@ -25,7 +26,6 @@ public sealed class AnnouncementsController(ISender sender, ICurrentUser current
     {
         var command = new CreateAnnouncementCommand(
             body.GymHouseId,
-            currentUser.UserId,
             body.Title,
             body.Content,
             body.TargetAudience,

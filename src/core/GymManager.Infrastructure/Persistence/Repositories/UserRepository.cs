@@ -56,4 +56,20 @@ public sealed class UserRepository(GymManagerDbContext db) : IUserRepository
             .Where(u => u.Role == role && u.DeletedAt == null)
             .ToListAsync(ct);
     }
+
+    public async Task<List<User>> GetByTenantAndRoleAsync(Guid tenantId, Role role, CancellationToken ct = default)
+    {
+        // Collect all gym house IDs owned by this tenant
+        var tenantGymHouseIds = db.GymHouses
+            .Where(g => g.OwnerId == tenantId && g.DeletedAt == null)
+            .Select(g => g.Id);
+
+        // Return users with the given role whose membership or staff record is in one of the tenant's houses
+        return await db.Users
+            .AsNoTracking()
+            .Where(u => u.Role == role && u.DeletedAt == null &&
+                (db.Members.Any(m => m.UserId == u.Id && tenantGymHouseIds.Contains(m.GymHouseId) && m.DeletedAt == null) ||
+                 db.Staff.Any(s => s.UserId == u.Id && tenantGymHouseIds.Contains(s.GymHouseId) && s.DeletedAt == null)))
+            .ToListAsync(ct);
+    }
 }

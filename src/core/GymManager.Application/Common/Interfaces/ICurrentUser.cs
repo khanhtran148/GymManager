@@ -8,5 +8,6 @@ public interface ICurrentUser
     Guid TenantId { get; }
     string Email { get; }
     Permission Permissions { get; }
+    Role Role { get; }
     bool IsAuthenticated { get; }
 }

@@ -8,6 +8,9 @@ namespace GymManager.Infrastructure.Persistence.Repositories;
 
 public sealed class BookingRepository(GymManagerDbContext db) : IBookingRepository
 {
+    private static DateTime ToUtc(DateTime dt) =>
+        dt.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(dt, DateTimeKind.Utc) : dt.ToUniversalTime();
+
     public async Task CreateAsync(Booking booking, CancellationToken ct = default)
     {
         db.Bookings.Add(booking);
@@ -62,10 +65,16 @@ public sealed class BookingRepository(GymManagerDbContext db) : IBookingReposito
             .Where(b => b.GymHouseId == gymHouseId);
 
         if (from.HasValue)
-            query = query.Where(b => b.BookedAt >= from.Value);
+        {
+            var fromUtc = ToUtc(from.Value);
+            query = query.Where(b => b.BookedAt >= fromUtc);
+        }
 
         if (to.HasValue)
-            query = query.Where(b => b.BookedAt <= to.Value);
+        {
+            var toUtc = ToUtc(to.Value);
+            query = query.Where(b => b.BookedAt <= toUtc);
+        }
 
         var totalCount = await query.CountAsync(ct);
 
@@ -87,8 +96,8 @@ public sealed class BookingRepository(GymManagerDbContext db) : IBookingReposito
                 && b.Status == BookingStatus.Completed
                 && b.ClassSchedule != null
                 && trainerIds.Contains(b.ClassSchedule.TrainerId)
-                && b.BookedAt >= from
-                && b.BookedAt <= to)
+                && b.BookedAt >= ToUtc(from)
+                && b.BookedAt <= ToUtc(to))
             .GroupBy(b => b.ClassSchedule!.TrainerId)
             .ToDictionaryAsync(g => g.Key, g => g.Count(), ct);
 
@@ -101,6 +110,6 @@ public sealed class BookingRepository(GymManagerDbContext db) : IBookingReposito
                 && b.Status == BookingStatus.Completed
                 && b.ClassSchedule != null
                 && b.ClassSchedule.TrainerId == trainerId
-                && b.BookedAt >= from
-                && b.BookedAt <= to, ct);
+                && b.BookedAt >= ToUtc(from)
+                && b.BookedAt <= ToUtc(to), ct);
 }

@@ -10,8 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
+import { FormModal } from "@/components/ui/form-modal";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { PermissionGate } from "@/components/permission-gate";
+import { useRbacStore } from "@/stores/rbac-store";
+import { useCreateModal } from "@/hooks/use-create-modal";
+import { useToastStore } from "@/stores/toast-store";
+import { TransactionForm } from "@/components/forms/transaction-form";
 import type { TransactionDto, TransactionType, TransactionDirection } from "@/types/transaction";
 
 function formatCurrency(value: number): string {
@@ -50,14 +56,28 @@ const TYPE_LABELS: Record<TransactionType, string> = {
   Other: "Other",
 };
 
+function getDefaultDateRange(): { from: string; to: string } {
+  const to = new Date();
+  const from = new Date();
+  from.setDate(from.getDate() - 30);
+  return {
+    from: from.toISOString().split("T")[0],
+    to: to.toISOString().split("T")[0],
+  };
+}
+
 export default function TransactionsPage() {
+  const { permissionMap } = useRbacStore();
+  const createModal = useCreateModal();
+  const { addToast } = useToastStore();
   const { data: gymHouses, isLoading: gymLoading } = useGymHouses();
+  const defaultRange = getDefaultDateRange();
   const [selectedHouseId, setSelectedHouseId] = useState<string>("");
   const [page, setPage] = useState(1);
   const [filterType, setFilterType] = useState<TransactionType | "">("");
   const [filterDirection, setFilterDirection] = useState<TransactionDirection | "">("");
-  const [filterFrom, setFilterFrom] = useState<string>("");
-  const [filterTo, setFilterTo] = useState<string>("");
+  const [filterFrom, setFilterFrom] = useState<string>(defaultRange.from);
+  const [filterTo, setFilterTo] = useState<string>(defaultRange.to);
 
   const gymHouseId = selectedHouseId || (gymHouses?.[0]?.id ?? "");
 
@@ -155,19 +175,19 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="space-y-5 max-w-7xl">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Finance</p>
           <h2 className="text-2xl font-bold text-text-primary tracking-tight">Transactions</h2>
         </div>
-        <Link href="/finance/transactions/new">
-          <Button variant="primary" size="md">
+        <PermissionGate permission={permissionMap["ProcessPayments"] ?? 0n}>
+          <Button variant="primary" size="md" onClick={createModal.open}>
             <Plus className="w-4 h-4" aria-hidden="true" />
             Record Transaction
           </Button>
-        </Link>
+        </PermissionGate>
       </div>
 
       {error && (
@@ -177,7 +197,7 @@ export default function TransactionsPage() {
       {!gymHouseId && (
         <Alert variant="error">
           No gym house found. Please{" "}
-          <Link href="/gym-houses/new" className="underline font-medium">
+          <Link href="/gym-houses?create=true" className="underline font-medium">
             create a gym house
           </Link>{" "}
           first.
@@ -286,6 +306,16 @@ export default function TransactionsPage() {
             : undefined
         }
       />
+
+      <FormModal isOpen={createModal.isOpen} onClose={createModal.close} title="Record Transaction" maxWidth="xl">
+        <TransactionForm
+          onSuccess={() => {
+            createModal.close();
+            addToast({ message: "Transaction recorded successfully", variant: "success" });
+          }}
+          onCancel={createModal.close}
+        />
+      </FormModal>
     </div>
   );
 }

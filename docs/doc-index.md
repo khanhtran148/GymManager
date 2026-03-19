@@ -1,6 +1,6 @@
 ---
 type: doc-index
-updated: 2026-03-17
+updated: 2026-03-19
 ---
 
 # Documentation Index
@@ -14,8 +14,11 @@ All documentation files for the GymManager platform.
 | File | Type | Description |
 |---|---|---|
 | [`CLAUDE.md`](../CLAUDE.md) | project-instructions | Development standards, architecture rules, patterns, anti-guessing rules |
+| [`README.md`](../README.md) | readme | Project overview, quick start, solution structure |
+| [`docs/product-overview.md`](product-overview.md) | product-overview | Product vision, user roles, core features, phase status |
+| [`docs/domain-glossary.md`](domain-glossary.md) | domain-glossary | Domain entities, business terms, enum values, entity relationships |
 | [`docs/codebase-summary.md`](codebase-summary.md) | codebase-summary | Entity inventory, API endpoints, frontend routes, infrastructure components |
-| [`docs/architecture.md`](architecture.md) | architecture | System diagrams, multi-tenancy, auth flow, key data flows, ADR summary |
+| [`docs/architecture.md`](architecture.md) | architecture | System diagrams, multi-tenancy, auth flow, permission system, error handling |
 | [`docs/api-reference.md`](api-reference.md) | api-reference | All REST endpoints, request/response shapes, error format, rate limits |
 | [`docs/doc-index.md`](doc-index.md) | doc-index | This file |
 
@@ -85,7 +88,7 @@ For the living, consolidated reference see [`docs/api-reference.md`](api-referen
 |---|---|
 | Phase 1 — Foundation | Complete |
 | Phase 2 — Booking | Complete |
-| Phase 3 — Finance | Pending |
-| Phase 4 — Staff/HR | Pending |
-| Phase 5 — Communications | Pending |
+| Phase 3 — Finance | Complete |
+| Phase 4 — Staff/HR | Complete |
+| Phase 5 — Communications + RBAC | Complete |
 | Phase 6 — Hardening | Pending |

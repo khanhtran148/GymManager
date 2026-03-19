@@ -15,6 +15,8 @@ import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { FormField } from "@/components/ui/form-field";
 import { cn } from "@/lib/utils";
+import { PermissionGate } from "@/components/permission-gate";
+import { useRbacStore } from "@/stores/rbac-store";
 import type {
   ShiftAssignmentDto,
   ShiftStatus,
@@ -75,6 +77,7 @@ interface ShiftFormErrors {
 }
 
 export default function ShiftsPage() {
+  const { permissionMap } = useRbacStore();
   const { data: gymHouses, isLoading: gymLoading } = useGymHouses();
   const [selectedHouseId, setSelectedHouseId] = useState<string>("");
   const [weekStart, setWeekStart] = useState<Date>(() => getWeekStart(new Date()));
@@ -183,10 +186,12 @@ export default function ShiftsPage() {
           <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Staff & HR</p>
           <h2 className="text-2xl font-bold text-text-primary tracking-tight">Shift Schedule</h2>
         </div>
-        <Button variant="primary" size="md" onClick={handleOpenModal} disabled={!gymHouseId}>
-          <Plus className="w-4 h-4" aria-hidden="true" />
-          Add Shift
-        </Button>
+        <PermissionGate permission={permissionMap["ManageShifts"] ?? 0n}>
+          <Button variant="primary" size="md" onClick={handleOpenModal} disabled={!gymHouseId}>
+            <Plus className="w-4 h-4" aria-hidden="true" />
+            Add Shift
+          </Button>
+        </PermissionGate>
       </div>
 
       {error && (

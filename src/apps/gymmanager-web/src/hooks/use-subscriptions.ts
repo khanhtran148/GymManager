@@ -13,16 +13,16 @@ const QUERY_KEYS = {
   byMember: (memberId: string) => ["subscriptions", "member", memberId] as const,
 };
 
-export function useSubscriptions(memberId: string) {
+export function useSubscriptions(memberId: string, gymHouseId?: string) {
   return useQuery({
     queryKey: QUERY_KEYS.byMember(memberId),
     queryFn: () =>
-      get<SubscriptionDto[]>(`/members/${memberId}/subscriptions`),
-    enabled: !!memberId,
+      get<SubscriptionDto[]>(`/gymhouses/${gymHouseId}/members/${memberId}/subscriptions`),
+    enabled: !!memberId && !!gymHouseId,
   });
 }
 
-export function useCreateSubscription() {
+export function useCreateSubscription(gymHouseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
@@ -31,7 +31,7 @@ export function useCreateSubscription() {
     }: {
       memberId: string;
       data: CreateSubscriptionRequest;
-    }) => post<SubscriptionDto>(`/members/${memberId}/subscriptions`, data),
+    }) => post<SubscriptionDto>(`/gymhouses/${gymHouseId}/members/${memberId}/subscriptions`, data),
     onSuccess: (_result, { memberId }) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.byMember(memberId) });
     },

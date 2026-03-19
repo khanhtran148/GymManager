@@ -17,7 +17,9 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.FullName).HasColumnName("full_name").HasMaxLength(200).IsRequired();
         builder.Property(u => u.Phone).HasColumnName("phone").HasMaxLength(50);
         builder.Property(u => u.Role).HasColumnName("role").IsRequired();
+#pragma warning disable CS0618 // Permissions column must remain mapped for DB persistence during migration period
         builder.Property(u => u.Permissions).HasColumnName("permissions").HasColumnType("bigint").IsRequired();
+#pragma warning restore CS0618
         builder.Property(u => u.RefreshToken).HasColumnName("refresh_token");
         builder.Property(u => u.RefreshTokenExpiresAt).HasColumnName("refresh_token_expires_at");
         builder.Property(u => u.CreatedAt).HasColumnName("created_at").IsRequired();

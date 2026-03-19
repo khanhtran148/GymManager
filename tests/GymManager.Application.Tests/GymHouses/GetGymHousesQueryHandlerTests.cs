@@ -12,7 +12,7 @@ public sealed class GetGymHousesQueryHandlerTests : ApplicationTestBase
     [Fact]
     public async Task GetGymHouses_ReturnsHousesForCurrentOwner()
     {
-        var reg = await Sender.Send(new RegisterCommand("gethouseowner@example.com", "Password123", "Owner", null));
+        var reg = await Sender.Send(new RegisterCommand("gethouseowner@example.com", "Password123!", "Owner", null));
         CurrentUser.UserId = reg.Value.UserId;
         CurrentUser.TenantId = reg.Value.UserId;
         CurrentUser.Permissions = Permission.Admin;

@@ -25,6 +25,9 @@ public sealed class FreezeSubscriptionCommandHandler(
         if (subscription is null)
             return Result.Failure<SubscriptionDto>(new NotFoundError("Subscription", request.Id).ToString());
 
+        if (subscription.GymHouseId != request.GymHouseId)
+            return Result.Failure<SubscriptionDto>(new ForbiddenError("Subscription does not belong to this gym house.").ToString());
+
         var freezeResult = subscription.Freeze(request.FrozenUntil);
         if (freezeResult.IsFailure)
             return Result.Failure<SubscriptionDto>(freezeResult.Error);

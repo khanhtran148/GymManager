@@ -9,5 +9,6 @@ public sealed class FakeCurrentUser : ICurrentUser
     public Guid TenantId { get; set; } = Guid.NewGuid();
     public string Email { get; set; } = "test@example.com";
     public Permission Permissions { get; set; } = Permission.Admin;
+    public Role Role { get; set; } = Role.Owner;
     public bool IsAuthenticated { get; set; } = true;
 }

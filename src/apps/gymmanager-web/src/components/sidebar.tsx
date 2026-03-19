@@ -2,8 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { useRole } from "@/hooks/use-permissions";
+import type { RoleType } from "@/lib/roles";
+import { useRbacStore } from "@/stores/rbac-store";
+import { getAllowedRolesForRoute } from "@/lib/route-access";
 import {
   LayoutDashboard,
   Building2,
@@ -11,8 +15,6 @@ import {
   Menu,
   X,
   Dumbbell,
-  Crown,
-  Zap,
   CalendarCheck,
   GraduationCap,
   Clock,
@@ -25,6 +27,8 @@ import {
   CalendarDays,
   Banknote,
   Megaphone,
+  Settings,
+  Shield,
 } from "lucide-react";
 
 type IconComponent = React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" | "false" }>;
@@ -33,6 +37,7 @@ interface NavItem {
   label: string;
   href: string;
   icon: IconComponent;
+  allowedRoles?: RoleType[];
 }
 
 interface NavGroup {
@@ -40,6 +45,7 @@ interface NavGroup {
   icon: IconComponent;
   prefix: string;
   children: NavItem[];
+  allowedRoles?: RoleType[];
 }
 
 type NavEntry = NavItem | NavGroup;
@@ -48,45 +54,79 @@ function isNavGroup(entry: NavEntry): entry is NavGroup {
   return "children" in entry;
 }
 
-const navEntries: NavEntry[] = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Gym Houses", href: "/gym-houses", icon: Building2 },
-  { label: "Members", href: "/members", icon: Users },
-  { label: "Bookings", href: "/bookings", icon: CalendarCheck },
-  { label: "Class Schedules", href: "/class-schedules", icon: GraduationCap },
-  { label: "Time Slots", href: "/time-slots", icon: Clock },
-  { label: "Check-in", href: "/check-in", icon: ScanLine },
-  {
-    label: "Finance",
-    icon: Wallet,
-    prefix: "/finance",
-    children: [
-      { label: "Dashboard", href: "/finance", icon: Wallet },
-      { label: "Transactions", href: "/finance/transactions", icon: Receipt },
-      { label: "P&L Report", href: "/finance/pnl", icon: FileText },
-    ],
-  },
-  {
-    label: "Staff & HR",
-    icon: UserCog,
-    prefix: "/staff-hr",
-    children: [
-      { label: "Staff", href: "/staff", icon: Users },
-      { label: "Shifts", href: "/shifts", icon: CalendarDays },
-      { label: "Payroll", href: "/payroll", icon: Banknote },
-    ],
-  },
-  { label: "Announcements", href: "/announcements", icon: Megaphone },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
+  const role = useRole();
+  const { routeAccess } = useRbacStore();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ "/finance": true, "/staff-hr": true });
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ "/finance": true, "/staff-hr": true, "/settings": true });
+
+  // Build nav entries dynamically from routeAccess (falls back to no restrictions when not yet loaded)
+  const navEntries: NavEntry[] = useMemo(() => [
+    { label: "Dashboard", href: "/", icon: LayoutDashboard, allowedRoles: getAllowedRolesForRoute("/", routeAccess) },
+    { label: "Gym Houses", href: "/gym-houses", icon: Building2, allowedRoles: getAllowedRolesForRoute("/gym-houses", routeAccess) },
+    { label: "Members", href: "/members", icon: Users, allowedRoles: getAllowedRolesForRoute("/members", routeAccess) },
+    { label: "Bookings", href: "/bookings", icon: CalendarCheck, allowedRoles: getAllowedRolesForRoute("/bookings", routeAccess) },
+    { label: "Class Schedules", href: "/class-schedules", icon: GraduationCap, allowedRoles: getAllowedRolesForRoute("/class-schedules", routeAccess) },
+    { label: "Time Slots", href: "/time-slots", icon: Clock, allowedRoles: getAllowedRolesForRoute("/time-slots", routeAccess) },
+    { label: "Check-in", href: "/check-in", icon: ScanLine, allowedRoles: getAllowedRolesForRoute("/check-in", routeAccess) },
+    {
+      label: "Finance",
+      icon: Wallet,
+      prefix: "/finance",
+      allowedRoles: getAllowedRolesForRoute("/finance", routeAccess),
+      children: [
+        { label: "Dashboard", href: "/finance", icon: Wallet, allowedRoles: getAllowedRolesForRoute("/finance", routeAccess) },
+        { label: "Transactions", href: "/finance/transactions", icon: Receipt, allowedRoles: getAllowedRolesForRoute("/finance/transactions", routeAccess) },
+        { label: "P&L Report", href: "/finance/pnl", icon: FileText, allowedRoles: getAllowedRolesForRoute("/finance/pnl", routeAccess) },
+      ],
+    },
+    {
+      label: "Staff & HR",
+      icon: UserCog,
+      prefix: "/staff-hr",
+      allowedRoles: getAllowedRolesForRoute("/staff", routeAccess),
+      children: [
+        { label: "Staff", href: "/staff", icon: Users, allowedRoles: getAllowedRolesForRoute("/staff", routeAccess) },
+        { label: "Shifts", href: "/shifts", icon: CalendarDays, allowedRoles: getAllowedRolesForRoute("/shifts", routeAccess) },
+        { label: "Payroll", href: "/payroll", icon: Banknote, allowedRoles: getAllowedRolesForRoute("/payroll", routeAccess) },
+      ],
+    },
+    { label: "Announcements", href: "/announcements", icon: Megaphone, allowedRoles: getAllowedRolesForRoute("/announcements", routeAccess) },
+    {
+      label: "Settings",
+      icon: Settings,
+      prefix: "/settings",
+      allowedRoles: getAllowedRolesForRoute("/settings", routeAccess),
+      children: [
+        { label: "Role Permissions", href: "/settings/roles", icon: Shield, allowedRoles: getAllowedRolesForRoute("/settings/roles", routeAccess) },
+        { label: "User Roles", href: "/settings/roles/users", icon: UserCog, allowedRoles: getAllowedRolesForRoute("/settings/roles/users", routeAccess) },
+      ],
+    },
+  ], [routeAccess]);
+
+  const filteredEntries = useMemo(() => {
+    if (!role) return navEntries;
+
+    return navEntries
+      .map((entry) => {
+        if (isNavGroup(entry)) {
+          if (entry.allowedRoles && !entry.allowedRoles.includes(role)) return null;
+          const filteredChildren = entry.children.filter(
+            (child) => !child.allowedRoles || child.allowedRoles.includes(role)
+          );
+          if (filteredChildren.length === 0) return null;
+          return { ...entry, children: filteredChildren };
+        }
+        if (entry.allowedRoles && !entry.allowedRoles.includes(role)) return null;
+        return entry;
+      })
+      .filter((entry): entry is NavEntry => entry !== null);
+  }, [role, navEntries]);
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
-    return pathname === href || (href !== "/" && pathname.startsWith(href + "/"));
+    return pathname === href;
   };
 
   const isGroupActive = (group: NavGroup) => {
@@ -183,7 +223,7 @@ export function Sidebar() {
       <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-text-muted">
         Menu
       </p>
-      {navEntries.map((entry) =>
+      {filteredEntries.map((entry) =>
         isNavGroup(entry) ? renderNavGroup(entry) : renderNavItem(entry)
       )}
     </nav>
@@ -243,26 +283,9 @@ export function Sidebar() {
 
         {navContent}
 
-        {/* Upgrade card */}
-        <div className="px-3 pb-3">
-          <div className="rounded-xl bg-upgrade-bg border border-upgrade-border p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Crown className="w-4 h-4 text-nav-active-text" aria-hidden="true" />
-              <span className="text-xs font-semibold text-nav-active-text">Go Premium</span>
-            </div>
-            <p className="text-[11px] text-text-muted leading-relaxed mb-3">
-              Unlock analytics, reports, and advanced features.
-            </p>
-            <button className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white text-xs font-semibold shadow-sm shadow-primary-500/25 hover:from-primary-600 hover:to-primary-700 transition-all">
-              <Zap className="w-3 h-3" aria-hidden="true" />
-              Upgrade Now
-            </button>
-          </div>
-        </div>
-
         {/* Footer */}
         <div className="px-5 py-3 border-t border-sidebar-border-color">
-          <p className="text-[10px] text-text-muted font-medium">Phase 5 — Communications v5.0</p>
+          <p className="text-[10px] text-text-muted font-medium">Phase 5 -- Communications v5.0</p>
         </div>
       </aside>
     </>

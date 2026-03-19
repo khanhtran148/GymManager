@@ -1,8 +1,8 @@
 ---
 type: api-reference
-updated: 2026-03-17
+updated: 2026-03-19
 version: v1
-phases-covered: Phase 1 (Foundation), Phase 2 (Booking), Phase 3 (Finance), Phase 4 (Staff/HR), Phase 5 (Communications)
+phases-covered: Phase 1 (Foundation), Phase 2 (Booking), Phase 3 (Finance), Phase 4 (Staff/HR), Phase 5 (Communications + RBAC)
 ---
 
 # API Reference
@@ -29,7 +29,7 @@ Access tokens expire in 15 minutes. Use `/auth/refresh` to obtain a new pair.
 
 ### Error Format
 
-All errors use [RFC 7807 ProblemDetails](https://www.rfc-editor.org/rfc/rfc7807):
+All errors use [RFC 7807 ProblemDetails](https://www.rfc-editor.org/rfc/rfc7807). Every error response includes a `title` field:
 
 ```json
 {
@@ -685,6 +685,8 @@ Creates a new announcement, optionally scheduled for future publishing.
 
 **Permissions required:** `ManageAnnouncements`. Chain-wide announcements (`gymHouseId: null`) additionally require `Owner` role.
 
+`authorId` is derived from the JWT in the handler — do not pass it in the request body.
+
 **Request body:**
 ```json
 {
@@ -720,7 +722,7 @@ Returns paginated announcements, optionally filtered by gym house.
 
 ### GET /api/v1/notifications
 
-Returns paginated notification deliveries for the authenticated user.
+Returns paginated notification deliveries for the authenticated user. The `userId` is derived from the JWT — no query parameter required.
 
 **Query params:** `page`, `pageSize`
 
@@ -730,9 +732,7 @@ Returns paginated notification deliveries for the authenticated user.
 
 ### PATCH /api/v1/notifications/{id}/read
 
-Marks a notification as read. Sets `status = Read` and `readAt = utcNow`.
-
-**Permissions:** Must own the notification (recipient check enforced in handler).
+Marks a notification as read. Sets `status = Read` and `readAt = utcNow`. The caller's `userId` is derived from the JWT; the handler verifies the notification belongs to that user.
 
 **Responses:** 204, 403, 404
 
@@ -762,6 +762,88 @@ Updates channel toggle settings.
 ```
 
 **Responses:** 200 `NotificationPreferenceDto`, 422
+
+---
+
+## Roles and RBAC
+
+**Auth:** required. **Permission:** `ManageRoles` required for write operations.
+
+### GET /api/v1/roles/permissions
+
+Returns all roles with their current permission bitmasks for the caller's tenant.
+
+**Responses:** 200 `RolePermissionDto[]`, 403
+
+**RolePermissionDto:**
+```json
+{
+  "role": "HouseManager",
+  "permissions": "ManageMembers, ManageBookings, ViewReports"
+}
+```
+
+---
+
+### PUT /api/v1/roles/{role}/permissions
+
+**Rate limit:** `strict` (5/min). Updates the permission bitmask for one role within the caller's tenant.
+
+**Path params:** `role` — one of `Owner | HouseManager | Trainer | Staff | Member`
+
+**Request body:**
+```json
+{
+  "permissions": "ManageMembers, ManageBookings, ViewReports"
+}
+```
+
+`permissions` is a comma-separated list of `Permission` enum flag names.
+
+**Responses:** 204, 400, 403
+
+---
+
+### POST /api/v1/roles/reset-defaults
+
+**Rate limit:** `strict` (5/min). Resets all role permission bitmasks to the seed defaults for the caller's tenant.
+
+**Responses:** 204, 403
+
+---
+
+### GET /api/v1/roles/metadata
+
+Returns static RBAC metadata: role definitions, the full permission catalogue, and route access rules. Does not require `ManageRoles` — requires authentication only.
+
+**Responses:** 200 `RolesMetadataDto`, 401
+
+---
+
+### GET /api/v1/roles/{role}/users
+
+Lists users currently holding the given role within the caller's tenant. Paginated.
+
+**Query params:** `page`, `pageSize`
+
+**Responses:** 200 `PagedList<RoleUserDto>`, 403
+
+---
+
+### PUT /api/v1/users/{userId}/role
+
+**Rate limit:** `strict` (5/min). Changes a user's role.
+
+**Path params:** `userId` — UUID
+
+**Request body:**
+```json
+{
+  "role": "HouseManager"
+}
+```
+
+**Responses:** 204, 400, 403, 404
 
 ---
 

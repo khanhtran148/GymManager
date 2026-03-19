@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search } from "lucide-react";
 import { useMembers } from "@/hooks/use-members";
 import { DataTable } from "@/components/ui/data-table";
@@ -9,29 +8,39 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
+import { FormModal } from "@/components/ui/form-modal";
+import { PermissionGate } from "@/components/permission-gate";
+import { useRbacStore } from "@/stores/rbac-store";
+import { useActiveGymHouse } from "@/hooks/use-active-gym-house";
+import { useCreateModal } from "@/hooks/use-create-modal";
+import { useViewModal } from "@/hooks/use-view-modal";
+import { useToastStore } from "@/stores/toast-store";
+import { MemberForm } from "@/components/forms/member-form";
+import { MemberDetail } from "@/components/details/member-detail";
 import type { MemberDto } from "@/types/member";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
-  const timeoutRef = { current: null as ReturnType<typeof setTimeout> | null };
 
-  const debounce = useCallback(
-    (val: T) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => setDebouncedValue(val), delay);
-    },
-    [delay]
-  );
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
 
   return debouncedValue;
 }
 
 export default function MembersPage() {
+  const { permissionMap } = useRbacStore();
+  const { gymHouseId } = useActiveGymHouse();
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const createModal = useCreateModal();
+  const viewModal = useViewModal();
+  const { addToast } = useToastStore();
 
-  const { data, isLoading, error } = useMembers(page, search);
+  const { data, isLoading, error } = useMembers(gymHouseId, page, search);
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     setSearchInput(e.target.value);
@@ -55,12 +64,13 @@ export default function MembersPage() {
       key: "fullName",
       header: "Name",
       render: (m: MemberDto) => (
-        <Link
-          href={`/members/${m.id}`}
-          className="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+        <button
+          type="button"
+          onClick={() => viewModal.open(m.id)}
+          className="bg-transparent border-none p-0 cursor-pointer font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
         >
           {m.fullName}
-        </Link>
+        </button>
       ),
     },
     {
@@ -126,12 +136,12 @@ export default function MembersPage() {
           </Button>
         </form>
 
-        <Link href="/members/new">
-          <Button variant="primary" size="md">
+        <PermissionGate permission={permissionMap["ManageMembers"] ?? 0n}>
+          <Button variant="primary" size="md" onClick={createModal.open}>
             <Plus className="w-4 h-4" aria-hidden="true" />
             Add Member
           </Button>
-        </Link>
+        </PermissionGate>
       </div>
 
       <DataTable
@@ -150,6 +160,25 @@ export default function MembersPage() {
             : undefined
         }
       />
+
+      <FormModal isOpen={createModal.isOpen} onClose={createModal.close} title="Add New Member">
+        <MemberForm
+          onSuccess={() => {
+            createModal.close();
+            addToast({ message: "Member created successfully", variant: "success" });
+          }}
+          onCancel={createModal.close}
+        />
+      </FormModal>
+
+      <FormModal isOpen={viewModal.isOpen} onClose={viewModal.close} title="Member Details" maxWidth="4xl">
+        {viewModal.viewId && (
+          <MemberDetail
+            memberId={viewModal.viewId}
+            onClose={viewModal.close}
+          />
+        )}
+      </FormModal>
     </div>
   );
 }

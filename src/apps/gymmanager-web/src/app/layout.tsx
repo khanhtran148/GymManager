@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { ToastContainer } from "@/components/toast-container";
+import { RouteProgress } from "@/components/route-progress";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -33,6 +36,10 @@ export default function RootLayout({
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider>
           <QueryProvider>{children}</QueryProvider>
+          <ToastContainer />
+          <Suspense fallback={null}>
+            <RouteProgress />
+          </Suspense>
         </ThemeProvider>
       </body>
     </html>

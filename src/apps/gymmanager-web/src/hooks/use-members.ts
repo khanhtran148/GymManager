@@ -10,46 +10,49 @@ import type {
 } from "@/types/member";
 
 const QUERY_KEYS = {
-  all: (page: number, search: string) => ["members", page, search] as const,
-  single: (id: string) => ["members", id] as const,
+  all: (gymHouseId: string, page: number, search: string) =>
+    ["members", gymHouseId, page, search] as const,
+  single: (gymHouseId: string, id: string) => ["members", gymHouseId, id] as const,
 };
 
-export function useMembers(page: number = 1, search: string = "") {
+export function useMembers(gymHouseId: string | null, page: number = 1, search: string = "") {
   return useQuery({
-    queryKey: QUERY_KEYS.all(page, search),
+    queryKey: QUERY_KEYS.all(gymHouseId ?? "", page, search),
     queryFn: () =>
-      get<PaginatedResponse<MemberDto>>("/members", {
+      get<PaginatedResponse<MemberDto>>(`/gymhouses/${gymHouseId}/members`, {
         params: { page, pageSize: 20, search: search || undefined },
       }),
+    enabled: !!gymHouseId,
   });
 }
 
-export function useMember(id: string) {
+export function useMember(gymHouseId: string | null, id: string) {
   return useQuery({
-    queryKey: QUERY_KEYS.single(id),
-    queryFn: () => get<MemberDto>(`/members/${id}`),
-    enabled: !!id,
+    queryKey: QUERY_KEYS.single(gymHouseId ?? "", id),
+    queryFn: () => get<MemberDto>(`/gymhouses/${gymHouseId}/members/${id}`),
+    enabled: !!gymHouseId && !!id,
   });
 }
 
-export function useCreateMember() {
+export function useCreateMember(gymHouseId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateMemberRequest) => post<MemberDto>("/members", data),
+    mutationFn: (data: CreateMemberRequest) =>
+      post<MemberDto>(`/gymhouses/${gymHouseId}/members`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["members"] });
     },
   });
 }
 
-export function useUpdateMember() {
+export function useUpdateMember(gymHouseId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateMemberRequest }) =>
-      put<MemberDto>(`/members/${id}`, data),
+      put<MemberDto>(`/gymhouses/${gymHouseId}/members/${id}`, data),
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ["members"] });
-      queryClient.setQueryData(QUERY_KEYS.single(updated.id), updated);
+      queryClient.setQueryData(QUERY_KEYS.single(gymHouseId ?? "", updated.id), updated);
     },
   });
 }

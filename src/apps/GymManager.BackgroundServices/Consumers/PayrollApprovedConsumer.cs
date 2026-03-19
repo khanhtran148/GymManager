@@ -23,30 +23,42 @@ public sealed class PayrollApprovedConsumer(
         if (payrollPeriod is null)
             return;
 
-        foreach (var entry in payrollPeriod.Entries)
-        {
-            if (entry.NetPay <= 0)
-                continue;
+        var eligibleEntries = payrollPeriod.Entries
+            .Where(e => e.NetPay > 0)
+            .ToList();
 
-            var alreadyRecorded = await transactionRepository.ExistsByRelatedEntityIdAsync(
-                entry.Id, TransactionType.SalaryPayment, ct);
-            if (alreadyRecorded)
-                continue;
+        if (eligibleEntries.Count == 0)
+            return;
 
-            var transaction = new Transaction
+        // Batch-check which entries already have a recorded transaction — one query instead of N.
+        var entryIds = eligibleEntries.Select(e => e.Id).ToList();
+        var alreadyRecordedIds = await transactionRepository.GetExistingRelatedEntityIdsAsync(
+            entryIds, TransactionType.SalaryPayment, ct);
+
+        var periodLabel = $"{payrollPeriod.PeriodStart:yyyy-MM-dd} to {payrollPeriod.PeriodEnd:yyyy-MM-dd}";
+        var now = DateTime.UtcNow;
+
+        var newTransactions = eligibleEntries
+            .Where(e => !alreadyRecordedIds.Contains(e.Id))
+            .Select(e => new Transaction
             {
                 GymHouseId = evt.GymHouseId,
                 TransactionType = TransactionType.SalaryPayment,
                 Direction = TransactionDirection.Debit,
-                Amount = entry.NetPay,
+                Amount = e.NetPay,
                 Category = TransactionCategory.Payroll,
-                Description = $"Salary payment for staff {entry.StaffId} - Period {payrollPeriod.PeriodStart:yyyy-MM-dd} to {payrollPeriod.PeriodEnd:yyyy-MM-dd}",
-                TransactionDate = DateTime.UtcNow,
-                RelatedEntityId = entry.Id
-            };
+                Description = $"Salary payment for staff {e.StaffId} - Period {periodLabel}",
+                TransactionDate = now,
+                RelatedEntityId = e.Id
+            })
+            .ToList();
 
-            await transactionRepository.RecordAsync(transaction, ct);
+        // Batch-insert all new transactions — one SaveChanges instead of N.
+        await transactionRepository.RecordBatchAsync(newTransactions, ct);
 
+        // Publish a domain event per transaction so downstream consumers remain unchanged.
+        foreach (var transaction in newTransactions)
+        {
             await publisher.Publish(
                 new TransactionRecordedEvent(
                     transaction.Id,

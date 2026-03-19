@@ -55,7 +55,7 @@ export default function PnLReportPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Finance</p>
@@ -71,7 +71,7 @@ export default function PnLReportPage() {
       {!gymHouseId && (
         <Alert variant="error">
           No gym house found. Please{" "}
-          <Link href="/gym-houses/new" className="underline font-medium">
+          <Link href="/gym-houses?create=true" className="underline font-medium">
             create a gym house
           </Link>{" "}
           first.

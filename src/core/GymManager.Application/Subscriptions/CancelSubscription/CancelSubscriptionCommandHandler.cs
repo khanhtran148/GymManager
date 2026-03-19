@@ -25,6 +25,9 @@ public sealed class CancelSubscriptionCommandHandler(
         if (subscription is null)
             return Result.Failure<SubscriptionDto>(new NotFoundError("Subscription", request.Id).ToString());
 
+        if (subscription.GymHouseId != request.GymHouseId)
+            return Result.Failure<SubscriptionDto>(new ForbiddenError("Subscription does not belong to this gym house.").ToString());
+
         var cancelResult = subscription.Cancel();
         if (cancelResult.IsFailure)
             return Result.Failure<SubscriptionDto>(cancelResult.Error);

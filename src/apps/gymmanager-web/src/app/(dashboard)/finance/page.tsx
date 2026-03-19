@@ -93,7 +93,7 @@ export default function FinanceDashboardPage() {
   const netProfitPositive = (pnl?.netProfit ?? 0) >= 0;
 
   return (
-    <div className="space-y-6 max-w-7xl">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
@@ -116,7 +116,7 @@ export default function FinanceDashboardPage() {
               ))}
             </Select>
           )}
-          <Link href="/finance/transactions/new">
+          <Link href="/finance/transactions?create=true">
             <Button variant="primary" size="md">
               <Plus className="w-4 h-4" aria-hidden="true" />
               Record Transaction
@@ -134,7 +134,7 @@ export default function FinanceDashboardPage() {
       {!gymHouseId && !gymLoading && (
         <Alert variant="error">
           No gym house found. Please{" "}
-          <Link href="/gym-houses/new" className="underline font-medium">
+          <Link href="/gym-houses?create=true" className="underline font-medium">
             create a gym house
           </Link>{" "}
           first.
@@ -218,7 +218,7 @@ export default function FinanceDashboardPage() {
               desc: "Browse and filter all financial transactions",
             },
             {
-              href: "/finance/transactions/new",
+              href: "/finance/transactions?create=true",
               title: "Record Transaction",
               desc: "Log a new expense or income entry",
             },

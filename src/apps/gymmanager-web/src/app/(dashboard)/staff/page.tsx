@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import { useGymHouses } from "@/hooks/use-gym-houses";
 import { useStaff } from "@/hooks/use-staff";
 import { DataTable } from "@/components/ui/data-table";
@@ -10,7 +10,17 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
+import { FormModal } from "@/components/ui/form-modal";
 import { cn } from "@/lib/utils";
+import { PermissionGate } from "@/components/permission-gate";
+import { useRbacStore } from "@/stores/rbac-store";
+import { useCreateModal } from "@/hooks/use-create-modal";
+import { useEditModal } from "@/hooks/use-edit-modal";
+import { useViewModal } from "@/hooks/use-view-modal";
+import { useToastStore } from "@/stores/toast-store";
+import { StaffForm } from "@/components/forms/staff-form";
+import { StaffEditForm } from "@/components/forms/staff-edit-form";
+import { StaffDetail } from "@/components/details/staff-detail";
 import type { StaffDto, StaffType } from "@/types/staff";
 
 function formatCurrency(value: number): string {
@@ -42,10 +52,15 @@ const STAFF_TYPE_COLORS: Record<StaffType, string> = {
 };
 
 export default function StaffPage() {
+  const { permissionMap } = useRbacStore();
   const { data: gymHouses, isLoading: gymLoading } = useGymHouses();
   const [selectedHouseId, setSelectedHouseId] = useState<string>("");
   const [page, setPage] = useState(1);
   const [filterType, setFilterType] = useState<StaffType | "">("");
+  const createModal = useCreateModal();
+  const editModal = useEditModal();
+  const viewModal = useViewModal();
+  const { addToast } = useToastStore();
 
   const gymHouseId = selectedHouseId || (gymHouses?.[0]?.id ?? "");
 
@@ -60,12 +75,13 @@ export default function StaffPage() {
       key: "userName",
       header: "Name",
       render: (s: StaffDto) => (
-        <Link
-          href={`/staff/${s.id}`}
-          className="font-medium text-text-primary hover:text-primary-500 transition-colors"
+        <button
+          type="button"
+          onClick={() => viewModal.open(s.id)}
+          className="bg-transparent border-none p-0 cursor-pointer font-medium text-text-primary hover:text-primary-500 transition-colors"
         >
           {s.userName}
-        </Link>
+        </button>
       ),
     },
     {
@@ -114,6 +130,24 @@ export default function StaffPage() {
         <span className="text-text-muted text-xs tabular-nums">{formatDate(s.hiredAt)}</span>
       ),
     },
+    {
+      key: "actions",
+      header: "",
+      className: "w-16",
+      render: (s: StaffDto) => (
+        <PermissionGate permission={permissionMap["ManageStaff"] ?? 0n}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editModal.open(s.id)}
+            aria-label={`Edit ${s.userName}`}
+            className="text-text-muted hover:text-primary-500"
+          >
+            <Pencil className="w-4 h-4" aria-hidden="true" />
+          </Button>
+        </PermissionGate>
+      ),
+    },
   ];
 
   if (gymLoading) {
@@ -125,19 +159,19 @@ export default function StaffPage() {
   }
 
   return (
-    <div className="space-y-5 max-w-7xl">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Staff & HR</p>
           <h2 className="text-2xl font-bold text-text-primary tracking-tight">Staff</h2>
         </div>
-        <Link href="/staff/new">
-          <Button variant="primary" size="md">
+        <PermissionGate permission={permissionMap["ManageStaff"] ?? 0n}>
+          <Button variant="primary" size="md" onClick={createModal.open}>
             <Plus className="w-4 h-4" aria-hidden="true" />
             Add Staff
           </Button>
-        </Link>
+        </PermissionGate>
       </div>
 
       {error && (
@@ -147,7 +181,7 @@ export default function StaffPage() {
       {!gymHouseId && (
         <Alert variant="error">
           No gym house found. Please{" "}
-          <Link href="/gym-houses/new" className="underline font-medium">
+          <Link href="/gym-houses?create=true" className="underline font-medium">
             create a gym house
           </Link>{" "}
           first.
@@ -209,6 +243,43 @@ export default function StaffPage() {
             : undefined
         }
       />
+
+      <FormModal isOpen={createModal.isOpen} onClose={createModal.close} title="Add Staff">
+        <StaffForm
+          onSuccess={() => {
+            createModal.close();
+            addToast({ message: "Staff member added successfully", variant: "success" });
+          }}
+          onCancel={createModal.close}
+        />
+      </FormModal>
+
+      <FormModal isOpen={editModal.isOpen} onClose={editModal.close} title="Edit Staff">
+        {editModal.editId && (
+          <StaffEditForm
+            staffId={editModal.editId}
+            onSuccess={() => {
+              editModal.close();
+              addToast({ message: "Staff updated successfully", variant: "success" });
+            }}
+            onCancel={editModal.close}
+          />
+        )}
+      </FormModal>
+
+      <FormModal isOpen={viewModal.isOpen} onClose={viewModal.close} title="Staff Details" maxWidth="xl">
+        {viewModal.viewId && (
+          <StaffDetail
+            staffId={viewModal.viewId}
+            onClose={viewModal.close}
+            onEdit={() => {
+              const id = viewModal.viewId!;
+              viewModal.close();
+              editModal.open(id);
+            }}
+          />
+        )}
+      </FormModal>
     </div>
   );
 }

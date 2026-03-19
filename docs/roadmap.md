@@ -1,6 +1,6 @@
 # GymManager — Product Roadmap
 
-**Last updated:** 2026-03-17
+**Last updated:** 2026-03-19
 **Current version:** 0.5.0
 
 ---
@@ -16,7 +16,7 @@ Six sequential phases, each independently deployable. Run `dotnet test` after ea
 | 3 | Finance | COMPLETE | Transaction | 6 | 5 | 4 |
 | 4 | Staff/HR | COMPLETE | Staff, ShiftAssignment, PayrollPeriod, PayrollEntry | 11 | 9 | 5 |
 | 5 | Communications | COMPLETE | Announcement, NotificationDelivery, NotificationPreference | 8 | 7 | 4 |
-| 6 | Hardening | PLANNED | — | 1 | — | — |
+| 6 | Hardening | IN PROGRESS | — | 1 | — | — |
 | **Total** | | | **16 entities** | **56 handlers** | **46 endpoints** | **30 pages** |
 
 ---
@@ -136,14 +136,47 @@ Delivered scheduled announcements, real-time SignalR notifications, Firebase pus
 
 ---
 
-## Phase 6: Hardening — PLANNED
+## Phase 6: Hardening — IN PROGRESS
 
 **Target:** TBD
 **Depends on:** All prior phases
 
 Harden for production: PostgreSQL RLS, load testing, Flutter offline queue, payment gateway stub.
 
-### Scope
+### Completed — 2026-03-19
+
+**Security Hardening (22 of 26 findings resolved)**
+- Cross-tenant IDOR closed in all three subscription handlers
+- JWT issuer/audience and secret-length validation enforced at startup
+- Password policy strengthened (uppercase + lowercase + digit + special character)
+- Secrets removed from `appsettings.json`; local override file pattern established
+- HTTP security headers middleware added
+- `AllowedHosts` restricted from wildcard to `localhost`
+- `PermissionChecker` defensive check on `userId` mismatch
+
+**Quality Hardening**
+- `ApiControllerBase` error dispatch replaced with prefix-based routing; RFC 7807 `Title` added
+- `ICurrentUser` removed from 3 controllers (architecture rule compliance)
+- All 5 RBAC handlers routed through `IPermissionChecker` with `Permission.ManageRoles`
+- `TokenDefaults` constants extracted
+
+**Performance**
+- N+1 eliminated in `GetBookingsQueryHandler`
+- Batch insert in `PayrollApprovedConsumer`
+- Batch preference fetch in `AnnouncementFcmConsumer`
+
+**Frontend**
+- `useDebounce` hook fixed in members page
+- `COOKIE_MAX_AGE_SECONDS` constant extracted in `auth-store.ts`
+
+### Deferred (separate PRs / efforts)
+
+- **S3 — HttpOnly refresh token cookie**: requires coordinated backend API change; separate PR
+- **Q7 — Booking creation dedup**: refactor of `CreateBookingCommandHandler` logic; separate PR
+- **T1 — Validator test coverage**: 29 validators without unit tests
+- **T2 — Handler test coverage**: 28 handlers without unit tests
+
+### Remaining Scope
 
 **PostgreSQL Row-Level Security**
 - RLS policies on all 13 tenant-scoped tables
@@ -171,7 +204,7 @@ Harden for production: PostgreSQL RLS, load testing, Flutter offline queue, paym
 - Covering indexes for dashboard aggregate queries
 - Optional: `IMemoryCache` for permission checks (5-minute TTL)
 
-**Security Audit**
+**Security Audit (remaining)**
 - Audit every `IgnoreQueryFilters()` call — each must have a justification comment
 - Tenant isolation suite: one test per scoped entity, tested via both EF filter and RLS
 - Verify JWT rotation, short access token expiry (15 min), 7-day refresh window

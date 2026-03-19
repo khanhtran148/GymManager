@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { useBookings, useCheckIn } from "@/hooks/use-bookings";
+import { useActiveGymHouse } from "@/hooks/use-active-gym-house";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
@@ -10,10 +11,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { CheckInCard } from "@/components/check-in-card";
 import type { BookingDto } from "@/types/booking";
 
-// TODO: Get from gym house selector/context
-const gymHouseId = "placeholder-gym-id";
-
 export default function CheckInPage() {
+  const { gymHouseId, isLoading: gymHouseLoading } = useActiveGymHouse();
   const [searchInput, setSearchInput] = useState("");
   const [submittedSearch, setSubmittedSearch] = useState("");
   const [checkInError, setCheckInError] = useState<string | null>(null);
@@ -25,12 +24,12 @@ export default function CheckInPage() {
   const todayEnd = `${today}T23:59:59`;
 
   const { data, isLoading, error } = useBookings(
-    gymHouseId,
+    gymHouseId ?? "",
     1,
     todayStart,
     todayEnd
   );
-  const checkIn = useCheckIn(gymHouseId);
+  const checkIn = useCheckIn(gymHouseId ?? "");
 
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -72,6 +71,22 @@ export default function CheckInPage() {
     } finally {
       setCheckingInId(null);
     }
+  }
+
+  if (gymHouseLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Spinner label="Loading gym house..." />
+      </div>
+    );
+  }
+
+  if (!gymHouseId) {
+    return (
+      <Alert variant="error">
+        Please create a gym house first before using check-in.
+      </Alert>
+    );
   }
 
   return (

@@ -5,7 +5,7 @@ namespace GymManager.Application.Common.Interfaces;
 
 public interface ITokenService
 {
-    string GenerateAccessToken(User user);
+    Task<string> GenerateAccessTokenAsync(User user, CancellationToken ct = default);
     string GenerateRefreshToken();
     ClaimsPrincipal? GetPrincipalFromExpiredToken(string token);
 }

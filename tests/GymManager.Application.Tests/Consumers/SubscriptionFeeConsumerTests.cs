@@ -15,7 +15,7 @@ public sealed class SubscriptionFeeConsumerTests : ApplicationTestBase
     private async Task<(Guid OwnerId, Guid GymHouseId, Guid MemberId)> SetupOwnerHouseMemberAsync()
     {
         var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123", "Owner", null));
+            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
         CurrentUser.UserId = reg.Value.UserId;
         CurrentUser.TenantId = reg.Value.UserId;
         CurrentUser.Permissions = Permission.Admin;

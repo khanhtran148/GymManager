@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { useTimeSlots, useCreateTimeSlot } from "@/hooks/use-time-slots";
+import { useActiveGymHouse } from "@/hooks/use-active-gym-house";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
@@ -10,9 +11,6 @@ import { Card } from "@/components/ui/card";
 import { FormField } from "@/components/ui/form-field";
 import { Spinner } from "@/components/ui/spinner";
 import type { TimeSlotDto } from "@/types/booking";
-
-// TODO: Get from gym house selector/context
-const gymHouseId = "placeholder-gym-id";
 
 function CapacityBar({ slot }: { slot: TimeSlotDto }) {
   const fillPct =
@@ -56,6 +54,7 @@ function CapacityBar({ slot }: { slot: TimeSlotDto }) {
 }
 
 export default function TimeSlotsPage() {
+  const { gymHouseId, isLoading: gymHouseLoading } = useActiveGymHouse();
   const today = new Date().toISOString().slice(0, 10);
   const [from, setFrom] = useState(today);
   const [to, setTo] = useState(today);
@@ -69,8 +68,8 @@ export default function TimeSlotsPage() {
   const [newCapacity, setNewCapacity] = useState("20");
   const [formError, setFormError] = useState<string | null>(null);
 
-  const { data, isLoading, error } = useTimeSlots(gymHouseId, appliedFrom, appliedTo);
-  const createTimeSlot = useCreateTimeSlot(gymHouseId);
+  const { data, isLoading, error } = useTimeSlots(gymHouseId ?? "", appliedFrom, appliedTo);
+  const createTimeSlot = useCreateTimeSlot(gymHouseId ?? "");
 
   function handleFilterSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -126,6 +125,22 @@ export default function TimeSlotsPage() {
         setFormError("Something went wrong.");
       }
     }
+  }
+
+  if (gymHouseLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Spinner label="Loading gym house..." />
+      </div>
+    );
+  }
+
+  if (!gymHouseId) {
+    return (
+      <Alert variant="error">
+        Please create a gym house first before managing time slots.
+      </Alert>
+    );
   }
 
   if (error) {

@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { useBookings, useCancelBooking } from "@/hooks/use-bookings";
+import { useActiveGymHouse } from "@/hooks/use-active-gym-house";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,14 +11,20 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormField } from "@/components/ui/form-field";
+import { FormModal } from "@/components/ui/form-modal";
+import { Spinner } from "@/components/ui/spinner";
+import { PermissionGate } from "@/components/permission-gate";
+import { useRbacStore } from "@/stores/rbac-store";
+import { useCreateModal } from "@/hooks/use-create-modal";
+import { useViewModal } from "@/hooks/use-view-modal";
+import { useToastStore } from "@/stores/toast-store";
+import { BookingForm } from "@/components/forms/booking-form";
+import { BookingDetail } from "@/components/details/booking-detail";
 import {
   bookingTypeLabel,
   bookingStatusLabel,
 } from "@/lib/booking-utils";
 import type { BookingDto } from "@/types/booking";
-
-// TODO: Get from gym house selector/context
-const gymHouseId = "placeholder-gym-id";
 
 const statusBadgeMap: Record<string, string> = {
   Confirmed: "Active",
@@ -28,21 +34,37 @@ const statusBadgeMap: Record<string, string> = {
   "Wait Listed": "Frozen",
 };
 
+function getDefaultDateRange(): { from: string; to: string } {
+  const to = new Date();
+  const from = new Date();
+  from.setDate(from.getDate() - 30);
+  return {
+    from: `${from.toISOString().split("T")[0]}T00:00`,
+    to: `${to.toISOString().split("T")[0]}T23:59`,
+  };
+}
+
 export default function BookingsPage() {
+  const { permissionMap } = useRbacStore();
+  const { gymHouseId, isLoading: gymHouseLoading } = useActiveGymHouse();
+  const defaultRange = getDefaultDateRange();
   const [page, setPage] = useState(1);
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [appliedFrom, setAppliedFrom] = useState("");
-  const [appliedTo, setAppliedTo] = useState("");
+  const [from, setFrom] = useState(defaultRange.from);
+  const [to, setTo] = useState(defaultRange.to);
+  const [appliedFrom, setAppliedFrom] = useState(defaultRange.from);
+  const [appliedTo, setAppliedTo] = useState(defaultRange.to);
   const [cancelId, setCancelId] = useState<string | null>(null);
+  const createModal = useCreateModal();
+  const viewModal = useViewModal();
+  const { addToast } = useToastStore();
 
   const { data, isLoading, error } = useBookings(
-    gymHouseId,
+    gymHouseId ?? "",
     page,
     appliedFrom || undefined,
     appliedTo || undefined
   );
-  const cancelBooking = useCancelBooking(gymHouseId);
+  const cancelBooking = useCancelBooking(gymHouseId ?? "");
 
   function handleFilterSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -77,12 +99,13 @@ export default function BookingsPage() {
       key: "memberName",
       header: "Member Name",
       render: (b: BookingDto) => (
-        <Link
-          href={`/bookings/${b.id}`}
-          className="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+        <button
+          type="button"
+          onClick={() => viewModal.open(b.id)}
+          className="bg-transparent border-none p-0 cursor-pointer font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
         >
           {b.memberName}
-        </Link>
+        </button>
       ),
     },
     {
@@ -117,11 +140,9 @@ export default function BookingsPage() {
       header: "Actions",
       render: (b: BookingDto) => (
         <div className="flex items-center gap-2">
-          <Link href={`/bookings/${b.id}`}>
-            <Button variant="secondary" size="sm">
-              View
-            </Button>
-          </Link>
+          <Button variant="secondary" size="sm" onClick={() => viewModal.open(b.id)}>
+            View
+          </Button>
           {b.status !== 1 && b.status !== 3 && (
             <Button
               variant="danger"
@@ -136,6 +157,22 @@ export default function BookingsPage() {
       ),
     },
   ];
+
+  if (gymHouseLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Spinner label="Loading gym house..." />
+      </div>
+    );
+  }
+
+  if (!gymHouseId) {
+    return (
+      <Alert variant="error">
+        Please create a gym house first before managing bookings.
+      </Alert>
+    );
+  }
 
   if (error) {
     return (
@@ -192,12 +229,12 @@ export default function BookingsPage() {
           </div>
         </form>
 
-        <Link href="/bookings/new">
-          <Button variant="primary" size="md">
+        <PermissionGate permission={permissionMap["ManageBookings"] ?? 0n}>
+          <Button variant="primary" size="md" onClick={createModal.open}>
             <Plus className="w-4 h-4" aria-hidden="true" />
             New Booking
           </Button>
-        </Link>
+        </PermissionGate>
       </div>
 
       <DataTable
@@ -228,6 +265,25 @@ export default function BookingsPage() {
         onConfirm={handleCancelConfirm}
         onCancel={() => setCancelId(null)}
       />
+
+      <FormModal isOpen={createModal.isOpen} onClose={createModal.close} title="New Booking">
+        <BookingForm
+          onSuccess={() => {
+            createModal.close();
+            addToast({ message: "Booking created successfully", variant: "success" });
+          }}
+          onCancel={createModal.close}
+        />
+      </FormModal>
+
+      <FormModal isOpen={viewModal.isOpen} onClose={viewModal.close} title="Booking Details" maxWidth="lg">
+        {viewModal.viewId && (
+          <BookingDetail
+            bookingId={viewModal.viewId}
+            onClose={viewModal.close}
+          />
+        )}
+      </FormModal>
     </div>
   );
 }

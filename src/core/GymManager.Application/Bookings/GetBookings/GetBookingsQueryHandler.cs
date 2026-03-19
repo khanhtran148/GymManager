@@ -9,7 +9,6 @@ namespace GymManager.Application.Bookings.GetBookings;
 
 public sealed class GetBookingsQueryHandler(
     IBookingRepository bookingRepository,
-    IMemberRepository memberRepository,
     IPermissionChecker permissions,
     ICurrentUser currentUser)
     : IRequestHandler<GetBookingsQuery, Result<PagedList<BookingDto>>>
@@ -24,12 +23,11 @@ public sealed class GetBookingsQueryHandler(
         var pagedBookings = await bookingRepository.GetByGymHouseAsync(
             request.GymHouseId, request.Page, request.PageSize, request.From, request.To, ct);
 
-        var dtos = new List<BookingDto>(pagedBookings.Items.Count);
-        foreach (var booking in pagedBookings.Items)
-        {
-            var member = booking.Member ?? await memberRepository.GetByIdAsync(booking.MemberId, ct);
-            dtos.Add(BookingMapper.ToDto(booking, member!));
-        }
+        // GetByGymHouseAsync eagerly loads Member via .Include(b => b.Member).ThenInclude(m => m.User),
+        // so booking.Member is always populated — no per-booking fallback fetch is needed.
+        var dtos = pagedBookings.Items
+            .Select(b => BookingMapper.ToDto(b, b.Member!))
+            .ToList();
 
         return Result.Success(new PagedList<BookingDto>(
             dtos, pagedBookings.TotalCount, pagedBookings.Page, pagedBookings.PageSize));
