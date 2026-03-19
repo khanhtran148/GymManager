@@ -13,7 +13,7 @@ public sealed class GetMembersQueryHandlerTests : ApplicationTestBase
     private async Task<Guid> SetupGymHouseAsync()
     {
         var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123", "Owner", null));
+            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
         CurrentUser.UserId = reg.Value.UserId;
         CurrentUser.TenantId = reg.Value.UserId;
         CurrentUser.Permissions = Permission.Admin;
@@ -47,7 +47,7 @@ public sealed class GetMembersQueryHandlerTests : ApplicationTestBase
 
         // Switch owner for second house
         var reg2 = await Sender.Send(new RegisterCommand(
-            $"owner2{Guid.NewGuid()}@example.com", "Password123", "Owner2", null));
+            $"owner2{Guid.NewGuid()}@example.com", "Password123!", "Owner2", null));
         CurrentUser.UserId = reg2.Value.UserId;
         CurrentUser.TenantId = reg2.Value.UserId;
         var house2 = await Sender.Send(new CreateGymHouseCommand("Second Gym", "789 Other St", null, null, 50));

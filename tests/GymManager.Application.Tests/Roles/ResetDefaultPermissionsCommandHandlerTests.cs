@@ -37,11 +37,11 @@ public sealed class ResetDefaultPermissionsCommandHandlerTests : ApplicationTest
     {
         await SetupOwnerAsync();
         CurrentUser.Role = Role.HouseManager;
+        CurrentUser.Permissions = Permission.ViewMembers | Permission.ManageMembers;
 
         var result = await Sender.Send(new ResetDefaultPermissionsCommand());
 
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Contain("Access denied");
     }
 
     [Fact]

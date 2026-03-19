@@ -32,7 +32,6 @@ public sealed class CreateAnnouncementCommandHandlerTests : ApplicationTestBase
 
         var command = new CreateAnnouncementCommand(
             gymHouseId,
-            authorId,
             "Test Announcement",
             "Test content for the announcement.",
             TargetAudience.AllMembers,
@@ -56,7 +55,6 @@ public sealed class CreateAnnouncementCommandHandlerTests : ApplicationTestBase
 
         var command = new CreateAnnouncementCommand(
             null,
-            authorId,
             "Chain-Wide Announcement",
             "This goes to all members.",
             TargetAudience.Everyone,
@@ -92,7 +90,6 @@ public sealed class CreateAnnouncementCommandHandlerTests : ApplicationTestBase
 
         var command = new CreateAnnouncementCommand(
             null,
-            staffUser.Id,
             "Chain-Wide Announcement",
             "This goes to all members.",
             TargetAudience.Everyone,
@@ -112,7 +109,6 @@ public sealed class CreateAnnouncementCommandHandlerTests : ApplicationTestBase
 
         var command = new CreateAnnouncementCommand(
             gymHouseId,
-            authorId,
             "Announcement",
             "Content",
             TargetAudience.AllMembers,
@@ -130,7 +126,6 @@ public sealed class CreateAnnouncementCommandHandlerTests : ApplicationTestBase
 
         var command = new CreateAnnouncementCommand(
             gymHouseId,
-            authorId,
             "Announcement",
             "Content",
             TargetAudience.AllMembers,

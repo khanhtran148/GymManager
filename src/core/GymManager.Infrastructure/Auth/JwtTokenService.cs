@@ -1,3 +1,4 @@
+using GymManager.Application.Common.Constants;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
@@ -48,7 +49,7 @@ public sealed class JwtTokenService(
             audience: audience,
             claims: claims,
             notBefore: DateTime.UtcNow,
-            expires: DateTime.UtcNow.AddMinutes(15),
+            expires: DateTime.UtcNow.AddMinutes(TokenDefaults.AccessTokenExpiryMinutes),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -64,16 +65,18 @@ public sealed class JwtTokenService(
     {
         var secret = configuration["Jwt:Secret"]
             ?? throw new InvalidOperationException("Jwt:Secret configuration is missing.");
-        var issuer = configuration["Jwt:Issuer"];
-        var audience = configuration["Jwt:Audience"];
+        var issuer = configuration["Jwt:Issuer"]
+            ?? throw new InvalidOperationException("Jwt:Issuer configuration is missing.");
+        var audience = configuration["Jwt:Audience"]
+            ?? throw new InvalidOperationException("Jwt:Audience configuration is missing.");
 
         var parameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
-            ValidateIssuer = issuer is not null,
+            ValidateIssuer = true,
             ValidIssuer = issuer,
-            ValidateAudience = audience is not null,
+            ValidateAudience = true,
             ValidAudience = audience,
             ValidateLifetime = false
         };

@@ -50,10 +50,11 @@ public sealed class GetRolePermissionsQueryHandlerTests : ApplicationTestBase
     {
         await SetupOwnerAsync();
         CurrentUser.Role = Role.Trainer;
+        CurrentUser.Permissions = Permission.ViewMembers | Permission.ManageMembers;
 
         var result = await Sender.Send(new GetRolePermissionsQuery());
 
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Contain("Access denied");
+        result.Error.Should().Contain("[FORBIDDEN]");
     }
 }

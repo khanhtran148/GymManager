@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using GymManager.Application.Auth.Shared;
+using GymManager.Application.Common.Constants;
 using GymManager.Application.Common.Interfaces;
 using MediatR;
 using System.Security.Claims;
@@ -18,9 +19,9 @@ public sealed class RefreshTokenCommandHandler(
         {
             principal = tokenService.GetPrincipalFromExpiredToken(request.AccessToken);
         }
-        catch
+        catch (Exception)
         {
-            // swallow — will return failure below
+            // Invalid token format — principal remains null, will return failure below
         }
 
         Guid userId = Guid.Empty;
@@ -40,7 +41,7 @@ public sealed class RefreshTokenCommandHandler(
 
         var newAccessToken = await tokenService.GenerateAccessTokenAsync(user, ct);
         var newRefreshToken = tokenService.GenerateRefreshToken();
-        user.SetRefreshToken(newRefreshToken, DateTime.UtcNow.AddDays(7));
+        user.SetRefreshToken(newRefreshToken, DateTime.UtcNow.AddDays(TokenDefaults.RefreshTokenExpiryDays));
 
         await userRepository.UpdateAsync(user, ct);
 
@@ -50,6 +51,6 @@ public sealed class RefreshTokenCommandHandler(
             user.FullName,
             newAccessToken,
             newRefreshToken,
-            DateTime.UtcNow.AddMinutes(15)));
+            DateTime.UtcNow.AddMinutes(TokenDefaults.AccessTokenExpiryMinutes)));
     }
 }

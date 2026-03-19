@@ -29,6 +29,9 @@ public sealed class CreateSubscriptionCommandHandler(
         if (member is null)
             return Result.Failure<SubscriptionDto>(new NotFoundError("Member", request.MemberId).ToString());
 
+        if (member.GymHouseId != request.GymHouseId)
+            return Result.Failure<SubscriptionDto>(new ForbiddenError("Member does not belong to this gym house.").ToString());
+
         var activeSub = await subscriptionRepository.GetActiveByMemberIdAsync(request.MemberId, ct);
         if (activeSub is not null)
             return Result.Failure<SubscriptionDto>(

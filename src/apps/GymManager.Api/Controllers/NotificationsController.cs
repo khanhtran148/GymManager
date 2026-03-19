@@ -1,5 +1,5 @@
+using Asp.Versioning;
 using GymManager.Api.Common;
-using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Notifications.GetNotifications;
 using GymManager.Application.Notifications.MarkNotificationRead;
 using GymManager.Application.Notifications.Shared;
@@ -10,9 +10,10 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace GymManager.Api.Controllers;
 
+[ApiVersion("1.0")]
 [Authorize]
 [EnableRateLimiting(RateLimitPolicies.Default)]
-public sealed class NotificationsController(ISender sender, ICurrentUser currentUser)
+public sealed class NotificationsController(ISender sender)
     : ApiControllerBase(sender)
 {
     [HttpGet]
@@ -23,8 +24,7 @@ public sealed class NotificationsController(ISender sender, ICurrentUser current
         CancellationToken ct = default)
     {
         var clampedPageSize = Math.Min(pageSize, 100);
-        var result = await Sender.Send(
-            new GetNotificationsQuery(currentUser.UserId, page, clampedPageSize), ct);
+        var result = await Sender.Send(new GetNotificationsQuery(page, clampedPageSize), ct);
         return result.IsSuccess ? Ok(result.Value) : HandleResult(result);
     }
 
@@ -34,7 +34,7 @@ public sealed class NotificationsController(ISender sender, ICurrentUser current
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> MarkRead(Guid id, CancellationToken ct)
     {
-        var result = await Sender.Send(new MarkNotificationReadCommand(id, currentUser.UserId), ct);
+        var result = await Sender.Send(new MarkNotificationReadCommand(id), ct);
         return result.IsSuccess ? NoContent() : HandleResult(result);
     }
 }

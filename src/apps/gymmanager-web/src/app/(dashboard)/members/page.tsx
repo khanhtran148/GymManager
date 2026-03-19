@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search } from "lucide-react";
 import { useMembers } from "@/hooks/use-members";
 import { DataTable } from "@/components/ui/data-table";
@@ -21,15 +21,11 @@ import type { MemberDto } from "@/types/member";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
-  const timeoutRef = { current: null as ReturnType<typeof setTimeout> | null };
 
-  const debounce = useCallback(
-    (val: T) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => setDebouncedValue(val), delay);
-    },
-    [delay]
-  );
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
 
   return debouncedValue;
 }

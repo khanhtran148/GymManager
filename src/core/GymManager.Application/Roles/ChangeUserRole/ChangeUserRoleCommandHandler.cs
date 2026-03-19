@@ -11,24 +11,27 @@ namespace GymManager.Application.Roles.ChangeUserRole;
 public sealed class ChangeUserRoleCommandHandler(
     IUserRepository userRepository,
     IRolePermissionRepository rolePermissionRepository,
+    IPermissionChecker permissions,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<ChangeUserRoleCommand, Result>
 {
     public async Task<Result> Handle(ChangeUserRoleCommand request, CancellationToken ct)
     {
-        if (currentUser.Role != Role.Owner)
-            return Result.Failure(new ForbiddenError("Access denied.").ToString());
+        var canManage = await permissions.HasPermissionAsync(
+            currentUser.UserId, currentUser.TenantId, Permission.ManageRoles, ct);
+        if (!canManage)
+            return Result.Failure(new ForbiddenError().ToString());
 
         var user = await userRepository.GetByIdAsync(request.UserId, ct);
         if (user is null)
             return Result.Failure(new NotFoundError("User", request.UserId).ToString());
 
         if (user.Role == Role.Owner)
-            return Result.Failure("Cannot change the role of an Owner.");
+            return Result.Failure(new ConflictError("Cannot change the role of an Owner.").ToString());
 
         if (request.Role == Role.Owner)
-            return Result.Failure("Cannot assign Owner role to a user.");
+            return Result.Failure(new ConflictError("Cannot assign Owner role to a user.").ToString());
 
         var newRolePermission = await rolePermissionRepository
             .GetByTenantAndRoleAsync(currentUser.TenantId, request.Role, ct);

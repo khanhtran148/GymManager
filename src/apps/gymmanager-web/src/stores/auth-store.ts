@@ -18,11 +18,12 @@ interface AuthState {
 }
 
 const SECURE_FLAG = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
+const COOKIE_MAX_AGE_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 function setAuthCookie(isAuthenticated: boolean): void {
   if (typeof document === "undefined") return;
   if (isAuthenticated) {
-    document.cookie = `is_authenticated=1; path=/; max-age=604800; SameSite=Lax${SECURE_FLAG}`;
+    document.cookie = `is_authenticated=1; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax${SECURE_FLAG}`;
   } else {
     document.cookie = "is_authenticated=; path=/; max-age=0; SameSite=Lax";
   }
@@ -31,7 +32,7 @@ function setAuthCookie(isAuthenticated: boolean): void {
 function setRoleCookie(role: string | null): void {
   if (typeof document === "undefined") return;
   if (role) {
-    document.cookie = `user_role=${role}; path=/; max-age=604800; SameSite=Lax${SECURE_FLAG}`;
+    document.cookie = `user_role=${role}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax${SECURE_FLAG}`;
   } else {
     document.cookie = "user_role=; path=/; max-age=0; SameSite=Lax";
   }

@@ -4,6 +4,5 @@ using MediatR;
 
 namespace GymManager.Application.Notifications.GetPreferences;
 
-public sealed record GetNotificationPreferencesQuery(
-    Guid UserId)
+public sealed record GetNotificationPreferencesQuery()
     : IRequest<Result<List<NotificationPreferenceDto>>>;

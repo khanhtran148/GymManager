@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using GymManager.Application.Auth.Shared;
+using GymManager.Application.Common.Constants;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Common.Models;
 using GymManager.Domain.Entities;
@@ -36,7 +37,7 @@ public sealed class RegisterCommandHandler(
 
         var accessToken = await tokenService.GenerateAccessTokenAsync(user, ct);
         var refreshToken = tokenService.GenerateRefreshToken();
-        user.SetRefreshToken(refreshToken, DateTime.UtcNow.AddDays(7));
+        user.SetRefreshToken(refreshToken, DateTime.UtcNow.AddDays(TokenDefaults.RefreshTokenExpiryDays));
 
         await userRepository.CreateAsync(user, ct);
 
@@ -46,6 +47,6 @@ public sealed class RegisterCommandHandler(
             user.FullName,
             accessToken,
             refreshToken,
-            DateTime.UtcNow.AddMinutes(15)));
+            DateTime.UtcNow.AddMinutes(TokenDefaults.AccessTokenExpiryMinutes)));
     }
 }

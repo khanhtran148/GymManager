@@ -9,14 +9,17 @@ namespace GymManager.Application.Roles.GetRolePermissions;
 
 public sealed class GetRolePermissionsQueryHandler(
     IRolePermissionRepository rolePermissionRepository,
+    IPermissionChecker permissions,
     ICurrentUser currentUser)
     : IRequestHandler<GetRolePermissionsQuery, Result<List<RolePermissionDto>>>
 {
     public async Task<Result<List<RolePermissionDto>>> Handle(
         GetRolePermissionsQuery request, CancellationToken ct)
     {
-        if (currentUser.Role != Role.Owner)
-            return Result.Failure<List<RolePermissionDto>>(new ForbiddenError("Access denied.").ToString());
+        var canManage = await permissions.HasPermissionAsync(
+            currentUser.UserId, currentUser.TenantId, Permission.ManageRoles, ct);
+        if (!canManage)
+            return Result.Failure<List<RolePermissionDto>>(new ForbiddenError().ToString());
 
         var tenantId = currentUser.TenantId;
 

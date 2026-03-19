@@ -85,6 +85,29 @@ public sealed class TransactionRepository(GymManagerDbContext db) : ITransaction
             .AsNoTracking()
             .AnyAsync(t => t.RelatedEntityId == relatedEntityId && t.TransactionType == type, ct);
 
+    public async Task<HashSet<Guid>> GetExistingRelatedEntityIdsAsync(
+        IReadOnlyList<Guid> entityIds, TransactionType type, CancellationToken ct = default)
+    {
+        var ids = await db.Transactions
+            .AsNoTracking()
+            .Where(t => t.RelatedEntityId != null
+                && entityIds.Contains(t.RelatedEntityId!.Value)
+                && t.TransactionType == type)
+            .Select(t => t.RelatedEntityId!.Value)
+            .ToListAsync(ct);
+
+        return [.. ids];
+    }
+
+    public async Task RecordBatchAsync(IReadOnlyList<Transaction> transactions, CancellationToken ct = default)
+    {
+        if (transactions.Count == 0)
+            return;
+
+        db.Transactions.AddRange(transactions);
+        await db.SaveChangesAsync(ct);
+    }
+
     public async Task<decimal> GetRevenueAggregateAsync(
         Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default)
     {

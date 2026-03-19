@@ -4,6 +4,5 @@ using MediatR;
 namespace GymManager.Application.Notifications.MarkNotificationRead;
 
 public sealed record MarkNotificationReadCommand(
-    Guid NotificationId,
-    Guid CurrentUserId)
+    Guid NotificationId)
     : IRequest<Result>;

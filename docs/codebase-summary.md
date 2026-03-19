@@ -1,7 +1,7 @@
 ---
 type: codebase-summary
-updated: 2026-03-17
-phases-complete: Phase 1 (Foundation), Phase 2 (Booking), Phase 3 (Finance), Phase 4 (Staff/HR), Phase 5 (Communications)
+updated: 2026-03-19
+phases-complete: Phase 1 (Foundation), Phase 2 (Booking), Phase 3 (Finance), Phase 4 (Staff/HR), Phase 5 (Communications + RBAC)
 ---
 
 # Codebase Summary
@@ -101,6 +101,20 @@ All handlers return `Result<T>` or `Result` from CSharpFunctionalExtensions. `Ap
 | `ValidationError` (thrown) | 422 |
 | Unhandled exception | 500 |
 
+`HandleResult(Result<T> result)` uses prefix-based string dispatch. Error strings carry a `[NOT_FOUND]`, `[FORBIDDEN]`, or `[CONFLICT]` prefix that `MapErrorToResult` switches on:
+
+```csharp
+private IActionResult MapErrorToResult(string error) => error switch
+{
+    var e when e.StartsWith("[NOT_FOUND]")  => NotFound(ToProblem("Not Found", StripPrefix(e), 404)),
+    var e when e.StartsWith("[FORBIDDEN]")  => StatusCode(403, ToProblem("Forbidden", StripPrefix(e), 403)),
+    var e when e.StartsWith("[CONFLICT]")   => Conflict(ToProblem("Conflict", StripPrefix(e), 409)),
+    var e                                   => BadRequest(ToProblem("Bad Request", e, 400))
+};
+```
+
+All ProblemDetails responses include a `title` field (RFC 7807 compliant). `instance` is always set to `HttpContext.Request.Path`.
+
 ### Permission System
 
 All mutations check `IPermissionChecker` as the first handler step. Never inline permission logic in controllers or repositories. Permissions are a `[Flags]` `long` enum stored on `User.Permissions`.
@@ -112,6 +126,10 @@ if (!allowed)
     return Result.Failure<BookingDto>(new ForbiddenError().ToString());
 ```
 
+**RBAC (Phase 5):** Tenant-specific permission overrides are stored in `RolePermission` (one row per `TenantId + Role`). `PermissionChecker` reads `RolePermission` for the active tenant before falling back to the user's own `Permissions` bitmask. Controllers never inject `ICurrentUser` directly; the userId/tenantId are extracted inside handlers via `ICurrentUser`.
+
+`ManageRoles` permission (bit 26) gates all `/roles/*` endpoints. Only Owner holds this by default.
+
 ### MediatR Pipeline Behaviors
 
 1. `ValidationBehavior<TRequest, TResponse>` — runs FluentValidation, throws `ValidationException` on failure
@@ -120,6 +138,10 @@ if (!allowed)
 ### Multi-Tenancy
 
 Tenant isolation via `GymHouseId` on every scoped entity. EF Core global query filters enforce this at the persistence layer. `ICurrentUser.TenantId` flows from JWT claims.
+
+### RolePermission entity
+
+`RolePermission` does not inherit `AuditableEntity`. It stores one row per `(TenantId, Role)` pair holding the permission bitmask for that role within the tenant. Seeded from `RoleSeedData` on tenant creation; modifiable at runtime via the `/roles/{role}/permissions` endpoint.
 
 ---
 
@@ -259,7 +281,7 @@ Methods: `CheckIn()`, `Cancel()`, `MarkNoShow()`, `Complete()`.
 | Enum | Values |
 |---|---|
 | `Role` | Owner, HouseManager, Trainer, Staff, Member |
-| `Permission` | 26 flags (ViewMembers, ManageMembers, ..., Admin=~0L) |
+| `Permission` | 27 flags (ViewMembers, ManageMembers, ..., ManageRoles=1L<<26, Admin=~0L) |
 | `BookingStatus` | Confirmed, Cancelled, NoShow, Completed, WaitListed |
 | `BookingType` | TimeSlot, ClassSession |
 | `CheckInSource` | QRScan, ManualByStaff, SelfKiosk |
@@ -297,6 +319,16 @@ Methods: `Publish()` — sets `IsPublished = true`.
 | `ReadAt` | DateTime? | set on mark-read |
 
 Methods: `MarkRead()` — sets `Status = Read`, `ReadAt = utcNow`.
+
+### RolePermission
+
+| Property | Type | Notes |
+|---|---|---|
+| `TenantId` | Guid | FK → GymHouseId |
+| `Role` | `Role` enum | Role being configured |
+| `Permissions` | `Permission` flags | Bitmask for this role within the tenant |
+
+Does not inherit `AuditableEntity`. Seeded by `RoleSeedData`.
 
 ### NotificationPreference
 
@@ -383,6 +415,14 @@ GymManager.Application/
 │   ├── UpdatePreferences/        # command, validator, handler
 │   ├── GetPreferences/           # query, handler
 │   └── Shared/                   # NotificationDto, NotificationPreferenceDto
+├── Roles/
+│   ├── ChangeUserRole/           # command, handler
+│   ├── GetRolePermissions/       # query, handler
+│   ├── GetRoleUsers/             # query, handler
+│   ├── GetRolesMetadata/         # query, handler (static RBAC metadata)
+│   ├── ResetDefaultPermissions/  # command, handler
+│   ├── UpdateRolePermissions/    # command, handler
+│   └── Shared/                   # RolePermissionDto, RoleUserDto, RolesMetadataDto
 └── Common/
     ├── Behaviors/
     │   ├── ValidationBehavior.cs
@@ -400,10 +440,11 @@ GymManager.Application/
     │   ├── IMemberRepository.cs
     │   ├── IPasswordHasher.cs
     │   ├── IPermissionChecker.cs
+    │   ├── IRolePermissionRepository.cs
     │   ├── ISubscriptionRepository.cs
     │   ├── ITimeSlotRepository.cs
     │   ├── ITokenService.cs
-    │   ├── IUserRepository.cs        # + GetByRoleAndHouseAsync added in Phase 5
+    │   ├── IUserRepository.cs
     │   └── IWaitlistRepository.cs
     └── Models/
         ├── PagedList<T>.cs        # { Items, TotalCount, Page, PageSize }
@@ -453,10 +494,21 @@ JWT claims: `NameIdentifier` (userId), `email`, `role`, `permissions` (long bitf
 ### Middleware Pipeline
 
 ```
-ExceptionHandlingMiddleware → HTTPS → CORS → RateLimit → Auth → Authorization → Controllers
+ExceptionHandlingMiddleware → HTTPS (non-dev: HSTS) → SecurityHeaders → CORS → RateLimit → Auth → Authorization → Controllers
 ```
 
 `ExceptionHandlingMiddleware` maps `ValidationException` → 422, `UnauthorizedAccessException` → 401, unhandled → 500, all as ProblemDetails JSON.
+
+**Security headers** are set by an inline middleware after `UseHttpsRedirection()`:
+
+| Header | Value |
+|--------|-------|
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` |
+
+**JWT startup validation:** `Program.cs` reads `Jwt:Secret` at startup and throws `InvalidOperationException` if it is absent or shorter than 32 characters. The app will not start with a misconfigured JWT secret.
 
 ### SignalR
 
@@ -535,6 +587,12 @@ Base path: `/api/v1/`
 | PATCH | `/notifications/{id}/read` | Mark notification as read |
 | GET | `/notification-preferences` | Get notification preferences for current user |
 | PUT | `/notification-preferences` | Update notification preferences |
+| GET | `/roles/permissions` | List all roles with their permission bitmasks for the caller's tenant |
+| PUT | `/roles/{role}/permissions` | Update the permission bitmask for a role within the caller's tenant |
+| POST | `/roles/reset-defaults` | Reset all role permissions to seed defaults |
+| GET | `/roles/metadata` | Static RBAC metadata — role definitions, permission catalogue |
+| GET | `/roles/{role}/users` | List users holding a given role (paginated) |
+| PUT | `/users/{userId}/role` | Change a user's role |
 
 ---
 

@@ -21,6 +21,8 @@ public interface ITransactionRepository
     Task<decimal> GetRevenueAggregateAsync(Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default);
 
     Task<bool> ExistsByRelatedEntityIdAsync(Guid relatedEntityId, TransactionType type, CancellationToken ct = default);
+    Task<HashSet<Guid>> GetExistingRelatedEntityIdsAsync(IReadOnlyList<Guid> entityIds, TransactionType type, CancellationToken ct = default);
+    Task RecordBatchAsync(IReadOnlyList<Transaction> transactions, CancellationToken ct = default);
     Task<List<(TransactionDirection Direction, TransactionCategory Category, decimal Total)>> GetAggregateByDirectionAndCategoryAsync(
         Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default);
 }

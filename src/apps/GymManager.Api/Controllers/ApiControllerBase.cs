@@ -16,17 +16,7 @@ public abstract class ApiControllerBase(ISender sender) : ControllerBase
         if (result.IsSuccess)
             return Ok(result.Value);
 
-        return result.Error switch
-        {
-            var e when e.Contains("not found", StringComparison.OrdinalIgnoreCase) =>
-                NotFound(ToProblem(e, 404)),
-            var e when e.Contains("Access denied", StringComparison.OrdinalIgnoreCase) ||
-                       e.Contains("Forbidden", StringComparison.OrdinalIgnoreCase) =>
-                StatusCode(403, ToProblem(e, 403)),
-            var e when e.Contains("already", StringComparison.OrdinalIgnoreCase) =>
-                Conflict(ToProblem(e, 409)),
-            var e => BadRequest(ToProblem(e, 400))
-        };
+        return MapErrorToResult(result.Error);
     }
 
     protected IActionResult HandleResult(Result result)
@@ -34,30 +24,38 @@ public abstract class ApiControllerBase(ISender sender) : ControllerBase
         if (result.IsSuccess)
             return NoContent();
 
-        return result.Error switch
-        {
-            var e when e.Contains("not found", StringComparison.OrdinalIgnoreCase) =>
-                NotFound(ToProblem(e, 404)),
-            var e when e.Contains("Access denied", StringComparison.OrdinalIgnoreCase) ||
-                       e.Contains("Forbidden", StringComparison.OrdinalIgnoreCase) =>
-                StatusCode(403, ToProblem(e, 403)),
-            var e when e.Contains("already", StringComparison.OrdinalIgnoreCase) =>
-                Conflict(ToProblem(e, 409)),
-            var e => BadRequest(ToProblem(e, 400))
-        };
+        return MapErrorToResult(result.Error);
     }
 
     protected IActionResult HandleResult<T>(Result<T, NotFoundError> result) =>
-        result.IsSuccess ? Ok(result.Value) : NotFound(ToProblem(result.Error.ToString(), 404));
+        result.IsSuccess ? Ok(result.Value) : NotFound(ToProblem("Not Found", StripPrefix(result.Error.ToString()), 404));
 
     protected IActionResult HandleResult<T>(Result<T, ForbiddenError> result) =>
-        result.IsSuccess ? Ok(result.Value) : StatusCode(403, ToProblem(result.Error.ToString(), 403));
+        result.IsSuccess ? Ok(result.Value) : StatusCode(403, ToProblem("Forbidden", StripPrefix(result.Error.ToString()), 403));
 
     protected IActionResult HandleResult<T>(Result<T, ConflictError> result) =>
-        result.IsSuccess ? Ok(result.Value) : Conflict(ToProblem(result.Error.ToString(), 409));
+        result.IsSuccess ? Ok(result.Value) : Conflict(ToProblem("Conflict", StripPrefix(result.Error.ToString()), 409));
 
-    private ProblemDetails ToProblem(string detail, int status) => new()
+    private IActionResult MapErrorToResult(string error) => error switch
     {
+        var e when e.StartsWith("[NOT_FOUND]", StringComparison.Ordinal) =>
+            NotFound(ToProblem("Not Found", StripPrefix(e), 404)),
+        var e when e.StartsWith("[FORBIDDEN]", StringComparison.Ordinal) =>
+            StatusCode(403, ToProblem("Forbidden", StripPrefix(e), 403)),
+        var e when e.StartsWith("[CONFLICT]", StringComparison.Ordinal) =>
+            Conflict(ToProblem("Conflict", StripPrefix(e), 409)),
+        var e => BadRequest(ToProblem("Bad Request", e, 400))
+    };
+
+    private static string StripPrefix(string error)
+    {
+        var closeBracket = error.IndexOf(']');
+        return closeBracket >= 0 ? error[(closeBracket + 1)..].TrimStart() : error;
+    }
+
+    private ProblemDetails ToProblem(string title, string detail, int status) => new()
+    {
+        Title = title,
         Status = status,
         Detail = detail,
         Instance = HttpContext.Request.Path

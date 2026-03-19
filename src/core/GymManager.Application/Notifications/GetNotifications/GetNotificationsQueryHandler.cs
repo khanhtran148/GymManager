@@ -14,11 +14,8 @@ public sealed class GetNotificationsQueryHandler(
     public async Task<Result<PagedList<NotificationDto>>> Handle(
         GetNotificationsQuery request, CancellationToken ct)
     {
-        if (request.RecipientId != currentUser.UserId)
-            return Result.Failure<PagedList<NotificationDto>>(new ForbiddenError().ToString());
-
         var paged = await deliveryRepository.GetByRecipientAsync(
-            request.RecipientId, request.Page, request.PageSize, ct);
+            currentUser.UserId, request.Page, request.PageSize, ct);
 
         var dtos = paged.Items.Select(d => new NotificationDto(
             d.Id,

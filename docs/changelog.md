@@ -7,7 +7,35 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased]
+## [Unreleased] — 2026-03-19 — Review Fixes (Security, Quality, Performance)
+
+### Security
+
+- Close cross-tenant IDOR in subscription handlers: `CreateSubscriptionCommandHandler`, `FreezeSubscriptionCommandHandler`, `CancelSubscriptionCommandHandler` now validate `GymHouseId` ownership before executing
+- Enforce JWT issuer/audience validation in `JwtTokenService.GetPrincipalFromExpiredToken` — throws on missing configuration instead of silently bypassing
+- Add JWT secret startup validation — minimum 32 characters enforced at application start
+- Strengthen password policy in `RegisterCommandValidator`: uppercase, lowercase, digit, and special character all required
+- Remove secrets from `appsettings.json` — replaced with empty placeholders; `appsettings.Local.json` added to config chain for local development (use env vars or user-secrets in production)
+- Add HTTP security headers middleware: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS
+- Restrict `AllowedHosts` from wildcard `*` to `localhost`
+- `PermissionChecker` now throws `InvalidOperationException` and logs a warning when `userId` does not match `currentUser.UserId` — catches misuse at call site
+
+### Changed
+
+- Replace fragile string-matching error dispatch in `ApiControllerBase` with prefix-based routing (`[NOT_FOUND]`, `[FORBIDDEN]`, `[CONFLICT]`) — error prefixes are stripped before reaching client-visible `Detail` field
+- Add RFC 7807 `Title` field to all `ProblemDetails` responses via `HandleResult`
+- Remove `ICurrentUser` injection from `AnnouncementsController`, `NotificationsController`, `NotificationPreferencesController` — handlers now resolve current user directly via `ICurrentUser` (architecture rule compliance)
+- Route all 5 RBAC handlers through `IPermissionChecker` with new `Permission.ManageRoles` enum value
+- Extract `TokenDefaults.AccessTokenExpiryMinutes` and `RefreshTokenExpiryDays` constants — eliminates magic numbers in token services
+- `RefreshTokenCommandHandler` exception catch narrowed from bare `catch` to `catch (Exception) when` for correctness
+
+### Fixed
+
+- Eliminate N+1 query in `GetBookingsQueryHandler` — removed redundant per-booking member fallback fetch (Member is already eagerly loaded)
+- Batch existence check and bulk insert in `PayrollApprovedConsumer` — previously issued one query per payroll entry
+- Batch preference fetch in `AnnouncementFcmConsumer` via new `GetByUserIdsAsync` — previously fetched preferences one user at a time
+- Fix broken `useDebounce` hook in members page (replaced inline implementation with correct `useEffect`-based approach)
+- Extract `COOKIE_MAX_AGE_SECONDS` constant in `auth-store.ts` — eliminates duplicated magic number
 
 ---
 

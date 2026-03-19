@@ -11,20 +11,23 @@ namespace GymManager.Application.Roles.UpdateRolePermissions;
 public sealed class UpdateRolePermissionsCommandHandler(
     IRolePermissionRepository rolePermissionRepository,
     IUserRepository userRepository,
+    IPermissionChecker permissions,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<UpdateRolePermissionsCommand, Result>
 {
     public async Task<Result> Handle(UpdateRolePermissionsCommand request, CancellationToken ct)
     {
-        if (currentUser.Role != Role.Owner)
-            return Result.Failure(new ForbiddenError("Access denied.").ToString());
+        var canManage = await permissions.HasPermissionAsync(
+            currentUser.UserId, currentUser.TenantId, Permission.ManageRoles, ct);
+        if (!canManage)
+            return Result.Failure(new ForbiddenError().ToString());
 
         if (request.Role == Role.Owner)
-            return Result.Failure("Owner role permissions cannot be modified.");
+            return Result.Failure(new ConflictError("Owner role permissions cannot be modified.").ToString());
 
         if (!long.TryParse(request.Permissions, out var permissionBits))
-            return Result.Failure("Permissions must be a valid numeric bitmask.");
+            return Result.Failure(new ForbiddenError("Permissions must be a valid numeric bitmask.").ToString());
 
         var newPermissions = (Permission)permissionBits;
 

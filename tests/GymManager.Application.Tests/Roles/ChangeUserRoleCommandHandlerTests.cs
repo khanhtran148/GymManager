@@ -81,12 +81,13 @@ public sealed class ChangeUserRoleCommandHandlerTests : ApplicationTestBase
     {
         await SetupOwnerAsync();
         CurrentUser.Role = Role.HouseManager;
+        CurrentUser.Permissions = Permission.ViewMembers | Permission.ManageMembers;
 
         var command = new ChangeUserRoleCommand(Guid.NewGuid(), Role.Staff);
         var result = await Sender.Send(command);
 
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Contain("Access denied");
+        result.Error.Should().Contain("[FORBIDDEN]");
     }
 
     [Fact]
@@ -132,7 +133,7 @@ public sealed class ChangeUserRoleCommandHandlerTests : ApplicationTestBase
         };
 
         var handler = new ChangeUserRoleCommandHandler(
-            userRepo, rolePermRepo, currentUser, fakePublisher);
+            userRepo, rolePermRepo, new FakePermissionChecker(), currentUser, fakePublisher);
 
         var result = await handler.Handle(
             new ChangeUserRoleCommand(targetUser.Id, Role.Staff),

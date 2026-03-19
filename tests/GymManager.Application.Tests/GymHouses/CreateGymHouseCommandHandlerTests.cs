@@ -11,7 +11,7 @@ public sealed class CreateGymHouseCommandHandlerTests : ApplicationTestBase
     [Fact]
     public async Task CreateGymHouse_WithManageTenantPermission_Succeeds()
     {
-        var reg = await Sender.Send(new RegisterCommand("gymowner@example.com", "Password123", "Gym Owner", null));
+        var reg = await Sender.Send(new RegisterCommand("gymowner@example.com", "Password123!", "Gym Owner", null));
         CurrentUser.UserId = reg.Value.UserId;
         CurrentUser.TenantId = reg.Value.UserId;
         CurrentUser.Permissions = Permission.Admin;

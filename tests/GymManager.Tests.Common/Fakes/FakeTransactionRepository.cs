@@ -48,6 +48,22 @@ public sealed class FakeTransactionRepository : ITransactionRepository
     public Task<bool> ExistsByRelatedEntityIdAsync(Guid relatedEntityId, TransactionType type, CancellationToken ct = default) =>
         Task.FromResult(_store.Any(t => t.RelatedEntityId == relatedEntityId && t.TransactionType == type));
 
+    public Task<HashSet<Guid>> GetExistingRelatedEntityIdsAsync(
+        IReadOnlyList<Guid> entityIds, TransactionType type, CancellationToken ct = default) =>
+        Task.FromResult(
+            _store
+                .Where(t => t.RelatedEntityId.HasValue
+                    && entityIds.Contains(t.RelatedEntityId!.Value)
+                    && t.TransactionType == type)
+                .Select(t => t.RelatedEntityId!.Value)
+                .ToHashSet());
+
+    public Task RecordBatchAsync(IReadOnlyList<Transaction> transactions, CancellationToken ct = default)
+    {
+        _store.AddRange(transactions);
+        return Task.CompletedTask;
+    }
+
     public Task<List<(TransactionDirection Direction, TransactionCategory Category, decimal Total)>> GetAggregateByDirectionAndCategoryAsync(
         Guid gymHouseId, DateTime from, DateTime to, CancellationToken ct = default) =>
         Task.FromResult(_store

@@ -9,14 +9,17 @@ namespace GymManager.Application.Roles.GetRoleUsers;
 
 public sealed class GetRoleUsersQueryHandler(
     IUserRepository userRepository,
+    IPermissionChecker permissions,
     ICurrentUser currentUser)
     : IRequestHandler<GetRoleUsersQuery, Result<PagedList<RoleUserDto>>>
 {
     public async Task<Result<PagedList<RoleUserDto>>> Handle(
         GetRoleUsersQuery request, CancellationToken ct)
     {
-        if (currentUser.Role != Role.Owner)
-            return Result.Failure<PagedList<RoleUserDto>>(new ForbiddenError("Access denied.").ToString());
+        var canManage = await permissions.HasPermissionAsync(
+            currentUser.UserId, currentUser.TenantId, Permission.ManageRoles, ct);
+        if (!canManage)
+            return Result.Failure<PagedList<RoleUserDto>>(new ForbiddenError().ToString());
 
         var users = await userRepository.GetByTenantAndRoleAsync(currentUser.TenantId, request.Role, ct);
 

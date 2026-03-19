@@ -75,11 +75,11 @@ public sealed class GetRolesMetadataQueryHandlerUnitTests
     // ------------------------------------------------------------------ //
 
     [Fact]
-    public async Task Permissions_Returns26_ExcludingNoneAndAdmin()
+    public async Task Permissions_Returns27_ExcludingNoneAndAdmin()
     {
         var dto = await GetMetadataAsync();
 
-        dto.Permissions.Should().HaveCount(26);
+        dto.Permissions.Should().HaveCount(27);
         dto.Permissions.Select(p => p.Name).Should().NotContain("None");
         dto.Permissions.Select(p => p.Name).Should().NotContain("Admin");
     }

@@ -95,7 +95,7 @@ public sealed class RolesControllerTests
     public async Task GetPermissions_Returns403_OnForbidden()
     {
         var sender = new FakeSender();
-        sender.SetResponse(Result.Failure<List<RolePermissionDto>>("Access denied."));
+        sender.SetResponse(Result.Failure<List<RolePermissionDto>>("[FORBIDDEN] Access denied."));
         var controller = CreateController(sender);
 
         var result = await controller.GetPermissions(CancellationToken.None);
@@ -201,7 +201,7 @@ public sealed class UserRoleControllerTests
     public async Task ChangeUserRole_Returns403_OnForbidden()
     {
         var sender = new FakeSender();
-        sender.SetResponse(Result.Failure("Access denied."));
+        sender.SetResponse(Result.Failure("[FORBIDDEN] Access denied."));
         var controller = CreateController(sender);
 
         var result = await controller.ChangeUserRole(
@@ -215,7 +215,7 @@ public sealed class UserRoleControllerTests
     public async Task ChangeUserRole_Returns404_WhenUserNotFound()
     {
         var sender = new FakeSender();
-        sender.SetResponse(Result.Failure("User with id '...' was not found."));
+        sender.SetResponse(Result.Failure("[NOT_FOUND] User with id '...' was not found."));
         var controller = CreateController(sender);
 
         var result = await controller.ChangeUserRole(

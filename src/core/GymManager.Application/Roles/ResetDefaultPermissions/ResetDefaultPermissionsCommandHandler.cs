@@ -11,14 +11,17 @@ namespace GymManager.Application.Roles.ResetDefaultPermissions;
 public sealed class ResetDefaultPermissionsCommandHandler(
     IRolePermissionRepository rolePermissionRepository,
     IUserRepository userRepository,
+    IPermissionChecker permissions,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<ResetDefaultPermissionsCommand, Result>
 {
     public async Task<Result> Handle(ResetDefaultPermissionsCommand request, CancellationToken ct)
     {
-        if (currentUser.Role != Role.Owner)
-            return Result.Failure(new ForbiddenError("Access denied.").ToString());
+        var canManage = await permissions.HasPermissionAsync(
+            currentUser.UserId, currentUser.TenantId, Permission.ManageRoles, ct);
+        if (!canManage)
+            return Result.Failure(new ForbiddenError().ToString());
 
         var tenantId = currentUser.TenantId;
         var defaults = RolePermissionDefaults.GetDefaultRolePermissions(tenantId);

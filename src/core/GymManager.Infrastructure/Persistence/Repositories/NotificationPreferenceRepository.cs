@@ -13,6 +13,13 @@ public sealed class NotificationPreferenceRepository(GymManagerDbContext db) : I
             .Where(p => p.UserId == userId)
             .ToListAsync(ct);
 
+    public async Task<List<NotificationPreference>> GetByUserIdsAsync(
+        IReadOnlyList<Guid> userIds, CancellationToken ct = default) =>
+        await db.NotificationPreferences
+            .AsNoTracking()
+            .Where(p => userIds.Contains(p.UserId))
+            .ToListAsync(ct);
+
     public async Task UpsertAsync(Guid userId, NotificationChannel channel, bool isEnabled, CancellationToken ct = default)
     {
         // IgnoreQueryFilters: intentionally includes soft-deleted preferences so we can

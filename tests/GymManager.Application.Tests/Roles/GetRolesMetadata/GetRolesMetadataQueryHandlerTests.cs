@@ -62,13 +62,13 @@ public sealed class GetRolesMetadataQueryHandlerTests : ApplicationTestBase
     // ------------------------------------------------------------------ //
 
     [Fact]
-    public async Task GetRolesMetadata_Returns26Permissions_ExcludingNoneAndAdmin()
+    public async Task GetRolesMetadata_Returns27Permissions_ExcludingNoneAndAdmin()
     {
         var result = await Sender.Send(new GetRolesMetadataQuery());
 
         result.IsSuccess.Should().BeTrue();
-        // Permission enum has None + Admin + 26 real permissions
-        result.Value.Permissions.Should().HaveCount(26);
+        // Permission enum has None + Admin + 27 real permissions
+        result.Value.Permissions.Should().HaveCount(27);
         result.Value.Permissions.Select(p => p.Name).Should().NotContain("None");
         result.Value.Permissions.Select(p => p.Name).Should().NotContain("Admin");
     }

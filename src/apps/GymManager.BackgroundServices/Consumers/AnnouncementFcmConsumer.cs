@@ -33,13 +33,20 @@ public sealed class AnnouncementFcmConsumer(
             return;
         }
 
+        // Batch-fetch all notification preferences in a single query instead of one per recipient.
+        var recipientIds = recipients.Select(r => r.Id).ToList();
+        var allPrefs = await preferenceRepository.GetByUserIdsAsync(recipientIds, ct);
+        var prefsByUser = allPrefs
+            .GroupBy(p => p.UserId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
         var deliveries = new List<GymManager.Domain.Entities.NotificationDelivery>();
         var deviceTokens = new List<string>();
 
         foreach (var recipient in recipients)
         {
-            var prefs = await preferenceRepository.GetByUserIdAsync(recipient.Id, ct);
-            var pushPref = prefs.FirstOrDefault(p => p.Channel == NotificationChannel.Push);
+            prefsByUser.TryGetValue(recipient.Id, out var prefs);
+            var pushPref = prefs?.FirstOrDefault(p => p.Channel == NotificationChannel.Push);
             var pushEnabled = pushPref?.IsEnabled ?? true;
 
             if (!pushEnabled)

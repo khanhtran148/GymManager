@@ -18,28 +18,24 @@ public sealed class CreateAnnouncementCommandHandler(
     public async Task<Result<AnnouncementDto>> Handle(
         CreateAnnouncementCommand request, CancellationToken ct)
     {
-        // 1. Permission check — ManageAnnouncements required
         var gymHouseIdForPermission = request.GymHouseId ?? currentUser.TenantId;
         var canManage = await permissions.HasPermissionAsync(
             currentUser.UserId, gymHouseIdForPermission, Permission.ManageAnnouncements, ct);
         if (!canManage)
             return Result.Failure<AnnouncementDto>(new ForbiddenError().ToString());
 
-        // 2. Resolve author
-        var authorUser = await userRepository.GetByIdAsync(request.AuthorId, ct);
+        var authorUser = await userRepository.GetByIdAsync(currentUser.UserId, ct);
         if (authorUser is null)
-            return Result.Failure<AnnouncementDto>(new NotFoundError("User", request.AuthorId).ToString());
+            return Result.Failure<AnnouncementDto>(new NotFoundError("User", currentUser.UserId).ToString());
 
-        // 3. Chain-wide announcements require Owner role
         if (request.GymHouseId is null && authorUser.Role != Role.Owner)
             return Result.Failure<AnnouncementDto>(
                 new ForbiddenError("Only Owners can create chain-wide announcements.").ToString());
 
-        // 4. Create entity
         var announcement = new Announcement
         {
             GymHouseId = request.GymHouseId,
-            AuthorId = request.AuthorId,
+            AuthorId = currentUser.UserId,
             Title = request.Title,
             Content = request.Content,
             TargetAudience = request.TargetAudience,

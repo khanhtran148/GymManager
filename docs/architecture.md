@@ -1,6 +1,6 @@
 ---
 type: architecture
-updated: 2026-03-17
+updated: 2026-03-19
 adr: docs/adrs/260317-gymmanager-platform-architecture.md
 ---
 
@@ -252,6 +252,66 @@ sequenceDiagram
 ## Soft Delete
 
 No hard deletes in application code. All entities have `deleted_at TIMESTAMPTZ NULL`. EF Core global query filter: `WHERE deleted_at IS NULL`. Soft delete sets `DeletedAt = DateTime.UtcNow`.
+
+---
+
+## Permission System
+
+`IPermissionChecker` is the single enforcement point for all permission decisions. Controllers never check permissions directly.
+
+```
+Handler
+  └── IPermissionChecker.HasPermissionAsync(userId, tenantId, permission, ct)
+        └── PermissionChecker (Infrastructure)
+              ├── Loads RolePermission for (tenantId, user.Role)
+              └── Returns (user.Permissions & required) != 0
+```
+
+**RBAC per tenant:** `RolePermission` stores a permission bitmask per `(TenantId, Role)`. Owners can customize which permissions each role holds within their GymHouse. Changes take effect immediately (no token refresh required for server-side enforcement).
+
+**Default permissions** are seeded from `RoleSeedData` when a tenant is created. Owners can reset to defaults via `POST /roles/reset-defaults`.
+
+---
+
+## Error Handling
+
+All handler errors flow through `ApiControllerBase.HandleResult()`. The method inspects the error string prefix to determine the HTTP status:
+
+| Prefix | Status | ProblemDetails title |
+|--------|--------|---------------------|
+| `[NOT_FOUND]` | 404 | `Not Found` |
+| `[FORBIDDEN]` | 403 | `Forbidden` |
+| `[CONFLICT]` | 409 | `Conflict` |
+| (none / other) | 400 | `Bad Request` |
+| Thrown `ValidationException` | 422 | `Validation failed` |
+| Unhandled exception | 500 | `Internal Server Error` |
+
+All ProblemDetails responses include `status`, `title`, `detail`, and `instance` (request path).
+
+---
+
+## Security Headers
+
+An inline middleware runs after `UseHttpsRedirection()` and sets:
+
+```
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+```
+
+HSTS is enabled in non-development environments.
+
+---
+
+## JWT Startup Validation
+
+`Program.cs` reads `Jwt:Secret` and fails fast at startup if:
+- The value is absent or empty (`ArgumentException.ThrowIfNullOrWhiteSpace`)
+- The value is shorter than 32 characters (`InvalidOperationException`)
+
+This prevents silent misconfiguration in new deployments.
 
 ---
 

@@ -13,7 +13,7 @@ public sealed class CreateSubscriptionCommandHandlerTests : ApplicationTestBase
     private async Task<(Guid GymHouseId, Guid MemberId)> SetupAsync()
     {
         var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123", "Owner", null));
+            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
         CurrentUser.UserId = reg.Value.UserId;
         CurrentUser.TenantId = reg.Value.UserId;
         CurrentUser.Permissions = Permission.Admin;
