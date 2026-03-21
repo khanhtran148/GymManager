@@ -77,9 +77,11 @@ public static class DependencyInjection
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        // Invite Options
+        // Invite Options — validated on startup to catch missing/invalid InviteBaseUrl early
         services.AddOptions<InviteOptions>()
-            .BindConfiguration(InviteOptions.SectionName);
+            .BindConfiguration(InviteOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         return services;
     }

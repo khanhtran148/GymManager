@@ -39,7 +39,7 @@ public sealed class CurrentUserTenantIdTests
     }
 
     [Fact]
-    public void TenantId_WhenNoTenantIdClaim_FallsBackToUserId()
+    public void TenantId_WhenNoTenantIdClaim_ReturnsGuidEmpty()
     {
         var userId = Guid.NewGuid();
 
@@ -48,7 +48,10 @@ public sealed class CurrentUserTenantIdTests
             new Claim(ClaimTypes.NameIdentifier, userId.ToString())
         ]);
 
-        currentUser.TenantId.Should().Be(userId);
+        // Fix #4: Returns Guid.Empty (not UserId) when tenant_id claim is absent,
+        // so callers cannot accidentally gain Owner-level access on a missing claim.
+        currentUser.TenantId.Should().Be(Guid.Empty);
+        currentUser.TenantId.Should().NotBe(userId);
     }
 
     [Fact]
@@ -66,7 +69,7 @@ public sealed class CurrentUserTenantIdTests
     }
 
     [Fact]
-    public void TenantId_WhenTenantIdClaimIsInvalid_FallsBackToUserId()
+    public void TenantId_WhenTenantIdClaimIsInvalid_ReturnsGuidEmpty()
     {
         var userId = Guid.NewGuid();
 
@@ -76,6 +79,9 @@ public sealed class CurrentUserTenantIdTests
             new Claim("tenant_id", "not-a-guid")
         ]);
 
-        currentUser.TenantId.Should().Be(userId);
+        // Fix #4: Returns Guid.Empty (not UserId) when tenant_id claim is unparseable,
+        // so callers cannot accidentally gain Owner-level access on a malformed claim.
+        currentUser.TenantId.Should().Be(Guid.Empty);
+        currentUser.TenantId.Should().NotBe(userId);
     }
 }

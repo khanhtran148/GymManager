@@ -26,25 +26,41 @@ public sealed class AcceptInvitationHandler(
     public async Task<Result<AuthResponse>> Handle(
         AcceptInvitationCommand request, CancellationToken ct)
     {
-        // 1. Look up invitation by token
-        var invitation = await invitationRepository.GetByTokenAsync(request.Token, ct);
+        // 1. Atomically mark the invitation as accepted (Fix #1: eliminates TOCTOU race).
+        //    AcceptByTokenAsync performs a single UPDATE WHERE accepted_at IS NULL AND expires_at > now.
+        //    If another request accepted the same token concurrently, this returns null.
+        var invitation = await invitationRepository.AcceptByTokenAsync(request.Token, ct);
+
         if (invitation is null)
-            return Result.Failure<AuthResponse>(new NotFoundError("Invitation", request.Token).ToString());
+        {
+            // Determine the precise failure reason via a secondary no-tracking read so we
+            // can return a useful error message to the caller.
+            var secondary = await invitationRepository.GetByTokenAsync(request.Token, ct);
 
-        // 2. Validate: not expired, not accepted
-        if (invitation.IsExpired)
+            if (secondary is null)
+                return Result.Failure<AuthResponse>(new NotFoundError("Invitation", request.Token).ToString());
+
+            if (secondary.IsAccepted)
+                return Result.Failure<AuthResponse>("This invitation has already been accepted.");
+
+            // Only remaining case: expired (accepted_at IS NULL but expires_at <= now)
             return Result.Failure<AuthResponse>("This invitation link has expired.");
+        }
 
-        if (invitation.IsAccepted)
-            return Result.Failure<AuthResponse>("This invitation has already been accepted.");
-
-        // 3. Check if user exists by email
+        // 2. Check if user exists by email
         var existingUser = await userRepository.GetByEmailAsync(invitation.Email, ct);
 
         User user;
         if (existingUser is not null)
         {
-            // Existing user: link to new gym with assigned role
+            // Fix #7: Existing-user path must verify identity via password to prevent
+            // an intercepted token from silently linking an arbitrary registered user to a gym.
+            if (string.IsNullOrWhiteSpace(request.Password))
+                return Result.Failure<AuthResponse>("Password is required to link an existing account.");
+
+            if (!passwordHasher.Verify(request.Password, existingUser.PasswordHash))
+                return Result.Failure<AuthResponse>("Invalid credentials.");
+
             user = existingUser;
         }
         else
@@ -72,10 +88,10 @@ public sealed class AcceptInvitationHandler(
             await userRepository.CreateAsync(user, ct);
         }
 
-        // 4. Create Member or Staff record linking user to the gym house
+        // 3. Create Member or Staff record linking user to the gym house
         await CreateGymAssociationAsync(user, invitation, ct);
 
-        // 5. Seed role_permissions if not existing for tenant
+        // 4. Seed role_permissions if not existing for tenant
         var permissionsSeeded = await rolePermissionRepository.ExistsForTenantAsync(invitation.TenantId, ct);
         if (!permissionsSeeded)
         {
@@ -83,11 +99,7 @@ public sealed class AcceptInvitationHandler(
             await rolePermissionRepository.UpsertRangeAsync(defaults, ct);
         }
 
-        // 6. Mark invitation accepted
-        invitation.AcceptedAt = DateTime.UtcNow;
-        await invitationRepository.UpdateAsync(invitation, ct);
-
-        // 7. Generate tokens — persist refresh token first so JWT tenant_id resolves correctly
+        // 5. Generate tokens — persist refresh token first so JWT tenant_id resolves correctly
         var accessToken = await tokenService.GenerateAccessTokenAsync(user, ct);
         var refreshToken = tokenService.GenerateRefreshToken();
         user.SetRefreshToken(refreshToken, DateTime.UtcNow.AddDays(TokenDefaults.RefreshTokenExpiryDays));

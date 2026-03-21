@@ -24,8 +24,13 @@ public sealed class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICur
     {
         get
         {
+            // Return Guid.Empty when the tenant_id claim is missing or unparseable rather than
+            // falling back to UserId. The fallback to UserId was masking auth bugs: a user without
+            // a tenant_id claim would be treated as an Owner (tenant_id == user_id), potentially
+            // granting elevated access. Guid.Empty is an honest "no tenant association" signal
+            // that downstream permission checks will correctly deny.
             var raw = Principal?.FindFirst("tenant_id")?.Value;
-            return Guid.TryParse(raw, out var id) ? id : UserId;
+            return Guid.TryParse(raw, out var id) ? id : Guid.Empty;
         }
     }
 

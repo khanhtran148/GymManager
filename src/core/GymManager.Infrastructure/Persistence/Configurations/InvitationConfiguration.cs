@@ -37,5 +37,15 @@ public sealed class InvitationConfiguration : IEntityTypeConfiguration<Invitatio
 
         // Soft delete global filter
         builder.HasQueryFilter(i => i.DeletedAt == null);
+
+        // Defense-in-depth concurrency token using PostgreSQL's xmin system column.
+        // Prevents a second SaveChanges from silently overwriting a row that was updated
+        // by a concurrent request (e.g., double-accept via tracked entities).
+        // xmin is a uint (uint4 in PostgreSQL) that EF Core maps as a shadow property.
+        builder.Property<uint>("xmin")
+            .HasColumnName("xmin")
+            .HasColumnType("xid")
+            .ValueGeneratedOnAddOrUpdate()
+            .IsConcurrencyToken();
     }
 }

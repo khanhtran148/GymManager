@@ -25,6 +25,11 @@ public sealed class RegisterCommandHandler(
         if (existing is not null)
             return Result.Failure<AuthResponse>(new ConflictError("Email is already registered.").ToString());
 
+        // Public self-registration: any caller may register as a member of any gym house by
+        // supplying its ID. This is intentional — GymManager is a SaaS platform where gym
+        // discovery and self-signup is a core feature. If the team later needs enrollment
+        // control (e.g., invite-only gyms), add a GymHouse.AllowPublicRegistration flag
+        // and check it here before proceeding.
         var gymHouse = await gymHouseRepository.GetByIdAsync(request.GymHouseId, ct);
         if (gymHouse is null)
             return Result.Failure<AuthResponse>(

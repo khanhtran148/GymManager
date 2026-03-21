@@ -14,30 +14,49 @@ using System.Text;
 
 namespace GymManager.Infrastructure.Auth;
 
-public sealed class JwtTokenService(
-    IConfiguration configuration,
-    IRolePermissionRepository rolePermissionRepository,
-    IMemoryCache cache,
-    GymManagerDbContext db) : ITokenService
+public sealed class JwtTokenService : ITokenService
 {
+    private readonly IRolePermissionRepository _rolePermissionRepository;
+    private readonly IMemoryCache _cache;
+    private readonly GymManagerDbContext _db;
+
+    // Fix #9: Cache JWT config values read once in the constructor so GenerateAccessTokenAsync
+    // and GetPrincipalFromExpiredToken do not re-read IConfiguration on every call.
+    private readonly string _secret;
+    private readonly string _issuer;
+    private readonly string _audience;
+
     private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
+
+    public JwtTokenService(
+        IConfiguration configuration,
+        IRolePermissionRepository rolePermissionRepository,
+        IMemoryCache cache,
+        GymManagerDbContext db)
+    {
+        _rolePermissionRepository = rolePermissionRepository;
+        _cache = cache;
+        _db = db;
+
+        _secret = configuration["Jwt:Secret"]
+            ?? throw new InvalidOperationException("Jwt:Secret configuration is missing.");
+        _issuer = configuration["Jwt:Issuer"]
+            ?? throw new InvalidOperationException("Jwt:Issuer configuration is missing.");
+        _audience = configuration["Jwt:Audience"]
+            ?? throw new InvalidOperationException("Jwt:Audience configuration is missing.");
+    }
 
     public async Task<string> GenerateAccessTokenAsync(User user, CancellationToken ct = default)
     {
-        var secret = configuration["Jwt:Secret"]
-            ?? throw new InvalidOperationException("Jwt:Secret configuration is missing.");
-        var issuer = configuration["Jwt:Issuer"]
-            ?? throw new InvalidOperationException("Jwt:Issuer configuration is missing.");
-        var audience = configuration["Jwt:Audience"]
-            ?? throw new InvalidOperationException("Jwt:Audience configuration is missing.");
-
-        var permissions = await ResolvePermissionsAsync(user, ct);
-
+        // Fix #9: Resolve tenant once and pass it to ResolvePermissionsAsync to avoid
+        // a second DB round-trip inside that method for non-Owner users.
         var tenantId = user.Role == Role.Owner
             ? user.Id
-            : (await ResolveTenantIdAsync(user.Id, ct) ?? user.Id);
+            : (await ResolveTenantIdAsync(user.Id, ct) ?? Guid.Empty); // Fix #5: use Guid.Empty, not user.Id
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+        var permissions = await ResolvePermissionsAsync(user, tenantId, ct);
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
@@ -50,8 +69,8 @@ public sealed class JwtTokenService(
         };
 
         var token = new JwtSecurityToken(
-            issuer: issuer,
-            audience: audience,
+            issuer: _issuer,
+            audience: _audience,
             claims: claims,
             notBefore: DateTime.UtcNow,
             expires: DateTime.UtcNow.AddMinutes(TokenDefaults.AccessTokenExpiryMinutes),
@@ -68,21 +87,14 @@ public sealed class JwtTokenService(
 
     public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
     {
-        var secret = configuration["Jwt:Secret"]
-            ?? throw new InvalidOperationException("Jwt:Secret configuration is missing.");
-        var issuer = configuration["Jwt:Issuer"]
-            ?? throw new InvalidOperationException("Jwt:Issuer configuration is missing.");
-        var audience = configuration["Jwt:Audience"]
-            ?? throw new InvalidOperationException("Jwt:Audience configuration is missing.");
-
         var parameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret)),
             ValidateIssuer = true,
-            ValidIssuer = issuer,
+            ValidIssuer = _issuer,
             ValidateAudience = true,
-            ValidAudience = audience,
+            ValidAudience = _audience,
             ValidateLifetime = false
         };
 
@@ -90,7 +102,9 @@ public sealed class JwtTokenService(
         return handler.ValidateToken(token, parameters, out _);
     }
 
-    private async Task<Permission> ResolvePermissionsAsync(User user, CancellationToken ct)
+    // Fix #9: Accept pre-resolved tenantId so GenerateAccessTokenAsync can pass it in,
+    // avoiding a second ResolveTenantIdAsync call that was previously made inside here.
+    private async Task<Permission> ResolvePermissionsAsync(User user, Guid tenantId, CancellationToken ct)
     {
         // Owner always gets full Admin permissions — cannot be demoted
         if (user.Role == Role.Owner)
@@ -98,13 +112,10 @@ public sealed class JwtTokenService(
 
         var cacheKey = $"role_permissions:user:{user.Id}:{user.Role}";
 
-        if (cache.TryGetValue(cacheKey, out Permission cached))
+        if (_cache.TryGetValue(cacheKey, out Permission cached))
             return cached;
 
-        // Resolve the tenant (Owner's userId) for this non-owner user via their gym house membership
-        var tenantId = await ResolveTenantIdAsync(user.Id, ct);
-
-        if (tenantId is null)
+        if (tenantId == Guid.Empty)
         {
             // No tenant association found — fall back to stored user.Permissions (deprecated fallback)
 #pragma warning disable CS0618
@@ -112,14 +123,14 @@ public sealed class JwtTokenService(
 #pragma warning restore CS0618
         }
 
-        var rolePermission = await rolePermissionRepository
-            .GetByTenantAndRoleAsync(tenantId.Value, user.Role, ct);
+        var rolePermission = await _rolePermissionRepository
+            .GetByTenantAndRoleAsync(tenantId, user.Role, ct);
 
 #pragma warning disable CS0618
         var resolved = rolePermission?.Permissions ?? user.Permissions;
 #pragma warning restore CS0618
 
-        cache.Set(cacheKey, resolved, CacheTtl);
+        _cache.Set(cacheKey, resolved, CacheTtl);
 
         return resolved;
     }
@@ -128,10 +139,10 @@ public sealed class JwtTokenService(
     {
         // Look up which GymHouse (and thus Owner/Tenant) this user belongs to
         // via Member or Staff association, then return that GymHouse's OwnerId
-        var tenantId = await db.Members
+        var tenantId = await _db.Members
             .AsNoTracking()
             .Where(m => m.UserId == userId && m.DeletedAt == null)
-            .Select(m => (Guid?)db.GymHouses
+            .Select(m => (Guid?)_db.GymHouses
                 .Where(g => g.Id == m.GymHouseId)
                 .Select(g => g.OwnerId)
                 .FirstOrDefault())
@@ -140,10 +151,10 @@ public sealed class JwtTokenService(
         if (tenantId is not null && tenantId != Guid.Empty)
             return tenantId;
 
-        tenantId = await db.Staff
+        tenantId = await _db.Staff
             .AsNoTracking()
             .Where(s => s.UserId == userId && s.DeletedAt == null)
-            .Select(s => (Guid?)db.GymHouses
+            .Select(s => (Guid?)_db.GymHouses
                 .Where(g => g.Id == s.GymHouseId)
                 .Select(g => g.OwnerId)
                 .FirstOrDefault())

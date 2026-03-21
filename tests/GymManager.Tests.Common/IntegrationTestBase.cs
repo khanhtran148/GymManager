@@ -48,7 +48,9 @@ public abstract class IntegrationTestBase : IAsyncLifetime
             {
                 ["Jwt:Secret"] = "test-secret-key-that-is-at-least-32-chars-long!",
                 ["Jwt:Issuer"] = "gymmanager-test",
-                ["Jwt:Audience"] = "gymmanager-test"
+                ["Jwt:Audience"] = "gymmanager-test",
+                // InviteOptions.InviteBaseUrl is [Required] and [Url]; provide a valid test value
+                ["App:InviteBaseUrl"] = "https://test.gymmanager.local/invite"
             })
             .Build();
 
@@ -90,7 +92,10 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         services.AddScoped<IInvitationRepository, InvitationRepository>();
 
         // Options — InviteOptions required by CreateInvitationHandler
-        services.AddOptions<InviteOptions>();
+        // InviteBaseUrl is required and validated; supply a test value via config.
+        services.AddOptions<InviteOptions>()
+            .BindConfiguration(InviteOptions.SectionName)
+            .ValidateDataAnnotations();
 
         // Notification services
         services.AddScoped<IFirebaseMessagingService, FirebaseMessagingService>();

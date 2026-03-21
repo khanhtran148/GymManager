@@ -101,4 +101,20 @@ public sealed class CreateInvitationCommandHandlerTests : ApplicationTestBase
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Contain("NOT_FOUND");
     }
+
+    // Fix #11: ManageRoles permission path not tested
+    [Fact]
+    public async Task Create_WithManageRolesPermission_Succeeds()
+    {
+        var (_, gymHouse) = await CreateOwnerAsync($"owner{Guid.NewGuid()}@test.com", "Roles Perm Gym");
+        CurrentUser.Permissions = Permission.ManageRoles;
+
+        var command = new CreateInvitationCommand(
+            "staffroles@example.com", Role.Staff, gymHouse.Id);
+
+        var result = await Sender.Send(command);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Token.Should().NotBeNullOrEmpty();
+    }
 }

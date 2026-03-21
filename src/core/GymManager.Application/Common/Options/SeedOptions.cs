@@ -12,6 +12,9 @@ public sealed class SeedOptions
 
     [Required(AllowEmptyStrings = false, ErrorMessage = "Seed:Owner:Password is required.")]
     [MinLength(8, ErrorMessage = "Seed:Owner:Password must be at least 8 characters.")]
+    [RegularExpression(
+        @"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$",
+        ErrorMessage = "Seed:Owner:Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character.")]
     public string Password { get; init; } = string.Empty;
 
     [Required(AllowEmptyStrings = false, ErrorMessage = "Seed:Owner:GymName is required.")]

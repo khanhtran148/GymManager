@@ -12,6 +12,24 @@ public sealed class FakeInvitationRepository : IInvitationRepository
     public Task<Invitation?> GetByTokenAsync(string token, CancellationToken ct = default) =>
         Task.FromResult(_store.FirstOrDefault(i => i.Token == token && i.DeletedAt == null));
 
+    /// <inheritdoc />
+    public Task<Invitation?> AcceptByTokenAsync(string token, CancellationToken ct = default)
+    {
+        var now = DateTime.UtcNow;
+        var invitation = _store.FirstOrDefault(i =>
+            i.Token == token &&
+            i.AcceptedAt == null &&
+            i.ExpiresAt > now &&
+            i.DeletedAt == null);
+
+        if (invitation is null)
+            return Task.FromResult<Invitation?>(null);
+
+        invitation.AcceptedAt = now;
+        invitation.UpdatedAt = now;
+        return Task.FromResult<Invitation?>(invitation);
+    }
+
     public Task<bool> HasPendingInviteAsync(string email, Guid tenantId, CancellationToken ct = default) =>
         Task.FromResult(_store.Any(i =>
             i.Email == email.ToLowerInvariant() &&
