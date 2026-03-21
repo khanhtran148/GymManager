@@ -32,12 +32,16 @@ export default function DashboardPage() {
     queryFn: () => get<GymHouseDto[]>("/gym-houses"),
   });
 
+  const firstGymHouseId = gymHouses?.[0]?.id;
+
   const { data: members, isLoading: membersLoading } = useQuery({
-    queryKey: ["members", 1, ""],
+    queryKey: ["members", firstGymHouseId, 1],
     queryFn: () =>
-      get<PaginatedResponse<MemberDto>>("/members", {
-        params: { page: 1, pageSize: 1 },
-      }),
+      get<PaginatedResponse<MemberDto>>(
+        `/gymhouses/${firstGymHouseId}/members`,
+        { params: { page: 1, pageSize: 1 } }
+      ),
+    enabled: !!firstGymHouseId,
   });
 
   const activeCount =

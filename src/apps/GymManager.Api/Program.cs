@@ -4,6 +4,7 @@ using GymManager.Api.Middleware;
 using GymManager.Application;
 using GymManager.Infrastructure;
 using Microsoft.AspNetCore.RateLimiting;
+using Scalar.AspNetCore;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -79,6 +80,20 @@ builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer
             IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
                 System.Text.Encoding.UTF8.GetBytes(jwtSecret))
         };
+
+        options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -135,9 +150,15 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "GymManager API v1"));
+    app.UseSwagger(options => options.RouteTemplate = "openapi/{documentName}.json");
+    app.MapScalarApiReference(options =>
+    {
+        options
+            .WithTitle("GymManager API")
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+            .AddPreferredSecuritySchemes("Bearer")
+            .AddHttpAuthentication("Bearer", auth => auth.Token = "");
+    });
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();

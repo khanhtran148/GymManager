@@ -7,7 +7,7 @@ import type { AuthResponse } from "@/types/auth";
 import { useAuthStore } from "@/stores/auth-store";
 import { useLoadingStore } from "@/stores/loading-store";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5050/api/v1";
 
 let isRefreshing = false;
 let failedQueue: Array<{

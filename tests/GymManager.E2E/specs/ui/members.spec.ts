@@ -7,7 +7,7 @@ import { register } from "../../helpers/api-client.js";
 
 // TODO: POST /gymhouses/{id}/members returns HTTP 500 — pre-existing backend bug.
 // All member-related tests are skipped until the backend is fixed.
-// Verified via: curl -X POST http://localhost:5000/api/v1/gymhouses/{id}/members
+// Verified via: curl -X POST http://localhost:5050/api/v1/gymhouses/{id}/members
 //   with valid payload returns {"title":"An unexpected error occurred.","status":500}
 
 test.describe("Member management", () => {

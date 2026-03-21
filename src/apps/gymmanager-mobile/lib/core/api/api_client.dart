@@ -3,7 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const _baseUrl = String.fromEnvironment(
   'API_BASE_URL',
-  defaultValue: 'http://localhost:5000/api/v1',
+  defaultValue: 'http://localhost:5050/api/v1',
 );
 
 class ApiClient {

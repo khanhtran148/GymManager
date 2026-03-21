@@ -75,7 +75,7 @@ dotnet ef database update \
 dotnet run --project src/apps/GymManager.Api
 ```
 
-API available at `http://localhost:5000`. SignalR hub at `ws://localhost:5000/hubs/notifications`.
+API available at `http://localhost:5050`. SignalR hub at `ws://localhost:5050/hubs/notifications`.
 
 ### 4. Run Background Services
 

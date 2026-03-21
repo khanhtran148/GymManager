@@ -10,7 +10,7 @@
  *
  * Run:
  *   k6 run \
- *     -e BASE_URL=http://localhost:5000 \
+ *     -e BASE_URL=http://localhost:5050 \
  *     -e TEST_EMAIL=loadtest@example.com \
  *     -e TEST_PASSWORD=Test@1234 \
  *     tests/load-tests/k6/auth-load-test.js
@@ -23,7 +23,7 @@ const loginSuccess = new Counter('login_success');
 const loginRateLimited = new Counter('login_rate_limited');
 const loginUnexpectedFailure = new Counter('login_unexpected_failure');
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:5000';
+const BASE_URL = __ENV.BASE_URL || 'http://localhost:5050';
 const TEST_EMAIL = __ENV.TEST_EMAIL || 'loadtest@example.com';
 if (!__ENV.TEST_PASSWORD) {
   throw new Error('TEST_PASSWORD env var is required. Usage: k6 run -e TEST_PASSWORD=... auth-load-test.js');

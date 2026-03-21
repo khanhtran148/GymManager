@@ -11,7 +11,7 @@
  *
  * Run:
  *   k6 run \
- *     -e BASE_URL=http://localhost:5000 \
+ *     -e BASE_URL=http://localhost:5050 \
  *     -e AUTH_TOKEN=<jwt_token> \
  *     -e TIME_SLOT_ID=<uuid> \
  *     -e MEMBER_IDS=<comma_separated_uuids> \
@@ -27,7 +27,7 @@ const conflictRejections = new Counter('conflict_rejections');
 const unexpectedFailures = new Counter('unexpected_failures');
 const successRate = new Rate('success_rate');
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:5000';
+const BASE_URL = __ENV.BASE_URL || 'http://localhost:5050';
 const AUTH_TOKEN = __ENV.AUTH_TOKEN || '';
 const TIME_SLOT_ID = __ENV.TIME_SLOT_ID || '';
 const MEMBER_IDS = (__ENV.MEMBER_IDS || '').split(',').filter(id => id.length > 0);

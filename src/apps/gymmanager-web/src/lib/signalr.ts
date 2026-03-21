@@ -9,7 +9,7 @@ import {
 
 const HUB_URL =
   process.env.NEXT_PUBLIC_API_URL?.replace("/api/v1", "") ??
-  "http://localhost:5000";
+  "http://localhost:5050";
 
 let connection: HubConnection | null = null;
 

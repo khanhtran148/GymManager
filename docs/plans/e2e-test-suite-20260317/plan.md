@@ -29,7 +29,7 @@ What is missing:
 ## Prerequisites
 
 Before any spec writing begins:
-1. API server running locally at `http://localhost:5000`
+1. API server running locally at `http://localhost:5050`
 2. Next.js frontend running locally at `http://localhost:3000`
 3. PostgreSQL + RabbitMQ running (via `docker compose up -d`)
 4. Database migrated (`dotnet ef database update` or API auto-migration)

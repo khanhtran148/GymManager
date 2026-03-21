@@ -11,7 +11,7 @@
  *
  * Run:
  *   k6 run \
- *     -e BASE_URL=http://localhost:5000 \
+ *     -e BASE_URL=http://localhost:5050 \
  *     -e AUTH_TOKEN=<jwt_token> \
  *     -e GYM_HOUSE_ID=<uuid> \
  *     tests/load-tests/k6/transaction-load-test.js
@@ -25,7 +25,7 @@ const txFailure = new Counter('transaction_failure');
 const createdIds = new Set();
 const duplicateIds = new Counter('duplicate_transaction_ids');
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:5000';
+const BASE_URL = __ENV.BASE_URL || 'http://localhost:5050';
 const AUTH_TOKEN = __ENV.AUTH_TOKEN || '';
 const GYM_HOUSE_ID = __ENV.GYM_HOUSE_ID || '';
 const EXPECTED_COUNT = parseInt(__ENV.EXPECTED_COUNT || '100', 10);

@@ -8,7 +8,7 @@ import {
   offsetDate,
 } from "../../helpers/test-data.js";
 
-const API_BASE = process.env.API_URL ?? "http://localhost:5000/api/v1";
+const API_BASE = process.env.API_URL ?? "http://localhost:5050/api/v1";
 
 // TODO: POST /gymhouses/{id}/members returns HTTP 500 — pre-existing backend bug.
 // All subscription tests depend on member creation, so they are skipped.

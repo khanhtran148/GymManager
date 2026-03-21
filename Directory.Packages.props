@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup Label="Domain">
     <PackageVersion Include="CSharpFunctionalExtensions" Version="2.42.2" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.13.13" />
   </ItemGroup>
   <ItemGroup Label="Application">
     <PackageVersion Include="MediatR" Version="[13.1.0]" />
