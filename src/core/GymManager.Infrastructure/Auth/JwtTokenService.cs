@@ -33,6 +33,10 @@ public sealed class JwtTokenService(
 
         var permissions = await ResolvePermissionsAsync(user, ct);
 
+        var tenantId = user.Role == Role.Owner
+            ? user.Id
+            : (await ResolveTenantIdAsync(user.Id, ct) ?? user.Id);
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -41,7 +45,8 @@ public sealed class JwtTokenService(
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Email, user.Email),
             new("role", user.Role.ToString()),
-            new("permissions", ((long)permissions).ToString())
+            new("permissions", ((long)permissions).ToString()),
+            new("tenant_id", tenantId.ToString())
         };
 
         var token = new JwtSecurityToken(

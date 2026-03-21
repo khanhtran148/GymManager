@@ -1,6 +1,4 @@
 using FluentAssertions;
-using GymManager.Application.Auth.Register;
-using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Application.TimeSlots.CreateTimeSlot;
 using GymManager.Domain.Enums;
 using Xunit;
@@ -11,14 +9,9 @@ public sealed class CreateTimeSlotCommandHandlerTests : ApplicationTestBase
 {
     private async Task<(Guid UserId, Guid GymHouseId)> SetupAsync()
     {
-        var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
-        CurrentUser.UserId = reg.Value.UserId;
-        CurrentUser.TenantId = reg.Value.UserId;
-        CurrentUser.Permissions = Permission.Admin;
-
-        var house = await Sender.Send(new CreateGymHouseCommand("Test Gym", "123 Test St", null, null, 50));
-        return (reg.Value.UserId, house.Value.Id);
+        var (owner, gymHouse) = await CreateOwnerAsync(
+            $"owner{Guid.NewGuid()}@example.com", "TimeSlot Test Gym");
+        return (owner.Id, gymHouse.Id);
     }
 
     [Fact]

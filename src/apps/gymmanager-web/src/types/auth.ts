@@ -17,6 +17,7 @@ export interface RegisterRequest {
   password: string;
   fullName: string;
   phone?: string;
+  gymHouseId: string;
 }
 
 export interface RefreshRequest {

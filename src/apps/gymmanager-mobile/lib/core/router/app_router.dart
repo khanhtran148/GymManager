@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/create_invitation_screen.dart';
+import '../../features/auth/presentation/invite_accept_screen.dart';
+import '../../features/auth/presentation/register_screen.dart';
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
@@ -15,9 +19,32 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/login',
         builder: (context, state) => const _LoginScreen(),
       ),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
+      ),
+
+      /// Deep-link route: `/invite/:token`
+      ///
+      /// Handles both in-app navigation and universal-link / app-link deep links
+      /// where the host app is launched with a URL of the form
+      /// `gymmanager://invite/<token>` or `https://app.gymmanager.com/invite/<token>`.
+      GoRoute(
+        path: '/invite/:token',
+        builder: (context, state) {
+          final token = state.pathParameters['token']!;
+          return InviteAcceptScreen(token: token);
+        },
+      ),
+
+      /// Owner/manager screen for sending invitations.
+      GoRoute(
+        path: '/invitations/new',
+        builder: (context, state) => const CreateInvitationScreen(),
+      ),
     ],
     redirect: (context, state) {
-      // TODO: add auth guard
+      // TODO: add auth guard — redirect unauthenticated users to /login
       return null;
     },
   );

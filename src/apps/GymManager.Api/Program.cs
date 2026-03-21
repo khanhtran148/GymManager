@@ -15,6 +15,9 @@ builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, relo
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
+// Hosted Services
+builder.Services.AddHostedService<GymManager.Infrastructure.Seeding.OwnerSeedService>();
+
 // Controllers
 builder.Services.AddControllers(options =>
 {

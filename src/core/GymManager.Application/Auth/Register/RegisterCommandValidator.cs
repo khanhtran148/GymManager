@@ -21,5 +21,8 @@ public sealed class RegisterCommandValidator : AbstractValidator<RegisterCommand
         RuleFor(x => x.FullName)
             .NotEmpty().WithMessage("Full name is required.")
             .MaximumLength(200).WithMessage("Full name must not exceed 200 characters.");
+
+        RuleFor(x => x.GymHouseId)
+            .NotEmpty().WithMessage("Gym house selection is required.");
     }
 }

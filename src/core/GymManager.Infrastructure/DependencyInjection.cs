@@ -1,4 +1,6 @@
 using GymManager.Application.Common.Interfaces;
+using GymManager.Application.Common.Options;
+using Microsoft.Extensions.Options;
 using GymManager.Infrastructure.Auth;
 using GymManager.Infrastructure.Notifications;
 using GymManager.Infrastructure.Payments;
@@ -48,6 +50,7 @@ public static class DependencyInjection
         services.AddScoped<INotificationDeliveryRepository, NotificationDeliveryRepository>();
         services.AddScoped<INotificationPreferenceRepository, NotificationPreferenceRepository>();
         services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
+        services.AddScoped<IInvitationRepository, InvitationRepository>();
 
         // Notification Services
         services.AddScoped<IFirebaseMessagingService, FirebaseMessagingService>();
@@ -67,6 +70,16 @@ public static class DependencyInjection
         {
             services.AddScoped<IPaymentGatewayService, StubPaymentGatewayService>();
         }
+
+        // Seed Options — validated on startup
+        services.AddOptions<SeedOptions>()
+            .BindConfiguration(SeedOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // Invite Options
+        services.AddOptions<InviteOptions>()
+            .BindConfiguration(InviteOptions.SectionName);
 
         return services;
     }

@@ -7,9 +7,12 @@ import type {
   CreateGymHouseRequest,
   UpdateGymHouseRequest,
 } from "@/types/gym-house";
+import type { GymHousePublic } from "@/types/invitation";
+import { getPublicGymHouses } from "@/lib/invitations";
 
 const QUERY_KEYS = {
   all: ["gym-houses"] as const,
+  public: ["gym-houses", "public"] as const,
   single: (id: string) => ["gym-houses", id] as const,
 };
 
@@ -17,6 +20,14 @@ export function useGymHouses() {
   return useQuery({
     queryKey: QUERY_KEYS.all,
     queryFn: () => get<GymHouseDto[]>("/gym-houses"),
+  });
+}
+
+export function usePublicGymHouses() {
+  return useQuery<GymHousePublic[]>({
+    queryKey: QUERY_KEYS.public,
+    queryFn: getPublicGymHouses,
+    staleTime: 5 * 60 * 1000, // 5 minutes — public data changes infrequently
   });
 }
 

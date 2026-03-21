@@ -1,7 +1,5 @@
 using FluentAssertions;
-using GymManager.Application.Auth.Register;
 using GymManager.Application.Common.Interfaces;
-using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Application.Notifications.MarkNotificationRead;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
@@ -14,14 +12,9 @@ public sealed class MarkNotificationReadCommandHandlerTests : ApplicationTestBas
 {
     private async Task<(Guid UserId, Guid GymHouseId)> SetupUserAndHouseAsync()
     {
-        var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
-        CurrentUser.UserId = reg.Value.UserId;
-        CurrentUser.TenantId = reg.Value.UserId;
-        CurrentUser.Permissions = Permission.Admin;
-
-        var house = await Sender.Send(new CreateGymHouseCommand("Test Gym", "123 St", null, null, 50));
-        return (reg.Value.UserId, house.Value.Id);
+        var (owner, gymHouse) = await CreateOwnerAsync(
+            $"owner{Guid.NewGuid()}@example.com", "Notification Test Gym");
+        return (owner.Id, gymHouse.Id);
     }
 
     private async Task<Guid> CreateNotificationDeliveryAsync(Guid recipientId, Guid gymHouseId)

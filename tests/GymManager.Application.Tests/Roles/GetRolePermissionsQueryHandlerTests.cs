@@ -1,6 +1,4 @@
 using FluentAssertions;
-using GymManager.Application.Auth.Register;
-using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Application.Roles.GetRolePermissions;
 using GymManager.Domain.Enums;
 using Xunit;
@@ -11,12 +9,7 @@ public sealed class GetRolePermissionsQueryHandlerTests : ApplicationTestBase
 {
     private async Task SetupOwnerAsync()
     {
-        var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
-        CurrentUser.UserId = reg.Value.UserId;
-        CurrentUser.TenantId = reg.Value.UserId;
-        CurrentUser.Permissions = Permission.Admin;
-        CurrentUser.Role = Role.Owner;
+        await CreateOwnerAsync($"owner{Guid.NewGuid()}@example.com");
     }
 
     [Fact]

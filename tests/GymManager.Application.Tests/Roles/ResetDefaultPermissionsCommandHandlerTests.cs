@@ -1,5 +1,4 @@
 using FluentAssertions;
-using GymManager.Application.Auth.Register;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.Roles.GetRolePermissions;
 using GymManager.Application.Roles.ResetDefaultPermissions;
@@ -14,12 +13,7 @@ public sealed class ResetDefaultPermissionsCommandHandlerTests : ApplicationTest
 {
     private async Task SetupOwnerAsync()
     {
-        var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
-        CurrentUser.UserId = reg.Value.UserId;
-        CurrentUser.TenantId = reg.Value.UserId;
-        CurrentUser.Permissions = Permission.Admin;
-        CurrentUser.Role = Role.Owner;
+        await CreateOwnerAsync($"owner{Guid.NewGuid()}@example.com");
     }
 
     [Fact]

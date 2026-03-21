@@ -18,6 +18,12 @@ public sealed class GymHouseRepository(GymManagerDbContext db) : IGymHouseReposi
             .OrderBy(g => g.Name)
             .ToListAsync(ct);
 
+    public async Task<List<GymHouse>> GetAllActiveAsync(CancellationToken ct = default) =>
+        await db.GymHouses
+            .AsNoTracking()
+            .OrderBy(g => g.Name)
+            .ToListAsync(ct);
+
     public async Task CreateAsync(GymHouse gymHouse, CancellationToken ct = default)
     {
         db.GymHouses.Add(gymHouse);

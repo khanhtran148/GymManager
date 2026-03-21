@@ -8,4 +8,5 @@ public sealed record RegisterCommand(
     string Email,
     string Password,
     string FullName,
-    string? Phone) : IRequest<Result<AuthResponse>>;
+    string? Phone,
+    Guid GymHouseId) : IRequest<Result<AuthResponse>>;

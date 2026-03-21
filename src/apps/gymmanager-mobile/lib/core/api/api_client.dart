@@ -1,5 +1,13 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../../features/auth/data/models/accept_invitation_request.dart';
+import '../../features/auth/data/models/auth_response.dart';
+import '../../features/auth/data/models/create_invitation_request.dart';
+import '../../features/auth/data/models/gym_house_public.dart';
+import '../../features/auth/data/models/invitation_response.dart';
+import '../../features/auth/data/models/register_request.dart';
 
 const _baseUrl = String.fromEnvironment(
   'API_BASE_URL',
@@ -76,4 +84,85 @@ class ApiClient {
   Future<void> delete(String path) async {
     await _dio.delete<dynamic>(path);
   }
+
+  // ---------------------------------------------------------------------------
+  // Auth
+  // ---------------------------------------------------------------------------
+
+  /// `POST /api/v1/auth/register`
+  Future<AuthResponse> register(RegisterRequest request) {
+    return post<AuthResponse>(
+      '/auth/register',
+      data: request.toJson(),
+      fromJson: (json) => AuthResponse.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Gym houses
+  // ---------------------------------------------------------------------------
+
+  /// `GET /api/v1/gym-houses/public`
+  Future<List<GymHousePublic>> getPublicGymHouses() async {
+    final result = await get<GymHousePublicList>(
+      '/gym-houses/public',
+      fromJson: (json) =>
+          GymHousePublicList.fromJson(json as Map<String, dynamic>),
+    );
+    return result.items;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Invitations
+  // ---------------------------------------------------------------------------
+
+  /// `POST /api/v1/invitations`
+  Future<InvitationResponse> createInvitation(
+    CreateInvitationRequest request,
+  ) {
+    return post<InvitationResponse>(
+      '/invitations',
+      data: request.toJson(),
+      fromJson: (json) =>
+          InvitationResponse.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  /// `POST /api/v1/invitations/{token}/accept`
+  Future<AuthResponse> acceptInvitation(
+    String token,
+    AcceptInvitationRequest request,
+  ) {
+    return post<AuthResponse>(
+      '/invitations/$token/accept',
+      data: request.toJson(),
+      fromJson: (json) => AuthResponse.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Token storage helpers
+  // ---------------------------------------------------------------------------
+
+  /// Persists [accessToken] and [refreshToken] to secure storage.
+  Future<void> saveTokens({
+    required String accessToken,
+    required String refreshToken,
+  }) async {
+    await _storage.write(key: 'access_token', value: accessToken);
+    await _storage.write(key: 'refresh_token', value: refreshToken);
+  }
+
+  /// Removes all stored auth tokens (logout).
+  Future<void> clearTokens() async {
+    await _storage.delete(key: 'access_token');
+    await _storage.delete(key: 'refresh_token');
+  }
 }
+
+// ---------------------------------------------------------------------------
+// Riverpod provider
+// ---------------------------------------------------------------------------
+
+/// Singleton [ApiClient] available app-wide.
+final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());

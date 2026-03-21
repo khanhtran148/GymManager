@@ -1,5 +1,4 @@
 using FluentAssertions;
-using GymManager.Application.Auth.Register;
 using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Domain.Enums;
 using Xunit;
@@ -11,10 +10,7 @@ public sealed class CreateGymHouseCommandHandlerTests : ApplicationTestBase
     [Fact]
     public async Task CreateGymHouse_WithManageTenantPermission_Succeeds()
     {
-        var reg = await Sender.Send(new RegisterCommand("gymowner@example.com", "Password123!", "Gym Owner", null));
-        CurrentUser.UserId = reg.Value.UserId;
-        CurrentUser.TenantId = reg.Value.UserId;
-        CurrentUser.Permissions = Permission.Admin;
+        var (owner, _) = await CreateOwnerAsync("gymowner@example.com");
 
         var command = new CreateGymHouseCommand("Elite Gym", "456 Fitness Ave", null, null, 100);
 
@@ -22,7 +18,7 @@ public sealed class CreateGymHouseCommandHandlerTests : ApplicationTestBase
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Name.Should().Be("Elite Gym");
-        result.Value.OwnerId.Should().Be(reg.Value.UserId);
+        result.Value.OwnerId.Should().Be(owner.Id);
     }
 
     [Fact]

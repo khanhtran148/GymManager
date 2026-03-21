@@ -1,5 +1,4 @@
 using FluentAssertions;
-using GymManager.Application.Auth.Register;
 using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Application.Members.CreateMember;
 using GymManager.Application.Roles.ChangeUserRole;
@@ -18,13 +17,8 @@ public sealed class ChangeUserRoleCommandHandlerTests : ApplicationTestBase
 {
     private async Task<Guid> SetupOwnerAsync()
     {
-        var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
-        CurrentUser.UserId = reg.Value.UserId;
-        CurrentUser.TenantId = reg.Value.UserId;
-        CurrentUser.Permissions = Permission.Admin;
-        CurrentUser.Role = Role.Owner;
-        return reg.Value.UserId;
+        var (owner, _) = await CreateOwnerAsync($"owner{Guid.NewGuid()}@example.com");
+        return owner.Id;
     }
 
     private async Task<Guid> CreateMemberUserAsync(Guid gymHouseId)

@@ -1,6 +1,4 @@
 using FluentAssertions;
-using GymManager.Application.Auth.Register;
-using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Application.Members.CreateMember;
 using GymManager.Application.Subscriptions.CancelSubscription;
 using GymManager.Application.Subscriptions.CreateSubscription;
@@ -14,20 +12,15 @@ public sealed class FreezeSubscriptionCommandHandlerTests : ApplicationTestBase
 {
     private async Task<(Guid GymHouseId, Guid SubscriptionId)> SetupActiveSubscriptionAsync()
     {
-        var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
-        CurrentUser.UserId = reg.Value.UserId;
-        CurrentUser.TenantId = reg.Value.UserId;
-        CurrentUser.Permissions = Permission.Admin;
-
-        var house = await Sender.Send(new CreateGymHouseCommand("Freeze Gym", "10 Freeze St", null, null, 50));
-        var member = await Sender.Send(new CreateMemberCommand(house.Value.Id, "freezemember@example.com", "Freeze Member", null));
+        var (_, gymHouse) = await CreateOwnerAsync(
+            $"owner{Guid.NewGuid()}@example.com", "Freeze Sub Test Gym");
+        var member = await Sender.Send(new CreateMemberCommand(gymHouse.Id, "freezemember@example.com", "Freeze Member", null));
 
         var sub = await Sender.Send(new CreateSubscriptionCommand(
-            member.Value.Id, house.Value.Id, SubscriptionType.Monthly, 100m,
+            member.Value.Id, gymHouse.Id, SubscriptionType.Monthly, 100m,
             DateTime.UtcNow, DateTime.UtcNow.AddMonths(1)));
 
-        return (house.Value.Id, sub.Value.Id);
+        return (gymHouse.Id, sub.Value.Id);
     }
 
     [Fact]

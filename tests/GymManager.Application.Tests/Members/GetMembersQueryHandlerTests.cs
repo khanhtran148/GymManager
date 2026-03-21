@@ -1,6 +1,4 @@
 using FluentAssertions;
-using GymManager.Application.Auth.Register;
-using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Application.Members.CreateMember;
 using GymManager.Application.Members.GetMembers;
 using GymManager.Domain.Enums;
@@ -12,14 +10,9 @@ public sealed class GetMembersQueryHandlerTests : ApplicationTestBase
 {
     private async Task<Guid> SetupGymHouseAsync()
     {
-        var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
-        CurrentUser.UserId = reg.Value.UserId;
-        CurrentUser.TenantId = reg.Value.UserId;
-        CurrentUser.Permissions = Permission.Admin;
-
-        var house = await Sender.Send(new CreateGymHouseCommand("Members Gym", "456 Test Ave", null, null, 50));
-        return house.Value.Id;
+        var (_, gymHouse) = await CreateOwnerAsync(
+            $"owner{Guid.NewGuid()}@example.com", "Members Gym");
+        return gymHouse.Id;
     }
 
     [Fact]
@@ -45,17 +38,9 @@ public sealed class GetMembersQueryHandlerTests : ApplicationTestBase
         var gymHouseId1 = await SetupGymHouseAsync();
         await Sender.Send(new CreateMemberCommand(gymHouseId1, "house1member@example.com", "House 1 Member", null));
 
-        // Switch owner for second house
-        var reg2 = await Sender.Send(new RegisterCommand(
-            $"owner2{Guid.NewGuid()}@example.com", "Password123!", "Owner2", null));
-        CurrentUser.UserId = reg2.Value.UserId;
-        CurrentUser.TenantId = reg2.Value.UserId;
-        var house2 = await Sender.Send(new CreateGymHouseCommand("Second Gym", "789 Other St", null, null, 50));
-        await Sender.Send(new CreateMemberCommand(house2.Value.Id, "house2member@example.com", "House 2 Member", null));
+        var (_, gymHouse2) = await CreateOwnerAsync($"owner2{Guid.NewGuid()}@example.com", "Second Gym");
+        await Sender.Send(new CreateMemberCommand(gymHouse2.Id, "house2member@example.com", "House 2 Member", null));
 
-        // Query house1 members as house2 owner — but note permission is Admin so all accessible
-        // Tenant isolation in queries is by gymHouseId filter
-        CurrentUser.UserId = reg2.Value.UserId;
         var result = await Sender.Send(new GetMembersQuery(gymHouseId1, 1, 20));
 
         result.IsSuccess.Should().BeTrue();

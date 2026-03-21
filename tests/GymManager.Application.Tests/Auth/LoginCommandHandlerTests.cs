@@ -1,6 +1,5 @@
 using FluentAssertions;
 using GymManager.Application.Auth.Login;
-using GymManager.Application.Auth.Register;
 using Xunit;
 
 namespace GymManager.Application.Tests.Auth;
@@ -10,9 +9,9 @@ public sealed class LoginCommandHandlerTests : ApplicationTestBase
     [Fact]
     public async Task Login_WithCorrectCredentials_Succeeds()
     {
-        await Sender.Send(new RegisterCommand("logintest@example.com", "Password123!", "Login User", null));
+        await CreateOwnerAsync("logintest@example.com", "Login Test Gym");
 
-        var result = await Sender.Send(new LoginCommand("logintest@example.com", "Password123!"));
+        var result = await Sender.Send(new LoginCommand("logintest@example.com", "Test@1234"));
 
         result.IsSuccess.Should().BeTrue();
         result.Value.AccessToken.Should().NotBeNullOrEmpty();
@@ -22,7 +21,7 @@ public sealed class LoginCommandHandlerTests : ApplicationTestBase
     [Fact]
     public async Task Login_WithWrongPassword_Fails()
     {
-        await Sender.Send(new RegisterCommand("wrongpass@example.com", "Password123!", "User", null));
+        await CreateOwnerAsync("wrongpass@example.com", "Wrong Pass Gym");
 
         var result = await Sender.Send(new LoginCommand("wrongpass@example.com", "WrongPassword!"));
 

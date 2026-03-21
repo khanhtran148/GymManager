@@ -1,7 +1,5 @@
 using FluentAssertions;
-using GymManager.Application.Auth.Register;
 using GymManager.Application.Bookings.CreateBooking;
-using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Application.Members.CreateMember;
 using GymManager.Application.TimeSlots.CreateTimeSlot;
 using GymManager.Application.ClassSchedules.CreateClassSchedule;
@@ -14,17 +12,12 @@ public sealed class CreateBookingCommandHandlerTests : ApplicationTestBase
 {
     private async Task<(Guid UserId, Guid GymHouseId)> SetupOwnerAndHouseAsync()
     {
-        var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
-        CurrentUser.UserId = reg.Value.UserId;
-        CurrentUser.TenantId = reg.Value.UserId;
-        CurrentUser.Permissions = Permission.Admin;
-
-        var house = await Sender.Send(new CreateGymHouseCommand("Test Gym", "123 Test St", null, null, 50));
-        return (reg.Value.UserId, house.Value.Id);
+        var (owner, gymHouse) = await CreateOwnerAsync(
+            $"owner{Guid.NewGuid()}@example.com", "Booking Test Gym");
+        return (owner.Id, gymHouse.Id);
     }
 
-    private async Task<Guid> CreateMemberAsync(Guid gymHouseId)
+    private async Task<Guid> CreateTestMemberAsync(Guid gymHouseId)
     {
         var result = await Sender.Send(new CreateMemberCommand(
             gymHouseId, $"member{Guid.NewGuid()}@example.com", "Test Member", null));
@@ -35,7 +28,7 @@ public sealed class CreateBookingCommandHandlerTests : ApplicationTestBase
     public async Task CreateBooking_TimeSlot_Success()
     {
         var (_, gymHouseId) = await SetupOwnerAndHouseAsync();
-        var memberId = await CreateMemberAsync(gymHouseId);
+        var memberId = await CreateTestMemberAsync(gymHouseId);
 
         var slotResult = await Sender.Send(new CreateTimeSlotCommand(
             gymHouseId,
@@ -59,7 +52,7 @@ public sealed class CreateBookingCommandHandlerTests : ApplicationTestBase
     public async Task CreateBooking_ClassSession_Success()
     {
         var (userId, gymHouseId) = await SetupOwnerAndHouseAsync();
-        var memberId = await CreateMemberAsync(gymHouseId);
+        var memberId = await CreateTestMemberAsync(gymHouseId);
 
         var classResult = await Sender.Send(new CreateClassScheduleCommand(
             gymHouseId, userId, "Yoga",
@@ -82,8 +75,8 @@ public sealed class CreateBookingCommandHandlerTests : ApplicationTestBase
     public async Task CreateBooking_CapacityFull_ReturnsWaitListed()
     {
         var (_, gymHouseId) = await SetupOwnerAndHouseAsync();
-        var memberId1 = await CreateMemberAsync(gymHouseId);
-        var memberId2 = await CreateMemberAsync(gymHouseId);
+        var memberId1 = await CreateTestMemberAsync(gymHouseId);
+        var memberId2 = await CreateTestMemberAsync(gymHouseId);
 
         var slotResult = await Sender.Send(new CreateTimeSlotCommand(
             gymHouseId,

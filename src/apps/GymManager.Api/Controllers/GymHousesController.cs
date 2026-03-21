@@ -4,6 +4,7 @@ using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Application.GymHouses.DeleteGymHouse;
 using GymManager.Application.GymHouses.GetGymHouseById;
 using GymManager.Application.GymHouses.GetGymHouses;
+using GymManager.Application.GymHouses.GetPublicGymHouses;
 using GymManager.Application.GymHouses.Shared;
 using GymManager.Application.GymHouses.UpdateGymHouse;
 using MediatR;
@@ -18,6 +19,15 @@ namespace GymManager.Api.Controllers;
 [EnableRateLimiting(RateLimitPolicies.Default)]
 public sealed class GymHousesController(ISender sender) : ApiControllerBase(sender)
 {
+    [HttpGet("public")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<GymHousePublicDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPublic(CancellationToken ct)
+    {
+        var result = await Sender.Send(new GetPublicGymHousesQuery(), ct);
+        return HandleResult(result);
+    }
+
     [HttpGet]
     [ProducesResponseType(typeof(List<GymHouseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]

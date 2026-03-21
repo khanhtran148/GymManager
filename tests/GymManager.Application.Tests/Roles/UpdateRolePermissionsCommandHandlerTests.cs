@@ -1,6 +1,5 @@
 using FluentAssertions;
 using FluentValidation;
-using GymManager.Application.Auth.Register;
 using GymManager.Application.Roles.UpdateRolePermissions;
 using GymManager.Domain.Entities;
 using GymManager.Domain.Enums;
@@ -15,12 +14,7 @@ public sealed class UpdateRolePermissionsCommandHandlerTests : ApplicationTestBa
 {
     private async Task SetupOwnerAsync()
     {
-        var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
-        CurrentUser.UserId = reg.Value.UserId;
-        CurrentUser.TenantId = reg.Value.UserId;
-        CurrentUser.Permissions = Permission.Admin;
-        CurrentUser.Role = Role.Owner;
+        await CreateOwnerAsync($"owner{Guid.NewGuid()}@example.com");
     }
 
     [Fact]

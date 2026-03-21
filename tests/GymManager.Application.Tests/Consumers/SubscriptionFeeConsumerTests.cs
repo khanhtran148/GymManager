@@ -1,7 +1,5 @@
 using FluentAssertions;
-using GymManager.Application.Auth.Register;
 using GymManager.Application.Common.Interfaces;
-using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Application.Members.CreateMember;
 using GymManager.Application.Subscriptions.CreateSubscription;
 using GymManager.Domain.Enums;
@@ -14,15 +12,10 @@ public sealed class SubscriptionFeeConsumerTests : ApplicationTestBase
 {
     private async Task<(Guid OwnerId, Guid GymHouseId, Guid MemberId)> SetupOwnerHouseMemberAsync()
     {
-        var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
-        CurrentUser.UserId = reg.Value.UserId;
-        CurrentUser.TenantId = reg.Value.UserId;
-        CurrentUser.Permissions = Permission.Admin;
-
-        var house = await Sender.Send(new CreateGymHouseCommand("Test Gym", "123 St", null, null, 50));
-        var member = await Sender.Send(new CreateMemberCommand(house.Value.Id, $"m{Guid.NewGuid()}@example.com", "Member", null));
-        return (reg.Value.UserId, house.Value.Id, member.Value.Id);
+        var (owner, gymHouse) = await CreateOwnerAsync(
+            $"owner{Guid.NewGuid()}@example.com", "Sub Fee Test Gym");
+        var member = await Sender.Send(new CreateMemberCommand(gymHouse.Id, $"m{Guid.NewGuid()}@example.com", "Member", null));
+        return (owner.Id, gymHouse.Id, member.Value.Id);
     }
 
     [Fact]

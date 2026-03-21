@@ -20,7 +20,14 @@ public sealed class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICur
         }
     }
 
-    public Guid TenantId => UserId; // For Owner role: TenantId == UserId (owning all their houses)
+    public Guid TenantId
+    {
+        get
+        {
+            var raw = Principal?.FindFirst("tenant_id")?.Value;
+            return Guid.TryParse(raw, out var id) ? id : UserId;
+        }
+    }
 
     public string Email =>
         Principal?.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;

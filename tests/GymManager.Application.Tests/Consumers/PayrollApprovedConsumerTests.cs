@@ -1,7 +1,5 @@
 using FluentAssertions;
-using GymManager.Application.Auth.Register;
 using GymManager.Application.Common.Interfaces;
-using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Application.Payroll.CreatePayrollPeriod;
 using GymManager.Application.Staff.CreateStaff;
 using GymManager.Domain.Entities;
@@ -18,14 +16,9 @@ public sealed class PayrollApprovedConsumerTests : ApplicationTestBase
 {
     private async Task<(Guid OwnerId, Guid GymHouseId)> SetupOwnerAndHouseAsync()
     {
-        var reg = await Sender.Send(new RegisterCommand(
-            $"owner{Guid.NewGuid()}@example.com", "Password123!", "Owner", null));
-        CurrentUser.UserId = reg.Value.UserId;
-        CurrentUser.TenantId = reg.Value.UserId;
-        CurrentUser.Permissions = Permission.Admin;
-
-        var house = await Sender.Send(new CreateGymHouseCommand("Test Gym", "123 St", null, null, 50));
-        return (reg.Value.UserId, house.Value.Id);
+        var (owner, gymHouse) = await CreateOwnerAsync(
+            $"owner{Guid.NewGuid()}@example.com", "Payroll Consumer Test Gym");
+        return (owner.Id, gymHouse.Id);
     }
 
     [Fact]
@@ -33,11 +26,11 @@ public sealed class PayrollApprovedConsumerTests : ApplicationTestBase
     {
         var (_, gymHouseId) = await SetupOwnerAndHouseAsync();
 
-        var reg1 = await Sender.Send(new RegisterCommand($"staff1{Guid.NewGuid()}@example.com", "Password123!", "Staff One", null));
-        await Sender.Send(new CreateStaffCommand(reg1.Value.UserId, gymHouseId, StaffType.Reception, 3000m, 0m));
+        var (staff1, _) = await CreateMemberAsync(gymHouseId, $"staff1{Guid.NewGuid()}@example.com");
+        await Sender.Send(new CreateStaffCommand(staff1.Id, gymHouseId, StaffType.Reception, 3000m, 0m));
 
-        var reg2 = await Sender.Send(new RegisterCommand($"staff2{Guid.NewGuid()}@example.com", "Password123!", "Staff Two", null));
-        await Sender.Send(new CreateStaffCommand(reg2.Value.UserId, gymHouseId, StaffType.SecurityGuard, 2800m, 0m));
+        var (staff2, _) = await CreateMemberAsync(gymHouseId, $"staff2{Guid.NewGuid()}@example.com");
+        await Sender.Send(new CreateStaffCommand(staff2.Id, gymHouseId, StaffType.SecurityGuard, 2800m, 0m));
 
         var created = await Sender.Send(new CreatePayrollPeriodCommand(
             gymHouseId,
@@ -94,8 +87,8 @@ public sealed class PayrollApprovedConsumerTests : ApplicationTestBase
     {
         var (_, gymHouseId) = await SetupOwnerAndHouseAsync();
 
-        var reg = await Sender.Send(new RegisterCommand($"staff{Guid.NewGuid()}@example.com", "Password123!", "Staff", null));
-        await Sender.Send(new CreateStaffCommand(reg.Value.UserId, gymHouseId, StaffType.Reception, 2000m, 0m));
+        var (staffUser, _) = await CreateMemberAsync(gymHouseId, $"staff{Guid.NewGuid()}@example.com");
+        await Sender.Send(new CreateStaffCommand(staffUser.Id, gymHouseId, StaffType.Reception, 2000m, 0m));
 
         var created = await Sender.Send(new CreatePayrollPeriodCommand(
             gymHouseId,

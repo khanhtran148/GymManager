@@ -1,6 +1,5 @@
 using FluentAssertions;
 using FluentValidation;
-using GymManager.Application.Auth.Register;
 using GymManager.Application.Common.Interfaces;
 using GymManager.Application.GymHouses.CreateGymHouse;
 using GymManager.Application.Members.CreateMember;
@@ -47,15 +46,8 @@ public sealed class RolePermissionFlowTests : ApiIntegrationTestBase
     private async Task<Guid> RegisterOwnerAsync()
     {
         var email = $"owner-{Guid.NewGuid():N}@test.com";
-        var reg = await Sender.Send(new RegisterCommand(email, "Password123!", "Test Owner", null));
-        reg.IsSuccess.Should().BeTrue("registration must succeed");
-
-        CurrentUser.UserId = reg.Value.UserId;
-        CurrentUser.TenantId = reg.Value.UserId;
-        CurrentUser.Permissions = Permission.Admin;
-        CurrentUser.Role = Role.Owner;
-
-        return reg.Value.UserId;
+        var (owner, _) = await CreateOwnerAsync(email);
+        return owner.Id;
     }
 
     private async Task<Guid> CreateTrainerUserAsync(Guid gymHouseId)
